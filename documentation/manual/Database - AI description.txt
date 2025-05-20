@@ -1,0 +1,6 @@
+Database design:
+- We use mongoDB as main database for storing and retrieving data
+- Database name is wrist_strap_monitor_system_db, collections are:
++ overal_firmware_information
++ communication_channel
++ voltage_readings
