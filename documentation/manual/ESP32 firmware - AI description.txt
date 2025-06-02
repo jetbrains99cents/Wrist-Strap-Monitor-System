@@ -1,0 +1,10 @@
+ESP32 requirements and its workflow:
+- Ability to display things on I2C oled display/TFT display but is also able to work with headless mode 
+- Can operate with both AP and station modes (with AP mode, we will config it via web interface which is stored on SPIFFS)
+- Can store data right at the time before blackout
+- In case of losing wifi connection, still operates normally and stores data for max 3 days/48 hrs
+- Has a simple but good system design that can be extended afterward for other types of use/system
+- Uses state machine and mediator system design 
+- Use MQTT as main connection for transmitting realtime data
+- Also use http requests to retrieve other one time information
+- Can be updated using OTA

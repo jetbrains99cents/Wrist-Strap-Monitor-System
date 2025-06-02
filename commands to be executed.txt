@@ -1,0 +1,30 @@
+"C:\Program Files\MongoDB\Server\8.0\bin\mongod.exe" --dbpath="D:\Working\Wrist Strap Monitor System\database\data\db" --bind_ip 172.16.10.184 --auth | "D:\Working\jq.exe" 
+
+"C:\Program Files\MongoDB\Server\8.0\bin\mongod.exe" --dbpath="D:\Working\Wrist Strap Monitor System\database\data\db" | "D:\Working\jq.exe" 
+
+"C:\Program Files\MongoDB\Server\8.0\bin\mongod.exe" --dbpath="D:\Working\Wrist Strap Monitor System\database\data\db" --bind_ip 127.0.0.1 --auth | "D:\Working\jq.exe" 
+
+db.createUser(
+  {
+    user: "admin",
+    pwd: passwordPrompt(), // Use passwordPrompt() for security
+    roles: [
+      { role: "userAdminAnyDatabase", db: "admin" },
+      { role: "readWriteAnyDatabase", db: "admin" }
+    ]
+  }
+)
+
+db.auth("admin", passwordPrompt())
+
+db.grantRolesToUser("admin", [{ role: "dbAdmin", db: "wrist_strap_monitor_system_db" }])
+
+db.createUser(
+  {
+    user: "wrist-strap-web-api",
+    pwd:  passwordPrompt(),   
+    roles: [ { role: "readWrite", db: "test" },
+             { role: "read", db: "reporting" } ]
+  }
+)
+

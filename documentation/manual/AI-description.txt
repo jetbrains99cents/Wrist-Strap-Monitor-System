@@ -1,0 +1,21 @@
+Ok, here is my description about the project and research:
+
+- My company has need for developing its own IoT infrastructure, specifically:
++ Temperature, humidity monitoring system
++ Wrist strap monitoring system
++ Others which rely on IoT (which uses MQTT at core) infrastructure
+
+- So in my mind, i think we will do some followed things:
++ Install mosquitto and use it as main MQTT broker
++ Install MongoDB and use it as main database
++ Choose some python framework that is suitable for developing a web API service (takes responsibility for processing requests, storing and retrieving data)
++ Start coding firmware for MCU (ESP32 module)
+
+- Wrist strap monitoring sytem:
+Basically, the MCU (ESP32) reads voltage values from the device (wrist strap monitor, this one outputs voltage accordingly to status of worker: Having wrist strap on their hands and no).
+The values then sent to MQTT broker and systhesises by web API service (this service connects to broker too)
+
+Put temperature, humidity monitoring system aside, go with above first.
+Because im working with AI like you, so i think its better to have a description file like todo file or something similar. Lets think and give me a deep dive, intuitive todo list for wrist strap monitoring
+system step by step, to achive final goal full and workable source code. The list/description should also include system design.
+I want to have a base infrastructure first to test, focus on MQTT and ESP32 firmware, then the dashboard on web, i think i will choose nuxtJS as main framework for this.
