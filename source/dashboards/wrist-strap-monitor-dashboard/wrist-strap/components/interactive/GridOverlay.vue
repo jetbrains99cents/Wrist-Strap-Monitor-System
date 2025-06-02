@@ -1,13 +1,14 @@
 <template>
   <div
-      class="grid-overlay-container"
+      class="grid-overlay-root"
       :style="{
       display: 'grid',
       gridTemplateColumns: `repeat(${cols}, ${cellWidth}px)`,
       gridTemplateRows: `repeat(${rows}, ${cellHeight}px)`,
-      width: `${cols * cellWidth}px`, /* Ensure container matches total grid size */
+      width: `${cols * cellWidth}px`,
       height: `${rows * cellHeight}px`,
-      pointerEvents: 'none', /* Container itself doesn't catch clicks */
+      pointerEvents: 'none',
+      opacity: 0.7,
     }"
   >
     <div
@@ -24,10 +25,10 @@
           'bg-yellow-400 bg-opacity-30 dark:bg-yellow-500 dark:bg-opacity-40': isSelected(row - 1, col - 1)
         }"
           :style="{
-          width: `${cellWidth}px`,
-          height: `${cellHeight}px`,
-          pointerEvents: 'auto', /* Individual cells catch clicks */
-        }"
+           width: `${cellWidth}px`,
+           height: `${cellHeight}px`,
+           pointerEvents: isPdfPanning ? 'none' : 'auto', // Dynamic pointer-events
+         }"
           role="button"
           tabindex="0"
           :aria-label="`Grid cell row ${row} column ${col}`"
@@ -49,6 +50,7 @@ interface Props {
   cellWidth: number;
   cellHeight: number;
   selectedCell: { row: number; col: number } | null;
+  isPdfPanning: boolean; // New prop
 }
 
 const props = defineProps<Props>();
@@ -58,6 +60,7 @@ const emit = defineEmits<{
 }>();
 
 const onCellClick = (rowIndex: number, colIndex: number) => {
+  if (props.isPdfPanning) return; // Prevent click if PDF is being panned
   emit('cell-click', {row: rowIndex, col: colIndex});
 };
 
@@ -67,16 +70,11 @@ const isSelected = (rowIndex: number, colIndex: number) => {
 </script>
 
 <style scoped>
-.grid-overlay-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  /* width and height are set by style binding */
-  opacity: 0.7; /* Make grid somewhat transparent so PDF below is visible */
+.grid-overlay-root {
+  /* This element is positioned by index.vue via the :style prop on the component tag. */
 }
 
 .grid-cell {
-  /* Basic styling, ensure it's clickable */
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -85,12 +83,10 @@ const isSelected = (rowIndex: number, colIndex: number) => {
 }
 
 .grid-cell:hover {
-  background-color: rgba(75, 85, 99, 0.1); /* Subtle hover, adjust as needed */
+  background-color: rgba(75, 85, 99, 0.1);
 }
 
 html.dark .grid-cell:hover {
   background-color: rgba(200, 200, 200, 0.1);
 }
-
-/* Highlight styling is done via :class binding in the template */
 </style>

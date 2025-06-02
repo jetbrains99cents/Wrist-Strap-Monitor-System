@@ -32,28 +32,28 @@
             class="pdf-controls-bar sticky top-0 z-10 p-2 flex justify-center items-center gap-2 bg-gray-100 dark:bg-dark-surface border-b dark:border-dark-border shadow-sm shrink-0"
         >
           <UButton size="sm" icon="i-heroicons-magnifying-glass-plus-20-solid" @click="pdfViewerComponentRef?.zoomIn()"
-                   :aria-label="zoomInLabel" :disabled="pdfViewerComponentRef?.isRendering.value"/>
+                   :aria-label="zoomInLabel" :disabled="pdfViewerComponentRef?.isRendering?.value"/>
           <UButton size="sm" icon="i-heroicons-magnifying-glass-minus-20-solid"
                    @click="pdfViewerComponentRef?.zoomOut()" :aria-label="zoomOutLabel"
-                   :disabled="pdfViewerComponentRef?.isRendering.value"/>
+                   :disabled="pdfViewerComponentRef?.isRendering?.value"/>
           <UButton size="sm" icon="i-heroicons-arrows-pointing-out-20-solid"
                    @click="pdfViewerComponentRef?.resetZoomAndPan()" :aria-label="resetViewLabel"
-                   :disabled="pdfViewerComponentRef?.isRendering.value"/>
+                   :disabled="pdfViewerComponentRef?.isRendering?.value"/>
           <div class="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
             <span>Scale:</span>
             <UInput v-model.number="zoomInputPercentage" type="number" size="xs" class="w-20 text-center"
                     @change="applyManualZoomToViewer" @keyup.enter="applyManualZoomToViewer" :min="minZoomPercentage"
-                    :max="maxZoomPercentage" :disabled="pdfViewerComponentRef?.isRendering.value"/>
+                    :max="maxZoomPercentage" :disabled="pdfViewerComponentRef?.isRendering?.value"/>
             <span>%</span>
           </div>
           <div class="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
             <span>Pg:</span>
             <UInput v-model.number="currentPageInput" type="number" size="xs" class="w-16 text-center"
                     @change="changePdfPage" @keyup.enter="changePdfPage" :min="1" :max="totalPagesForPdf"
-                    :disabled="!pdfViewerComponentRef || totalPagesForPdf <= 1 || pdfViewerComponentRef?.isRendering.value"/>
+                    :disabled="!pdfViewerComponentRef || totalPagesForPdf <= 1 || pdfViewerComponentRef?.isRendering?.value"/>
             <span>/ {{ totalPagesForPdf || '?' }}</span>
           </div>
-          <span v-if="pdfViewerComponentRef?.currentScale.value"
+          <span v-if="pdfViewerComponentRef?.currentScale?.value"
                 class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
             Render: {{ pdfViewerComponentRef.currentScale.value.toFixed(1) }}x
           </span>
@@ -67,16 +67,29 @@
               class="w-full h-full"
               @rendered="handlePdfRendered"
               @loaded="handlePdfLoaded"
+              @panstart="isPdfCurrentlyPanning = true"
+              @panend="isPdfCurrentlyPanning = false"
           />
           <GridOverlay
-              v-if="gridDimensions.cols > 0 && gridDimensions.rows > 0"
-              :rows="gridDimensions.rows"
-              :cols="gridDimensions.cols"
-              :cell-width="gridDimensions.cellWidth"
-              :cell-height="gridDimensions.cellHeight"
+              v-if="computedGridOverlayProps.visible"
+              :rows="computedGridOverlayProps.rows"
+              :cols="computedGridOverlayProps.cols"
+              :cell-width="computedGridOverlayProps.cellWidth"
+              :cell-height="computedGridOverlayProps.cellHeight"
               :selected-cell="selectedGridCell"
+              :is-pdf-panning="isPdfCurrentlyPanning"
               @cell-click="handleGridCellClick"
-              class="absolute top-0 left-0 pointer-events-none"
+              :style="{
+                position: 'absolute',
+                top: `${computedGridOverlayProps.y}px`,
+                left: `${computedGridOverlayProps.x}px`,
+                width: `${computedGridOverlayProps.width}px`,
+                height: `${computedGridOverlayProps.height}px`,
+                border: '3px solid red',
+                boxSizing: 'border-box',
+                pointerEvents: 'none',
+                zIndex: 10
+              }"
               aria-hidden="true"
           />
         </div>
@@ -111,7 +124,6 @@
                      @click="isGridCellModalOpen = false"/>
           </div>
         </template>
-
         <div v-if="modalCellData" class="p-4">
           <p>You selected cell at: </p>
           <p>Row: {{ modalCellData.row + 1 }}, Column: {{ modalCellData.col + 1 }}</p>
@@ -121,24 +133,21 @@
         <div v-else class="p-4">
           <p>No cell data available.</p>
         </div>
-
         <template #footer>
           <UButton label="Close" color="gray" @click="isGridCellModalOpen = false"/>
           <UButton label="Save" color="primary" @click="handleSaveCellData"/>
         </template>
       </UCard>
     </UModal>
-
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch, onMounted, onBeforeUnmount, nextTick} from 'vue';
+import {ref, computed, watch, onMounted} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
-import PdfViewer from '~/components/pdf/PdfViewer.vue'; // Assuming correct path
-import GridOverlay from '~/components/interactive/GridOverlay.vue'; // UPDATED PATH
+import PdfViewer from '~/components/pdf/PdfViewer.vue';
+import GridOverlay from '~/components/interactive/GridOverlay.vue';
 
-// Existing PdfViewer related interface and refs (condensed for brevity)
 interface PdfViewerExposed {
   zoomIn: () => void;
   zoomOut: () => void;
@@ -153,85 +162,114 @@ interface PdfViewerExposed {
   isLoading: { value: boolean };
   minScale: number;
   maxScale: number;
+  getCanvasActualWidth: () => number;
+  getCanvasActualHeight: () => number;
+  getCanvasPanX: () => number;
+  getCanvasPanY: () => number;
 }
 
 const {currentLanguage} = useLanguage();
 const isMobileMenuOpen = ref(false);
 const pdfViewerComponentRef = ref<PdfViewerExposed | null>(null);
+const isPdfCurrentlyPanning = ref(false);
 const zoomInputPercentage = ref(100);
 const currentPageInput = ref(1);
 const totalPagesForPdf = ref(0);
+
 const minZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.minScale * 100) : 20);
 const maxZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.maxScale * 100) : 500);
 const zoomInLabel = computed(() => currentLanguage.value === 'vi' ? 'Phóng to' : 'Zoom In');
 const zoomOutLabel = computed(() => currentLanguage.value === 'vi' ? 'Thu nhỏ' : 'Zoom Out');
 const resetViewLabel = computed(() => currentLanguage.value === 'vi' ? 'Đặt lại' : 'Reset View');
+
 const applyManualZoomToViewer = () => {
   if (pdfViewerComponentRef.value) pdfViewerComponentRef.value.setPdfScale(zoomInputPercentage.value / 100);
 };
 const changePdfPage = () => {
   if (pdfViewerComponentRef.value) pdfViewerComponentRef.value.goToPage(currentPageInput.value);
 };
+
 const handlePdfRendered = () => {
-  if (pdfViewerComponentRef.value) {
+  const viewer = pdfViewerComponentRef.value;
+  if (viewer && typeof viewer.getCanvasActualWidth === 'function') {
+    const w = viewer.getCanvasActualWidth();
+    const h = viewer.getCanvasActualHeight();
+    const px = viewer.getCanvasPanX();
+    const py = viewer.getCanvasPanY();
+    // console.log(`[index.vue] PDF RENDERED - Direct access via functions: W=${w}, H=${h}, PanX=${px}, PanY=${py}`);
+  }
+  if (pdfViewerComponentRef.value?.currentScale?.value) {
     zoomInputPercentage.value = Math.round(pdfViewerComponentRef.value.currentScale.value * 100);
+  }
+  if (pdfViewerComponentRef.value?.currentPageNum?.value) {
     currentPageInput.value = pdfViewerComponentRef.value.currentPageNum.value;
-    totalPagesForPdf.value = pdfViewerComponentRef.value.totalPages.value;
   }
 };
+
 const handlePdfLoaded = () => {
-  if (pdfViewerComponentRef.value) {
+  const viewer = pdfViewerComponentRef.value;
+  if (viewer && typeof viewer.getCanvasActualWidth === 'function') {
+    const w = viewer.getCanvasActualWidth();
+    const h = viewer.getCanvasActualHeight();
+    // console.log(`[index.vue] PDF LOADED - Direct access via functions: W=${w}, H=${h}`);
+  }
+  if (pdfViewerComponentRef.value?.totalPages?.value) {
     totalPagesForPdf.value = pdfViewerComponentRef.value.totalPages.value;
     currentPageInput.value = 1;
+  }
+  if (pdfViewerComponentRef.value?.currentScale?.value) {
     zoomInputPercentage.value = Math.round(pdfViewerComponentRef.value.currentScale.value * 100);
   }
 };
-watch(() => pdfViewerComponentRef.value?.currentScale.value, (newScale) => {
+
+watch(() => pdfViewerComponentRef.value?.currentScale?.value, (newScale) => {
   if (typeof newScale === 'number') zoomInputPercentage.value = Math.round(newScale * 100);
 });
-watch(() => pdfViewerComponentRef.value?.currentPageNum.value, (newPage) => {
+watch(() => pdfViewerComponentRef.value?.currentPageNum?.value, (newPage) => {
   if (typeof newPage === 'number') currentPageInput.value = newPage;
 });
-watch(() => pdfViewerComponentRef.value?.totalPages.value, (newTotal) => {
+watch(() => pdfViewerComponentRef.value?.totalPages?.value, (newTotal) => {
   if (typeof newTotal === 'number') totalPagesForPdf.value = newTotal;
 });
-const rawNavigationItems = ref([{
-  id: 'home',
-  label_en: 'Home',
-  label_vi: 'Trang chủ',
-  icon: 'i-heroicons-home-solid',
-  to: '/'
-}, {
-  id: 'device-list',
-  label_en: 'Device List',
-  label_vi: 'Danh sách thiết bị',
-  icon: 'i-heroicons-queue-list-solid',
-  to: '/device-list'
-}, {
-  id: 'device-management',
-  label_en: 'Device Management',
-  label_vi: 'Quản lý thiết bị',
-  icon: 'i-heroicons-cog-8-tooth-solid',
-  to: '/device-management'
-}, {
-  id: 'production-plan',
-  label_en: 'Production Plan\n& Working Time',
-  label_vi: 'Kế hoạch & Thời gian\nsản xuất',
-  icon: 'i-heroicons-calendar-days-solid',
-  to: '/production-plan'
-}, {
-  id: 'data-visualization',
-  label_en: 'Data Visualization',
-  label_vi: 'Trực quan hóa dữ liệu',
-  icon: 'i-heroicons-chart-pie-solid',
-  to: '/data-visualization'
-}, {
-  id: 'data-analysis',
-  label_en: 'Data Analysis',
-  label_vi: 'Phân tích dữ liệu',
-  icon: 'i-heroicons-presentation-chart-line-solid',
-  to: '/data-analysis'
-},]);
+
+const rawNavigationItems = ref([
+  {id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/'},
+  {
+    id: 'device-list',
+    label_en: 'Device List',
+    label_vi: 'Danh sách thiết bị',
+    icon: 'i-heroicons-queue-list-solid',
+    to: '/device-list'
+  },
+  {
+    id: 'device-management',
+    label_en: 'Device Management',
+    label_vi: 'Quản lý thiết bị',
+    icon: 'i-heroicons-cog-8-tooth-solid',
+    to: '/device-management'
+  },
+  {
+    id: 'production-plan',
+    label_en: 'Production Plan\n& Working Time',
+    label_vi: 'Kế hoạch & Thời gian\nsản xuất',
+    icon: 'i-heroicons-calendar-days-solid',
+    to: '/production-plan'
+  },
+  {
+    id: 'data-visualization',
+    label_en: 'Data Visualization',
+    label_vi: 'Trực quan hóa dữ liệu',
+    icon: 'i-heroicons-chart-pie-solid',
+    to: '/data-visualization'
+  },
+  {
+    id: 'data-analysis',
+    label_en: 'Data Analysis',
+    label_vi: 'Phân tích dữ liệu',
+    icon: 'i-heroicons-presentation-chart-line-solid',
+    to: '/data-analysis'
+  },
+]);
 const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({
   id: item.id,
   label: currentLanguage.value === 'vi' ? item.label_vi : item.label_en,
@@ -239,97 +277,108 @@ const localizedNavigationItems = computed(() => rawNavigationItems.value.map(ite
   to: item.to,
 })));
 
-// --- Grid Overlay Logic ---
 const pdfViewAndGridAreaRef = ref<HTMLElement | null>(null);
-const gridDimensions = ref({rows: 0, cols: 0, cellWidth: 0, cellHeight: 0});
-const BASE_CELL_SIZE_PX = 50; // Desired cell size in pixels (e.g., 50x50)
+const BASE_CELL_SIZE_PX = 50;
 const selectedGridCell = ref<{ row: number; col: number } | null>(null);
 const isGridCellModalOpen = ref(false);
 const modalCellData = ref<{ id: string; row: number; col: number } | null>(null);
 
-let gridResizeObserver: ResizeObserver | null = null;
-
-const calculateGridDimensions = () => {
-  if (pdfViewAndGridAreaRef.value) {
-    const containerWidth = pdfViewAndGridAreaRef.value.offsetWidth;
-    const containerHeight = pdfViewAndGridAreaRef.value.offsetHeight;
-
-    if (containerWidth > 0 && containerHeight > 0 && BASE_CELL_SIZE_PX > 0) {
-      const cols = Math.floor(containerWidth / BASE_CELL_SIZE_PX);
-      const rows = Math.floor(containerHeight / BASE_CELL_SIZE_PX);
-
-      // To make cells perfectly fill the space, adjust cell size, or accept partial fill with fixed cell size
-      // For now, let's use fixed cell size and the grid overlay will just draw this many full cells
-      gridDimensions.value = {
-        rows: rows,
-        cols: cols,
-        cellWidth: BASE_CELL_SIZE_PX, // Cells are fixed size
-        cellHeight: BASE_CELL_SIZE_PX,
-      };
-    } else {
-      gridDimensions.value = {rows: 0, cols: 0, cellWidth: 0, cellHeight: 0};
-    }
-  } else {
-    gridDimensions.value = {rows: 0, cols: 0, cellWidth: 0, cellHeight: 0};
+const computedGridOverlayProps = computed(() => {
+  const viewer = pdfViewerComponentRef.value;
+  if (!viewer ||
+      typeof viewer.getCanvasActualWidth !== 'function' ||
+      typeof viewer.getCanvasActualHeight !== 'function' ||
+      typeof viewer.getCanvasPanX !== 'function' ||
+      typeof viewer.getCanvasPanY !== 'function') {
+    return {
+      visible: false,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      rows: 0,
+      cols: 0,
+      cellWidth: BASE_CELL_SIZE_PX,
+      cellHeight: BASE_CELL_SIZE_PX
+    };
   }
-};
 
-onMounted(() => {
-  // Add ResizeObserver for the PDF viewing area to recalculate grid
-  nextTick(() => { // Ensure element is mounted
-    if (pdfViewAndGridAreaRef.value) {
-      calculateGridDimensions(); // Initial calculation
-      gridResizeObserver = new ResizeObserver(calculateGridDimensions);
-      gridResizeObserver.observe(pdfViewAndGridAreaRef.value);
-    }
-  });
+  const panXVal = viewer.getCanvasPanX();
+  const panYVal = viewer.getCanvasPanY();
+  const actualWidthVal = viewer.getCanvasActualWidth();
+  const actualHeightVal = viewer.getCanvasActualHeight();
+
+  if (typeof actualWidthVal !== 'number' || actualWidthVal <= 0 ||
+      typeof actualHeightVal !== 'number' || actualHeightVal <= 0 ||
+      typeof panXVal !== 'number' ||
+      typeof panYVal !== 'number' ||
+      BASE_CELL_SIZE_PX <= 0) {
+    return {
+      visible: false,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      rows: 0,
+      cols: 0,
+      cellWidth: BASE_CELL_SIZE_PX,
+      cellHeight: BASE_CELL_SIZE_PX
+    };
+  }
+
+  const cols = Math.floor(actualWidthVal / BASE_CELL_SIZE_PX);
+  const rows = Math.floor(actualHeightVal / BASE_CELL_SIZE_PX);
+
+  if (cols <= 0 || rows <= 0) {
+    return {
+      visible: false,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      rows: 0,
+      cols: 0,
+      cellWidth: BASE_CELL_SIZE_PX,
+      cellHeight: BASE_CELL_SIZE_PX
+    };
+  }
+
+  return {
+    visible: true, x: panXVal, y: panYVal, width: actualWidthVal, height: actualHeightVal,
+    rows: rows, cols: cols, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX,
+  };
 });
 
-onBeforeUnmount(() => {
-  if (gridResizeObserver && pdfViewAndGridAreaRef.value) {
-    gridResizeObserver.unobserve(pdfViewAndGridAreaRef.value);
-  }
-  if (gridResizeObserver) {
-    gridResizeObserver.disconnect();
-  }
+onMounted(() => {
+  // console.log('[index.vue] Component MOUNTED. pdfViewerComponentRef:', pdfViewerComponentRef.value);
 });
 
 const handleGridCellClick = (cell: { row: number; col: number }) => {
+  if (isPdfCurrentlyPanning.value) return; // Prevent cell click if panning
   if (selectedGridCell.value?.row === cell.row && selectedGridCell.value?.col === cell.col) {
-    // Clicking the same cell again could deselect or open modal directly
-    selectedGridCell.value = null; // Simple deselect for now
-    // Or, if modal should always open on click:
-    // modalCellData.value = { id: `cell-${cell.row}-${cell.col}`, row: cell.row, col: cell.col };
-    // isGridCellModalOpen.value = true;
+    selectedGridCell.value = null;
   } else {
     selectedGridCell.value = cell;
     modalCellData.value = {id: `cell-${cell.row}-${cell.col}`, row: cell.row, col: cell.col};
-    // Decide if modal opens on selection or requires another action
-    isGridCellModalOpen.value = true; // Open modal on new cell selection
-    console.log('Grid cell clicked:', cell, 'Modal should open.');
+    isGridCellModalOpen.value = true;
   }
 };
 
 const handleSaveCellData = () => {
   if (modalCellData.value) {
-    console.log('Saving data for cell:', modalCellData.value);
-    // Implement actual save logic here
+    // console.log('Saving data for cell:', modalCellData.value);
   }
   isGridCellModalOpen.value = false;
 };
 
 useHead({
   title: 'Factory Layout (PDF) - Wrist Strap Dashboard | IoT Hub',
-  meta: [
-    {name: 'description', content: 'Interactive overview of the factory production layout using PDF with grid overlay.'}
-  ]
+  meta: [{
+    name: 'description',
+    content: 'Interactive overview of the factory production layout using PDF with grid overlay.'
+  }]
 });
 </script>
 
-<style scoped>
-.pdf-main-area {
-  /* overflow-y: auto; is applied directly in the class attribute for clarity */
-}
-
-/* Additional styles for grid overlay or cells can be added here or in GridOverlay.vue */
-</style>
+<style scoped> .pdf-main-area { /* Styles for the main PDF area */
+} </style>

@@ -21,7 +21,6 @@
       {{ currentPdfJsRenderScale.toFixed(1) }}x ...
     </div>
     <div v-if="errorMsg" class="error-indicator">Error: {{ errorMsg }}</div>
-
   </div>
 </template>
 
@@ -37,6 +36,13 @@ const props = defineProps({
   pdfMinRenderScale: {type: Number, default: 0.2},
   pdfZoomStep: {type: Number, default: 0.2}
 });
+
+const emit = defineEmits<{
+  (e: 'rendered'): void;
+  (e: 'loaded'): void;
+  (e: 'panstart'): void;
+  (e: 'panend'): void;
+}>();
 
 const pdfViewportRef = ref<HTMLElement | null>(null);
 const pdfCanvasElementRef = ref<HTMLCanvasElement | null>(null);
@@ -60,25 +66,24 @@ const dragStartY = ref(0);
 
 let renderDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
+const actualCanvasWidth_internal = ref(0);
+const actualCanvasHeight_internal = ref(0);
+
 async function renderPage(pageNum: number, pdfScaleToRender: number) {
   const canvasEl = pdfCanvasElementRef.value;
   const viewportEl = pdfViewportRef.value;
 
   if (!canvasEl || !viewportEl) {
     errorMsg.value = "Render prerequisites: Missing canvas or viewport element.";
-    loading.value = false; // Though loading is more for loadPdf
     isRenderingPage.value = false;
     return;
   }
-
   const currentDocInstance = pdfDoc;
   if (!currentDocInstance) {
     errorMsg.value = "Render prerequisites: pdfDoc is null in renderPage.";
-    loading.value = false; // Though loading is more for loadPdf
     isRenderingPage.value = false;
     return;
   }
-
   if (renderTask) {
     try {
       renderTask.cancel();
@@ -88,7 +93,7 @@ async function renderPage(pageNum: number, pdfScaleToRender: number) {
   }
 
   isRenderingPage.value = true;
-  errorMsg.value = null; // Clear previous render-specific errors
+  errorMsg.value = null;
 
   try {
     const page = await currentDocInstance.getPage(pageNum);
@@ -96,36 +101,44 @@ async function renderPage(pageNum: number, pdfScaleToRender: number) {
     const context = canvasEl.getContext('2d');
 
     if (!context) {
-      errorMsg.value = 'Failed to get canvas 2D context'; // Set error directly
-      console.error(errorMsg.value);
-      isRenderingPage.value = false; // Reset flag as render won't proceed
-      return; // Exit function
+      errorMsg.value = 'Failed to get canvas 2D context';
+      isRenderingPage.value = false;
+      return;
     }
 
     canvasEl.height = viewport.height;
     canvasEl.width = viewport.width;
+    actualCanvasWidth_internal.value = canvasEl.width;
+    actualCanvasHeight_internal.value = canvasEl.height;
     currentPdfJsRenderScale.value = pdfScaleToRender;
 
     const renderContext = {canvasContext: context, viewport: viewport};
     renderTask = page.render(renderContext);
-
     await renderTask.promise;
     renderTask = null;
-
     await nextTick();
-    panX.value = Math.max(0, (viewportEl.offsetWidth - canvasEl.width) / 2);
-    panY.value = Math.max(0, (viewportEl.offsetHeight - canvasEl.height) / 2);
 
+    if (viewportEl.offsetWidth > canvasEl.width) {
+      panX.value = (viewportEl.offsetWidth - canvasEl.width) / 2;
+    } else {
+      panX.value = Math.max(viewportEl.offsetWidth - canvasEl.width, Math.min(panX.value, 0));
+    }
+    if (viewportEl.offsetHeight > canvasEl.height) {
+      panY.value = (viewportEl.offsetHeight - canvasEl.height) / 2;
+    } else {
+      panY.value = Math.max(viewportEl.offsetHeight - canvasEl.height, Math.min(panY.value, 0));
+    }
+
+    emit('rendered');
   } catch (err: any) {
     if (renderTask) renderTask = null;
     if (err.name === 'RenderingCancelledException' || (typeof err.message === 'string' && err.message.includes('Rendering cancelled'))) {
-      // This is expected if a new render was initiated and cancelled this one
+      // This is expected
     } else {
       errorMsg.value = err.message || `Failed to render page ${pageNum}`;
-      console.error('PDF Rendering Error:', err);
     }
   } finally {
-    isRenderingPage.value = false; // Ensure this is always set
+    isRenderingPage.value = false;
   }
 }
 
@@ -135,7 +148,6 @@ async function loadPdf() {
     loading.value = false;
     return;
   }
-
   loading.value = true;
   errorMsg.value = null;
 
@@ -146,7 +158,6 @@ async function loadPdf() {
     }
     renderTask = null;
   }
-
   if (pdfDoc) {
     try {
       await pdfDoc.destroy();
@@ -161,45 +172,46 @@ async function loadPdf() {
   currentPdfJsRenderScale.value = props.initialPdfRenderScale;
   panX.value = 0;
   panY.value = 0;
+  actualCanvasWidth_internal.value = 0;
+  actualCanvasHeight_internal.value = 0;
 
   try {
     if (typeof window !== 'undefined' && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = PdfjsWorkerPath;
     }
-
     const loadedDoc = await pdfjsLib.getDocument(props.src).promise;
-
     if (!loadedDoc) {
-      pdfDoc = null; // Ensure component state is null
-      errorMsg.value = "PDF document loading failed: getDocument resolved to a nullish value.";
-      console.error(errorMsg.value);
-      // No throw needed; the function will proceed to 'finally' where loading is set to false.
-      // The rest of the try block is effectively skipped as pdfDoc remains null or further checks fail.
+      pdfDoc = null;
+      errorMsg.value = "PDF document loading failed.";
     } else {
-      // This block executes only if loadedDoc is valid
       pdfDoc = loadedDoc;
-      numPages.value = loadedDoc.numPages; // Use the validated local const
-
+      numPages.value = loadedDoc.numPages;
       if (numPages.value > 0) {
         await renderPage(currentPage.value, currentPdfJsRenderScale.value);
       } else {
         errorMsg.value = "The PDF document has no pages to display.";
+        actualCanvasWidth_internal.value = 0;
+        actualCanvasHeight_internal.value = 0;
       }
     }
   } catch (err: any) {
-    pdfDoc = null; // Ensure component-level pdfDoc is null if any error occurs
+    pdfDoc = null;
     errorMsg.value = err.message || 'Failed to load PDF document';
-    console.error('loadPdf: Error:', err);
+    actualCanvasWidth_internal.value = 0;
+    actualCanvasHeight_internal.value = 0;
   } finally {
-    loading.value = false; // This will always run
+    loading.value = false;
+    if (!errorMsg.value && pdfDoc) {
+      emit('loaded');
+    }
   }
 }
 
-// --- Mouse Panning Logic --- (remains unchanged)
 const handleMouseDown = (event: MouseEvent) => {
   if (!pdfViewportRef.value || !(event.target === pdfViewportRef.value || event.target === pdfCanvasElementRef.value)) return;
   if (event.button !== 0) return;
   isDragging.value = true;
+  emit('panstart');
   dragStartX.value = event.clientX;
   dragStartY.value = event.clientY;
   startPanX.value = panX.value;
@@ -211,23 +223,47 @@ const handleMouseMove = (event: MouseEvent) => {
   if (!isDragging.value) return;
   const dx = event.clientX - dragStartX.value;
   const dy = event.clientY - dragStartY.value;
-  panX.value = startPanX.value + dx;
-  panY.value = startPanY.value + dy;
+  const canvasEl = pdfCanvasElementRef.value;
+  const viewportEl = pdfViewportRef.value;
+
+  if (canvasEl && viewportEl) {
+    let newPanX = startPanX.value + dx;
+    let newPanY = startPanY.value + dy;
+
+    if (canvasEl.width <= viewportEl.offsetWidth) { // Canvas is narrower or same width
+      newPanX = Math.max(0, Math.min(newPanX, viewportEl.offsetWidth - canvasEl.width));
+    } else { // Canvas is wider
+      newPanX = Math.max(viewportEl.offsetWidth - canvasEl.width, Math.min(newPanX, 0));
+    }
+    panX.value = newPanX;
+
+    if (canvasEl.height <= viewportEl.offsetHeight) { // Canvas is shorter or same height
+      newPanY = Math.max(0, Math.min(newPanY, viewportEl.offsetHeight - canvasEl.height));
+    } else { // Canvas is taller
+      newPanY = Math.max(viewportEl.offsetHeight - canvasEl.height, Math.min(newPanY, 0));
+    }
+    panY.value = newPanY;
+  } else {
+    panX.value = startPanX.value + dx;
+    panY.value = startPanY.value + dy;
+  }
 };
 
 const handleMouseUp = () => {
   if (!isDragging.value) return;
   isDragging.value = false;
+  emit('panend');
   if (pdfViewportRef.value) pdfViewportRef.value.style.cursor = 'grab';
 };
 
 const handleMouseLeave = () => {
   if (isDragging.value) {
-    handleMouseUp();
+    isDragging.value = false;
+    emit('panend');
+    if (pdfViewportRef.value) pdfViewportRef.value.style.cursor = 'grab';
   }
 };
 
-// --- Zoom Logic --- (remains unchanged)
 const changeZoom = (newScale: number) => {
   const targetScale = parseFloat(Math.max(props.pdfMinRenderScale, Math.min(props.pdfMaxRenderScale, newScale)).toFixed(2));
   if (targetScale !== currentPdfJsRenderScale.value) {
@@ -252,23 +288,22 @@ const handleWheelZoom = (event: WheelEvent) => {
 
 const triggerZoomIn = () => changeZoom(currentPdfJsRenderScale.value + props.pdfZoomStep);
 const triggerZoomOut = () => changeZoom(currentPdfJsRenderScale.value - props.pdfZoomStep);
-
 const triggerFullReset = () => {
-  panX.value = 0;
-  panY.value = 0;
   if (pdfDoc) {
+    currentPage.value = 1;
     renderPage(currentPage.value, props.initialPdfRenderScale);
   } else {
     currentPdfJsRenderScale.value = props.initialPdfRenderScale;
+    panX.value = 0;
+    panY.value = 0;
+    actualCanvasWidth_internal.value = 0;
+    actualCanvasHeight_internal.value = 0;
   }
 };
-
 const applyManualScale = (newScale: number) => {
   const targetScale = parseFloat(Math.max(props.pdfMinRenderScale, Math.min(props.pdfMaxRenderScale, newScale)).toFixed(2));
   changeZoom(targetScale);
 };
-
-// --- Page Navigation & Lifecycle --- (remains unchanged)
 const triggerGoToPage = (pageNumber: number) => {
   if (pageNumber >= 1 && pageNumber <= numPages.value && pageNumber !== currentPage.value && pdfDoc) {
     currentPage.value = pageNumber;
@@ -278,19 +313,16 @@ const triggerGoToPage = (pageNumber: number) => {
 onMounted(() => {
   loadPdf();
 });
-
 watch(() => props.src, (newSrc, oldSrc) => {
   if (newSrc && newSrc !== oldSrc) {
     loadPdf();
   }
 });
-
 watch(currentPage, (newPage, oldPage) => {
   if (newPage !== oldPage && newPage >= 1 && newPage <= numPages.value && pdfDoc) {
     renderPage(newPage, currentPdfJsRenderScale.value);
   }
 });
-
 onUnmounted(() => {
   if (renderDebounceTimer) clearTimeout(renderDebounceTimer);
   if (renderTask) {
@@ -310,7 +342,6 @@ onUnmounted(() => {
   }
 });
 
-// --- Expose --- (remains unchanged)
 defineExpose({
   zoomIn: triggerZoomIn,
   zoomOut: triggerZoomOut,
@@ -321,25 +352,28 @@ defineExpose({
   currentScale: computed(() => currentPdfJsRenderScale.value),
   currentPageNum: computed(() => currentPage.value),
   totalPages: computed(() => numPages.value),
-  isRendering: computed(() => isRenderingPage.value),
+  isRendering: computed(() => isRenderingPage.value || loading.value),
   isLoading: computed(() => loading.value),
   minScale: props.pdfMinRenderScale,
   maxScale: props.pdfMaxRenderScale,
+  getCanvasActualWidth: () => actualCanvasWidth_internal.value,
+  getCanvasActualHeight: () => actualCanvasHeight_internal.value,
+  getCanvasPanX: () => panX.value,
+  getCanvasPanY: () => panY.value,
 });
 </script>
 
 <style scoped>
 .pdf-viewer-wrapper {
-  background-color: #f0f0f0; /* Fallback if not overridden by dark mode */
+  background-color: #f0f0f0;
 }
 
 html.dark .pdf-viewer-wrapper {
-  background-color: #2d3748; /* Dark mode background */
+  background-color: #2d3748;
 }
 
 .pdf-canvas {
-  display: block; /* Removes extra space below canvas */
-  /* transform-origin: 0 0; */ /* Better to control precisely with panX/panY from center logic */
+  display: block;
 }
 
 .loading-indicator, .error-indicator {
@@ -352,20 +386,19 @@ html.dark .pdf-viewer-wrapper {
   color: white;
   border-radius: 0.5rem;
   z-index: 10;
-  font-family: 'ABeeZee', sans-serif; /* Ensure font is available */
+  font-family: 'ABeeZee', sans-serif;
   text-align: center;
-  pointer-events: none; /* Allow interaction with underlying elements if necessary */
+  pointer-events: none;
 }
 
 .error-indicator {
-  background-color: rgba(220, 38, 38, 0.9); /* Red for error messages */
+  background-color: rgba(220, 38, 38, 0.9);
 }
 
-/* This style is applied when isRenderingPage is true AND loading is false */
 .loading-indicator.bottom-16 {
-  bottom: 4rem; /* Adjust as needed, roughly 64px from bottom */
+  bottom: 4rem;
   top: auto;
-  transform: translateX(-50%); /* Keep it centered horizontally */
+  transform: translateX(-50%);
   left: 50%;
 }
 </style>
