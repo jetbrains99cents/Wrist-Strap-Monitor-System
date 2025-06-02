@@ -80,7 +80,10 @@ async function renderPage(pageNum: number, pdfScaleToRender: number) {
   }
 
   if (renderTask) {
-    try { renderTask.cancel(); } catch (e) { /* ignore */ }
+    try {
+      renderTask.cancel();
+    } catch (e) { /* ignore */
+    }
     renderTask = null;
   }
 
@@ -89,7 +92,7 @@ async function renderPage(pageNum: number, pdfScaleToRender: number) {
 
   try {
     const page = await currentDocInstance.getPage(pageNum);
-    const viewport = page.getViewport({ scale: pdfScaleToRender });
+    const viewport = page.getViewport({scale: pdfScaleToRender});
     const context = canvasEl.getContext('2d');
 
     if (!context) {
@@ -103,7 +106,7 @@ async function renderPage(pageNum: number, pdfScaleToRender: number) {
     canvasEl.width = viewport.width;
     currentPdfJsRenderScale.value = pdfScaleToRender;
 
-    const renderContext = { canvasContext: context, viewport: viewport };
+    const renderContext = {canvasContext: context, viewport: viewport};
     renderTask = page.render(renderContext);
 
     await renderTask.promise;
@@ -114,7 +117,7 @@ async function renderPage(pageNum: number, pdfScaleToRender: number) {
     panY.value = Math.max(0, (viewportEl.offsetHeight - canvasEl.height) / 2);
 
   } catch (err: any) {
-    if(renderTask) renderTask = null;
+    if (renderTask) renderTask = null;
     if (err.name === 'RenderingCancelledException' || (typeof err.message === 'string' && err.message.includes('Rendering cancelled'))) {
       // This is expected if a new render was initiated and cancelled this one
     } else {
@@ -137,12 +140,19 @@ async function loadPdf() {
   errorMsg.value = null;
 
   if (renderTask) {
-    try { renderTask.cancel(); } catch (e) { /* ignore */ }
+    try {
+      renderTask.cancel();
+    } catch (e) { /* ignore */
+    }
     renderTask = null;
   }
 
   if (pdfDoc) {
-    try { await pdfDoc.destroy(); } catch (e) { console.error('Error destroying previous pdfDoc:', e); }
+    try {
+      await pdfDoc.destroy();
+    } catch (e) {
+      console.error('Error destroying previous pdfDoc:', e);
+    }
     pdfDoc = null;
   }
 
@@ -284,13 +294,18 @@ watch(currentPage, (newPage, oldPage) => {
 onUnmounted(() => {
   if (renderDebounceTimer) clearTimeout(renderDebounceTimer);
   if (renderTask) {
-    try { renderTask.cancel(); } catch (e) { /* ignore */ }
+    try {
+      renderTask.cancel();
+    } catch (e) { /* ignore */
+    }
     renderTask = null;
   }
   if (pdfDoc) {
     try {
       pdfDoc.destroy();
-    } catch(e) { console.error('Error destroying PDF document on unmount:', e); }
+    } catch (e) {
+      console.error('Error destroying PDF document on unmount:', e);
+    }
     pdfDoc = null;
   }
 });

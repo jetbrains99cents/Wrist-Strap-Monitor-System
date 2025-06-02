@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import {computed} from 'vue';
 
 interface Props {
   rows: number;
@@ -58,7 +58,7 @@ const emit = defineEmits<{
 }>();
 
 const onCellClick = (rowIndex: number, colIndex: number) => {
-  emit('cell-click', { row: rowIndex, col: colIndex });
+  emit('cell-click', {row: rowIndex, col: colIndex});
 };
 
 const isSelected = (rowIndex: number, colIndex: number) => {
@@ -84,7 +84,7 @@ const isSelected = (rowIndex: number, colIndex: number) => {
   user-select: none;
 }
 
-.grid-cell:hover {.
+.grid-cell:hover {
   background-color: rgba(75, 85, 99, 0.1); /* Subtle hover, adjust as needed */
 }
 
