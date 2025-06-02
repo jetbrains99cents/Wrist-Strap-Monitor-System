@@ -1,0 +1,91 @@
+/* assets/css/main.css */
+
+/* Import Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=ABeeZee:ital,wght@0,400;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap");
+
+/* Classic Tailwind v3 Directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base layer customizations */
+@layer base {
+    html, body, #__nuxt { /* Assuming #__nuxt is your Nuxt root ID */
+        @apply h-full m-0 p-0;
+    }
+
+    html {
+        @apply overflow-x-hidden;
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply font-abeezee bg-white text-gray-900 transition-colors duration-300 overflow-y-hidden;
+    }
+
+    html.dark body {
+        @apply bg-dark-bg text-dark-text-primary;
+    }
+
+    html.dark a {
+        @apply text-nuxt-green hover:opacity-80;
+    }
+
+    a {
+        @apply text-blue-600 hover:text-blue-800;
+    }
+}
+
+/* Semantic Component Classes */
+@layer components {
+    .app-header {
+        @apply bg-white dark:bg-dark-surface text-[#226099] dark:text-nuxt-green border-b border-gray-200 dark:border-dark-border;
+    }
+
+    .app-header-subtitle {
+        @apply text-gray-800 dark:text-dark-text-secondary;
+    }
+
+    .app-footer {
+        @apply bg-white dark:bg-dark-surface text-gray-800 dark:text-dark-text-primary border-t border-gray-200 dark:border-dark-border;
+    }
+
+    .toggle-container-border {
+        @apply border-gray-400 dark:border-nuxt-green;
+    }
+
+    .menu-item-card {
+        @apply bg-white border border-gray-300
+        dark:bg-dark-surface dark:border-dark-border
+        rounded-lg
+        shadow-lg
+        cursor-pointer
+        transition-all duration-300 ease-in-out
+        hover:shadow-2xl
+        hover:border-nuxt-green
+        dark:hover:border-nuxt-green
+        hover:bg-gray-50
+        dark:hover:bg-[color-mix(in_srgb,var(--color-dark-surface)_90%,#fff)];
+    }
+
+    .menu-item-text {
+        @apply text-gray-800 dark:text-dark-text-primary;
+    }
+
+    .menu-item-description-text {
+        @apply text-gray-500 dark:text-dark-text-secondary;
+    }
+
+    .menu-item-icon-placeholder-bg {
+        @apply bg-gray-200 dark:bg-gray-700;
+    }
+
+    .menu-item-icon-placeholder-text {
+        @apply text-gray-500 dark:text-dark-text-secondary;
+    }
+
+    .circular-menu-center {
+        @apply bg-blue-500 dark:bg-nuxt-green text-white dark:text-dark-bg;
+    }
+}
