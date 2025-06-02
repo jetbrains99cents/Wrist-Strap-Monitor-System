@@ -14,6 +14,7 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/wrist-strap" />
+    <option name="ROOT_SYNC" value="SYNC" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
@@ -60,7 +61,7 @@
       <option name="presentableId" value="Default" />
       <updated>1748851464252</updated>
       <workItem from="1748851465297" duration="2536000" />
-      <workItem from="1748854925017" duration="2997000" />
+      <workItem from="1748854925017" duration="10269000" />
     </task>
     <servers />
   </component>
