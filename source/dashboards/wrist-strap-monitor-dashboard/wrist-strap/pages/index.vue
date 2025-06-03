@@ -4,12 +4,14 @@
         class="hidden md:flex md:flex-col bg-gray-100 dark:bg-dark-surface border-r border-gray-200 dark:border-dark-border p-4 w-60 lg:w-64 overflow-y-auto shrink-0"
         aria-label="Desktop Dashboard Navigation"
     >
-      <UVerticalNavigation :links="localizedNavigationItems" :ui="{ base: 'group relative flex items-start gap-x-3', padding: 'px-3 py-2.5', label: 'text-base whitespace-pre-line break-words text-left', icon: { base: 'flex-shrink-0 w-5 h-5 mt-0.5' } }" />
+      <UVerticalNavigation :links="localizedNavigationItems"
+                           :ui="{ base: 'group relative flex items-start gap-x-3', padding: 'px-3 py-2.5', label: 'text-base whitespace-pre-line break-words text-left', icon: { base: 'flex-shrink-0 w-5 h-5 mt-0.5' } }"/>
     </aside>
 
     <section class="flex-1 flex flex-col overflow-hidden">
       <div class="md:hidden p-3 sm:p-4 sticky top-0 bg-white dark:bg-dark-bg z-20 border-b dark:border-dark-border">
-        <UButton icon="i-heroicons-bars-3-20-solid" color="gray" variant="ghost" aria-label="Open navigation menu" @click="isMobileMenuOpen = true" />
+        <UButton icon="i-heroicons-bars-3-20-solid" color="gray" variant="ghost" aria-label="Open navigation menu"
+                 @click="isMobileMenuOpen = true"/>
       </div>
 
       <div class="pdf-main-area flex flex-col flex-1 overflow-y-auto">
@@ -18,17 +20,44 @@
             class="pdf-controls-bar sticky top-0 z-10 p-2 flex flex-wrap justify-center items-center gap-x-2 gap-y-1 bg-gray-100 dark:bg-dark-surface border-b dark:border-dark-border shadow-sm shrink-0"
         >
           <div class="flex items-center gap-1">
-            <UToggle v-model="isPanMode" on-icon="i-heroicons-arrows-pointing-out-20-solid" off-icon="i-heroicons-cursor-arrow-rays-20-solid" :aria-label="interactionModeToggleAriaLabel" />
-            <span class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap"> {{ viewModeBaseLabel }}: {{ currentInteractionModeLabel }} </span>
+            <UToggle v-model="isPanMode" on-icon="i-heroicons-arrows-pointing-out-20-solid"
+                     off-icon="i-heroicons-cursor-arrow-rays-20-solid" :aria-label="interactionModeToggleAriaLabel"/>
+            <span class="text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap"> {{
+                viewModeBaseLabel
+              }}: {{ currentInteractionModeLabel }} </span>
           </div>
-          <UButton size="sm" @click="pdfViewerComponentRef?.zoomIn()" :disabled="pdfViewerComponentRef?.isRendering?.value"> <UIcon name="i-heroicons-magnifying-glass-plus-20-solid" class="h-4 w-4 mr-1" /> {{ zoomInLabel }} </UButton>
-          <UButton size="sm" @click="pdfViewerComponentRef?.zoomOut()" :disabled="pdfViewerComponentRef?.isRendering?.value"> <UIcon name="i-heroicons-magnifying-glass-minus-20-solid" class="h-4 w-4 mr-1" /> {{ zoomOutLabel }} </UButton>
-          <UButton size="sm" @click="pdfViewerComponentRef?.resetZoomAndPan()" :disabled="pdfViewerComponentRef?.isRendering?.value"> <UIcon name="i-heroicons-arrows-pointing-out-20-solid" class="h-4 w-4 mr-1" /> {{ resetViewLabel }} </UButton>
+          <UButton size="sm" @click="pdfViewerComponentRef?.zoomIn()"
+                   :disabled="pdfViewerComponentRef?.isRendering?.value">
+            <UIcon name="i-heroicons-magnifying-glass-plus-20-solid" class="h-4 w-4 mr-1"/>
+            {{ zoomInLabel }}
+          </UButton>
+          <UButton size="sm" @click="pdfViewerComponentRef?.zoomOut()"
+                   :disabled="pdfViewerComponentRef?.isRendering?.value">
+            <UIcon name="i-heroicons-magnifying-glass-minus-20-solid" class="h-4 w-4 mr-1"/>
+            {{ zoomOutLabel }}
+          </UButton>
+          <UButton size="sm" @click="pdfViewerComponentRef?.resetZoomAndPan()"
+                   :disabled="pdfViewerComponentRef?.isRendering?.value">
+            <UIcon name="i-heroicons-arrows-pointing-out-20-solid" class="h-4 w-4 mr-1"/>
+            {{ resetViewLabel }}
+          </UButton>
           <div class="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
-            <span>{{ scaleLabel }}:</span> <UInput v-model.number="zoomInputPercentage" type="number" size="xs" class="w-20 text-center" @change="applyManualZoomToViewer" @keyup.enter="applyManualZoomToViewer" :min="minZoomPercentage" :max="maxZoomPercentage" :disabled="pdfViewerComponentRef?.isRendering?.value"/> <span>%</span>
+            <span>{{ scaleLabel }}:</span>
+            <UInput v-model.number="zoomInputPercentage" type="number" size="xs" class="w-20 text-center"
+                    @change="applyManualZoomToViewer" @keyup.enter="applyManualZoomToViewer" :min="minZoomPercentage"
+                    :max="maxZoomPercentage" :disabled="pdfViewerComponentRef?.isRendering?.value"/>
+            <span>%</span>
           </div>
-          <span v-if="pdfViewerComponentRef?.totalPages?.value > 1" class="text-xs text-gray-600 dark:text-gray-400"> {{ pageLabel }}: {{ pdfViewerComponentRef?.currentPageNum?.value }} / {{ pdfViewerComponentRef?.totalPages?.value }} </span>
-          <span v-if="pdfViewerComponentRef?.currentScale?.value && Number.isFinite(pdfViewerComponentRef.currentScale.value)" class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline"> {{ renderLabel }}: {{ pdfViewerComponentRef.currentScale.value.toFixed(1) }}x </span>
+          <span v-if="pdfViewerComponentRef?.totalPages?.value > 1" class="text-xs text-gray-600 dark:text-gray-400"> {{
+              pageLabel
+            }}: {{ pdfViewerComponentRef?.currentPageNum?.value }} / {{
+              pdfViewerComponentRef?.totalPages?.value
+            }} </span>
+          <span
+              v-if="pdfViewerComponentRef?.currentScale?.value && Number.isFinite(pdfViewerComponentRef.currentScale.value)"
+              class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline"> {{
+              renderLabel
+            }}: {{ pdfViewerComponentRef.currentScale.value.toFixed(1) }}x </span>
         </div>
 
         <div ref="pdfViewAndGridAreaRef" class="flex-grow relative overflow-hidden">
@@ -59,7 +88,6 @@
                 left: `${computedGridOverlayProps.x}px`,
                 width: `${computedGridOverlayProps.width}px`,
                 height: `${computedGridOverlayProps.height}px`,
-                border: '3px solid red',
                 boxSizing: 'border-box',
                 pointerEvents: 'none',
                 zIndex: 10
@@ -69,50 +97,92 @@
         </div>
       </div>
     </section>
-    <USlideover v-model="isMobileMenuOpen" side="left" :ui="{ width: 'max-w-xs w-full sm:w-72', zIndex: 'z-50' }"> <UCard class="flex flex-col flex-1 h-full" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', body: { padding: '', base: 'flex-1 overflow-y-auto' } }"> <template #header> <div class="flex items-center justify-between p-4"> <h3 class="text-lg font-semibold text-gray-800 dark:text-dark-text-primary">Wrist Strap Menu</h3> <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" @click="isMobileMenuOpen = false"/> </div> </template> <div class="p-4"> <UVerticalNavigation :links="localizedNavigationItems" :ui="{ base: 'group relative flex items-start gap-x-3', padding: 'px-3 py-3', label: 'text-base whitespace-pre-line break-words text-left', icon: { base: 'flex-shrink-0 w-5 h-5 mt-0.5' }}" @click="isMobileMenuOpen = false"/> </div> </UCard> </USlideover>
-    <UModal v-model="isGridCellModalOpen"> <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }"> <template #header> <div class="flex items-center justify-between"> <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white"> Cell Information </h3> <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="isGridCellModalOpen = false"/> </div> </template> <div v-if="modalCellData" class="p-4"> <p>You selected cell at: </p> <p>Row: {{ modalCellData.row + 1 }}, Column: {{ modalCellData.col + 1 }}</p> <p>ID (example): {{ modalCellData.id }}</p> <p class="mt-4">Use this modal to set purposes for this square.</p> <p v-if="modalCellData.status" class="mt-2">Device Status: {{ modalCellData.status }}</p> </div> <div v-else class="p-4"> <p>No cell data available.</p> </div> <template #footer> <UButton label="Close" color="gray" @click="isGridCellModalOpen = false"/> <UButton label="Save" color="primary" @click="handleSaveCellData"/> </template> </UCard> </UModal>
+    <USlideover v-model="isMobileMenuOpen" side="left" :ui="{ width: 'max-w-xs w-full sm:w-72', zIndex: 'z-50' }">
+      <UCard class="flex flex-col flex-1 h-full"
+             :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', body: { padding: '', base: 'flex-1 overflow-y-auto' } }">
+        <template #header>
+          <div class="flex items-center justify-between p-4"><h3
+              class="text-lg font-semibold text-gray-800 dark:text-dark-text-primary">Wrist Strap Menu</h3>
+            <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" @click="isMobileMenuOpen = false"/>
+          </div>
+        </template>
+        <div class="p-4">
+          <UVerticalNavigation :links="localizedNavigationItems"
+                               :ui="{ base: 'group relative flex items-start gap-x-3', padding: 'px-3 py-3', label: 'text-base whitespace-pre-line break-words text-left', icon: { base: 'flex-shrink-0 w-5 h-5 mt-0.5' }}"
+                               @click="isMobileMenuOpen = false"/>
+        </div>
+      </UCard>
+    </USlideover>
+    <UModal v-model="isGridCellModalOpen">
+      <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+        <template #header>
+          <div class="flex items-center justify-between"><h3
+              class="text-base font-semibold leading-6 text-gray-900 dark:text-white"> Cell Information </h3>
+            <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1"
+                     @click="isGridCellModalOpen = false"/>
+          </div>
+        </template>
+        <div v-if="modalCellData" class="p-4">
+          <p>You selected cell at: </p>
+          <p>Row: {{ modalCellData.row + 1 }}, Column: {{ modalCellData.col + 1 }}</p>
+          <p>Device Name: {{ modalCellData.deviceName || 'N/A' }}</p>
+          <p class="mt-4">Use this modal to set purposes for this square.</p>
+          <p v-if="modalCellData.status" class="mt-2">Device Status: {{ modalCellData.status }}</p>
+        </div>
+        <div v-else class="p-4"><p>No cell data available.</p></div>
+        <template #footer>
+          <UButton label="Close" color="gray" @click="isGridCellModalOpen = false"/>
+          <UButton label="Save" color="primary" @click="handleSaveCellData"/>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch, onMounted } from 'vue';
-import {useLanguage} from '~/composables/useLanguage';
+import {ref, computed, watch, onMounted, nextTick } from 'vue';
+// import {useLanguage} from '~/composables/useLanguage'; // Assuming this is project-specific
 import PdfViewer from '~/components/pdf/PdfViewer.vue';
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
 
 type InteractionMode = 'pan' | 'select';
 
-interface DeviceData {
-  id: string;
+interface GridCellDeviceData {
   name: string;
-  pdfX: number;
-  pdfY: number;
-  status: 'connected' | 'error' | 'disconnected';
+  row: number;    // Grid row index (NOW 1-based in JSON)
+  col: number;    // Grid column index (NOW 1-based in JSON)
+  status: 'connected' | 'error' | 'disconnected' | 'warning';
 }
 
-interface PredefinedArea {
-  id: string;
-  name: string;
-  description?: string;
-  pdfX: number; // Coordinate in PDF's point system, relative to definitionScale
-  pdfY: number; // Coordinate in PDF's point system, relative to definitionScale
-  definitionScale?: number; // The scale at which pdfX/pdfY were defined (defaults to 1.0 if undefined)
-  status: 'connected' | 'error' | 'disconnected';
-}
 
 interface PdfViewerExposed {
-  zoomIn: () => void; zoomOut: () => void; resetZoomAndPan: () => void;
-  setPdfScale: (scale: number) => void; goToPage: (page: number) => void; reloadPdf: () => void;
-  currentScale: { value: number }; currentPageNum: { value: number }; totalPages: { value: number };
-  isRendering: { value: boolean }; isLoading: { value: boolean };
-  minScale: number; maxScale: number;
-  getCanvasActualWidth: () => number; getCanvasActualHeight: () => number;
-  getCanvasPanX: () => number; getCanvasPanY: () => number;
-  getPdfPageOriginalWidth: () => number; getPdfPageOriginalHeight: () => number;
-  initialPdfRenderScale?: number; // Added for robust zoom reset
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetZoomAndPan: () => void;
+  setPdfScale: (scale: number) => void;
+  goToPage: (page: number) => void;
+  reloadPdf: () => void;
+  currentScale: { value: number };
+  currentPageNum: { value: number };
+  totalPages: { value: number };
+  isRendering: { value: boolean };
+  isLoading: { value: boolean };
+  minScale: number;
+  maxScale: number;
+  getCanvasActualWidth: () => number;
+  getCanvasActualHeight: () => number;
+  getCanvasPanX: () => number;
+  getCanvasPanY: () => number;
+  getPdfPageOriginalWidth: () => number;
+  getPdfPageOriginalHeight: () => number;
+  initialPdfRenderScale?: number;
 }
 
-const {currentLanguage} = useLanguage ? useLanguage() : { currentLanguage: ref('en')};
+// Mocking useLanguage for standalone example
+const useLanguage = () => ({ currentLanguage: ref('en') });
+const {currentLanguage} = useLanguage ? useLanguage() : {currentLanguage: ref('en')};
+
+
 const isMobileMenuOpen = ref(false);
 const pdfViewerComponentRef = ref<PdfViewerExposed | null>(null);
 const isPdfCurrentlyPanning = ref(false);
@@ -124,8 +194,12 @@ const isPanMode = ref(true);
 const interactionMode = computed<InteractionMode>(() => isPanMode.value ? 'pan' : 'select');
 
 const viewModeBaseLabel = computed(() => currentLanguage.value === 'vi' ? 'Chế độ xem' : 'View Mode');
-const currentInteractionModeLabel = computed(() => { return interactionMode.value === 'pan' ? (currentLanguage.value === 'vi' ? 'Vuốt bản đồ' : 'Pan Map') : (currentLanguage.value === 'vi' ? 'Chọn khu vực' : 'Select Area'); });
-const interactionModeToggleAriaLabel = computed(() => { return isPanMode.value ? (currentLanguage.value === 'vi' ? 'Chuyển sang Chọn khu vực' : 'Switch to Select Area Mode') : (currentLanguage.value === 'vi' ? 'Chuyển sang Vuốt bản đồ' : 'Switch to Pan Map Mode'); });
+const currentInteractionModeLabel = computed(() => {
+  return interactionMode.value === 'pan' ? (currentLanguage.value === 'vi' ? 'Vuốt bản đồ' : 'Pan Map') : (currentLanguage.value === 'vi' ? 'Chọn khu vực' : 'Select Area');
+});
+const interactionModeToggleAriaLabel = computed(() => {
+  return isPanMode.value ? (currentLanguage.value === 'vi' ? 'Chuyển sang Chọn khu vực' : 'Switch to Select Area Mode') : (currentLanguage.value === 'vi' ? 'Chuyển sang Vuốt bản đồ' : 'Switch to Pan Map Mode');
+});
 const scaleLabel = computed(() => currentLanguage.value === 'vi' ? 'Tỉ lệ thu phóng' : 'Scale');
 const pageLabel = computed(() => currentLanguage.value === 'vi' ? 'Trang' : 'Page');
 const renderLabel = computed(() => currentLanguage.value === 'vi' ? 'Kết xuất' : 'Render');
@@ -143,36 +217,35 @@ const applyManualZoomToViewer = () => {
     if (typeof currentZoomInputVal === 'number' && !isNaN(currentZoomInputVal)) {
       const newScale = currentZoomInputVal / 100;
       if (Number.isFinite(newScale) && newScale > 0) {
-        console.log(`[index.vue/applyManualZoom] Calling setPdfScale with: ${newScale}`);
         viewer.setPdfScale(newScale);
       } else {
-        console.warn(`[index.vue/applyManualZoom] Zoom input (${currentZoomInputVal}%) resulted in invalid scale (${newScale}). Resetting input.`);
         if (viewer.currentScale?.value && Number.isFinite(viewer.currentScale.value) && viewer.currentScale.value > 0) {
           zoomInputPercentage.value = Math.round(viewer.currentScale.value * 100);
         } else {
-          zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100) ;
+          zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100);
         }
       }
     } else {
-      console.warn(`[index.vue/applyManualZoom] Zoom input is not a valid number: ${currentZoomInputVal}. Resetting input.`);
       if (viewer.currentScale?.value && Number.isFinite(viewer.currentScale.value) && viewer.currentScale.value > 0) {
         zoomInputPercentage.value = Math.round(viewer.currentScale.value * 100);
       } else {
-        zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100) ;
+        zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100);
       }
     }
   }
 };
 
-const handlePdfRendered = () => { console.log('[index.vue] PDF Page Rendered'); };
-const handlePdfLoaded = () => {
-  console.log('[index.vue] PDF Loaded');
+const handlePdfRendered = () => {
+  console.log('[index.vue] PDF Page Rendered');
+};
+const handlePdfLoaded = async () => {
+  console.log('[index.vue] PDF Loaded event received.');
+  await nextTick();
   if (pdfViewerComponentRef.value) {
     const currentScaleVal = pdfViewerComponentRef.value.currentScale.value;
-    if(Number.isFinite(currentScaleVal) && currentScaleVal > 0) {
+    if (Number.isFinite(currentScaleVal) && currentScaleVal > 0) {
       zoomInputPercentage.value = Math.round(currentScaleVal * 100);
-    } else { // Fallback if PDFViewer reports an invalid current scale on load
-      console.warn("[index.vue/handlePdfLoaded] PDFViewer reported invalid current scale on load. Resetting zoom input to initial prop or 100%.");
+    } else {
       zoomInputPercentage.value = Math.round((pdfViewerComponentRef.value.initialPdfRenderScale || 1.0) * 100);
     }
     totalPagesForPdf.value = pdfViewerComponentRef.value.totalPages.value;
@@ -182,13 +255,17 @@ const handlePdfLoaded = () => {
 
 watch(() => pdfViewerComponentRef.value?.currentScale?.value, (newScale) => {
   if (typeof newScale === 'number' && Number.isFinite(newScale) && newScale > 0) {
-    zoomInputPercentage.value = Math.round(newScale * 100);
-  } else {
-    console.warn(`[index.vue/watchCurrentScale] Watched currentScale from PDFViewer became invalid: ${newScale}. Input not updated.`);
+    if (Math.round(newScale * 100) !== zoomInputPercentage.value) {
+      zoomInputPercentage.value = Math.round(newScale * 100);
+    }
   }
 });
-watch(() => pdfViewerComponentRef.value?.currentPageNum?.value, (newPage) => { if (typeof newPage === 'number') currentPageInput.value = newPage; });
-watch(() => pdfViewerComponentRef.value?.totalPages?.value, (newTotal) => { if (typeof newTotal === 'number') totalPagesForPdf.value = newTotal; });
+watch(() => pdfViewerComponentRef.value?.currentPageNum?.value, (newPage) => {
+  if (typeof newPage === 'number') currentPageInput.value = newPage;
+});
+watch(() => pdfViewerComponentRef.value?.totalPages?.value, (newTotal) => {
+  if (typeof newTotal === 'number') totalPagesForPdf.value = newTotal;
+});
 
 const rawNavigationItems = ref([
   { id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/' },
@@ -198,35 +275,43 @@ const rawNavigationItems = ref([
   { id: 'data-visualization', label_en: 'Data Visualization', label_vi: 'Trực quan hóa dữ liệu', icon: 'i-heroicons-chart-pie-solid', to: '/data-visualization'},
   { id: 'data-analysis', label_en: 'Data Analysis', label_vi: 'Phân tích dữ liệu', icon: 'i-heroicons-presentation-chart-line-solid', to: '/data-analysis'},
 ]);
-const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({ id: item.id, label: currentLanguage.value === 'vi' ? item.label_vi : item.label_en, icon: item.icon, to: item.to, })));
+const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({
+  id: item.id,
+  label: currentLanguage.value === 'vi' ? item.label_vi : item.label_en,
+  icon: item.icon,
+  to: item.to,
+})));
 
 const pdfViewAndGridAreaRef = ref<HTMLElement | null>(null);
 const BASE_CELL_SIZE_PX = 50;
 const selectedGridCell = ref<{ row: number; col: number } | null>(null);
 const isGridCellModalOpen = ref(false);
-const modalCellData = ref<{ id: string; row: number; col: number; status?: string } | null>(null);
+const modalCellData = ref<{ id: string; row: number; col: number; status?: string; deviceName?: string } | null>(null);
 
-const mockDeviceDataJson = `[
-  { "id": "device_temp_001", "name": "Temperature Sensor A1", "pdfX": 150, "pdfY": 220, "status": "connected" },
-  { "id": "device_motor_002", "name": "Motor Control B3", "pdfX": 350, "pdfY": 400, "status": "error" },
-  { "id": "device_light_003", "name": "Lighting Unit C5", "pdfX": 550, "pdfY": 150, "status": "disconnected" }
-]`;
-const mockDeviceData = ref<DeviceData[]>(JSON.parse(mockDeviceDataJson));
 
-const predefinedAreasJson = `[
-  { "id": "area_zone_alpha", "name": "Alpha Zone", "description": "Primary assembly line", "pdfX": 50, "pdfY": 50, "definitionScale": 1.0, "status": "connected" },
-  { "id": "area_storage_bay_1", "name": "Storage Bay 1 (Defined at 0.5x scale)", "pdfX": 300, "pdfY": 225, "definitionScale": 0.5, "status": "error" },
-  { "id": "area_qc_station", "name": "QC Station (Native PDF scale)", "pdfX": 100, "pdfY": 500, "status": "disconnected" }
+// MODIFIED: deviceDataStreamJson now uses 1-based indexing for row and col
+const deviceDataStreamJson = `[
+  { "name": "device_cell_1_1", "row": 1, "col": 1, "status": "connected" },
+  { "name": "device_cell_1_2", "row": 1, "col": 2, "status": "disconnected" },
+  { "name": "device_cell_2_1", "row": 2, "col": 1, "status": "warning" },
+  { "name": "device_cell_2_2", "row": 2, "col": 2, "status": "connected" },
+  { "name": "device_cell_6_6_error", "row": 6, "col": 6, "status": "error" }
 ]`;
-const predefinedAreasData: PredefinedArea[] = JSON.parse(predefinedAreasJson);
+
+const deviceDataStream = ref<GridCellDeviceData[]>([]);
 
 onMounted(() => {
-  // PdfViewer's onMounted calls loadPdf, which then emits 'loaded'
-  // We ensure handlePdfLoaded is called which syncs zoomInputPercentage
   console.log("[index.vue/onMounted] Component mounted.");
-  console.log("--- Predefined Areas JSON String (Raw Input) ---");
-  console.log(predefinedAreasJson);
-  console.log("---------------------------------------------");
+  console.log("--- Device Data Stream JSON (1-based Grid Coords) ---");
+  console.log(deviceDataStreamJson);
+  try {
+    deviceDataStream.value = JSON.parse(deviceDataStreamJson);
+    console.log("--- Parsed Device Data Stream (1-based Grid Coords) ---");
+    console.log(JSON.stringify(deviceDataStream.value, null, 2));
+  } catch (e) {
+    console.error("Failed to parse deviceDataStreamJson:", e);
+  }
+  console.log("-----------------------------------------------------------");
 });
 
 
@@ -234,7 +319,9 @@ const computedGridOverlayProps = computed(() => {
   const viewer = pdfViewerComponentRef.value;
   if (!viewer || typeof viewer.getCanvasActualWidth !== 'function' || typeof viewer.getCanvasActualHeight !== 'function' ||
       typeof viewer.getCanvasPanX !== 'function' || typeof viewer.getCanvasPanY !== 'function') {
-    return { visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX };
+    return {
+      visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX
+    };
   }
   const panXVal = viewer.getCanvasPanX();
   const panYVal = viewer.getCanvasPanY();
@@ -245,151 +332,101 @@ const computedGridOverlayProps = computed(() => {
       !Number.isFinite(actualHeightVal) || actualHeightVal <= 0 ||
       !Number.isFinite(panXVal) || !Number.isFinite(panYVal) ||
       BASE_CELL_SIZE_PX <= 0) {
-    console.warn("[index.vue/computedGridOverlayProps] Invalid dimensions/pan from viewer for grid overlay.", {actualWidthVal, actualHeightVal, panXVal, panYVal});
-    return { visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX };
+    return {
+      visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX
+    };
   }
-  const cols = Math.floor(actualWidthVal / BASE_CELL_SIZE_PX);
-  const rows = Math.floor(actualHeightVal / BASE_CELL_SIZE_PX);
+  const cols = Math.max(0,Math.floor(actualWidthVal / BASE_CELL_SIZE_PX));
+  const rows = Math.max(0,Math.floor(actualHeightVal / BASE_CELL_SIZE_PX));
   if (cols <= 0 || rows <= 0) {
-    return { visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX };
+    return {
+      visible: false, x: panXVal, y: panYVal, width: actualWidthVal, height: actualHeightVal, rows: 0, cols: 0, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX
+    };
   }
-  return { visible: true, x: panXVal, y: panYVal, width: actualWidthVal, height: actualHeightVal, rows: rows, cols: cols, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX };
+  return {
+    visible: true, x: panXVal, y: panYVal, width: actualWidthVal, height: actualHeightVal, rows: rows, cols: cols, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX
+  };
 });
 
+// MODIFIED: cellStatusesForOverlay to handle 1-based JSON data
 const cellStatusesForOverlay = computed(() => {
-  const statuses: Record<string, { status: string, sourceId?: string, sourceName?: string, sourceType?: 'device' | 'area' }> = {};
-  const priorities: Record<string, number> = { error: 3, disconnected: 2, connected: 1 };
+  const statuses: Record<string, { status: string, deviceId: string, deviceName: string }> = {};
+  const priorities: Record<string, number> = { error: 4, disconnected: 3, warning: 2, connected: 1 };
 
-  const viewer = pdfViewerComponentRef.value;
-  if (!viewer || !computedGridOverlayProps.value.visible ||
-      typeof viewer.currentScale?.value !== 'number' ||
-      !Number.isFinite(viewer.currentScale.value) ||
-      viewer.currentScale.value <= 0) {
-    console.warn("[index.vue/cellStatusesForOverlay] Viewer not ready or grid not visible or invalid currentScale.");
+  const gridProps = computedGridOverlayProps.value;
+  if (!gridProps.visible || gridProps.rows === 0 || gridProps.cols === 0) {
     return {};
   }
 
-  const currentViewScale = viewer.currentScale.value; // This is the PDF.js render scale (e.g. 1.0, 1.5)
+  console.log(`\n--- [cellStatusesForOverlay - Modified for 1-based JSON] Processing ---`);
+  console.log(`   Visible Grid Dimensions: ${gridProps.rows} Rows, ${gridProps.cols} Cols`);
 
-  // 1. Process Mock Device Data (assumes pdfX/pdfY are native PDF points, definitionScale = 1.0)
-  for (const device of mockDeviceData.value) {
-    const deviceNativePdfX = device.pdfX; // Already native
-    const deviceNativePdfY = device.pdfY; // Already native
+  for (const device of deviceDataStream.value) {
+    // device.row and device.col are now 1-based from JSON
+    const oneBasedRow = device.row;
+    const oneBasedCol = device.col;
+    const status = device.status;
+    const name = device.name;
 
-    const deviceCanvasX = deviceNativePdfX * currentViewScale;
-    const deviceCanvasY = deviceNativePdfY * currentViewScale;
-
-    const col = Math.floor(deviceCanvasX / BASE_CELL_SIZE_PX);
-    const row = Math.floor(deviceCanvasY / BASE_CELL_SIZE_PX);
-
-    if (col >= 0 && col < computedGridOverlayProps.value.cols && row >= 0 && row < computedGridOverlayProps.value.rows) {
-      const key = `${row}-${col}`;
-      const existingEntry = statuses[key];
-      const newPriority = priorities[device.status] || 0;
-      const existingPriority = existingEntry ? (priorities[existingEntry.status] || 0) : 0;
-
-      if (newPriority > existingPriority) {
-        statuses[key] = { status: device.status, sourceId: device.id, sourceName: device.name, sourceType: 'device' };
-      }
-    }
-  }
-
-  // 2. Process Predefined Areas (handles optional definitionScale)
-  console.log("--- Processing Predefined Areas from JSON for Grid Overlay ---");
-  for (const area of predefinedAreasData) {
-    const itemDefinitionScale = area.definitionScale || 1.0;
-    // Convert area's pdfX/pdfY to native PDF coordinates (scale 1.0)
-    const areaNativePdfX = area.pdfX / itemDefinitionScale;
-    const areaNativePdfY = area.pdfY / itemDefinitionScale;
-
-    // Convert native PDF coordinates to current canvas pixel coordinates
-    const areaCanvasX = areaNativePdfX * currentViewScale;
-    const areaCanvasY = areaNativePdfY * currentViewScale;
-
-    const col = Math.floor(areaCanvasX / BASE_CELL_SIZE_PX);
-    const row = Math.floor(areaCanvasY / BASE_CELL_SIZE_PX);
-
-    let color = 'unknown';
-    switch (area.status) {
-      case 'connected': color = 'green'; break;
-      case 'error': color = 'yellow'; break;
-      case 'disconnected': color = 'red'; break;
+    // Validate 1-based row/col from data
+    if (typeof oneBasedRow !== 'number' || typeof oneBasedCol !== 'number' || oneBasedRow < 1 || oneBasedCol < 1) {
+      console.warn(`  [Device: ${name}] Invalid 1-based row/col in data: R${oneBasedRow},C${oneBasedCol}. Skipping.`);
+      continue;
     }
 
-    console.log(
-        `Processing Predefined Area: ID='${area.id}', Name='${area.name}', `,
-        `Original Coords=(X:${area.pdfX}, Y:${area.pdfY}) at DefinitionScale:${itemDefinitionScale}, `,
-        `Native PDF Coords=(X:${areaNativePdfX.toFixed(2)}, Y:${areaNativePdfY.toFixed(2)}), `,
-        `Status='${area.status}', DerivedColor='${color}', CurrentViewScale=${currentViewScale.toFixed(2)}, `,
-        `Canvas Coords=(X:${areaCanvasX.toFixed(2)}, Y:${areaCanvasY.toFixed(2)}), `,
-        `MappedToGridCell=(R:${row}, C:${col}) (Key: ${row}-${col})`
-    );
+    // Convert to 0-based for internal keying and boundary checks
+    const zeroBasedRow = oneBasedRow - 1;
+    const zeroBasedCol = oneBasedCol - 1;
 
-    if (col >= 0 && col < computedGridOverlayProps.value.cols && row >= 0 && row < computedGridOverlayProps.value.rows) {
-      const key = `${row}-${col}`;
+    console.log(`  Device: ${name}, JSON Coords (1-based): (R:${oneBasedRow}, C:${oneBasedCol}), Status: ${status}`);
+    console.log(`    Converted to 0-based for internal use: (R:${zeroBasedRow}, C:${zeroBasedCol})`);
+
+
+    // Check if the 0-based row/col is within the currently VISIBLE grid dimensions
+    if (zeroBasedCol < gridProps.cols && zeroBasedRow < gridProps.rows) {
+      const key = `${zeroBasedRow}-${zeroBasedCol}`; // Key is 0-based
       const existingEntry = statuses[key];
-      const newPriority = priorities[area.status] || 0;
-      const existingPriority = existingEntry ? (priorities[existingEntry.status] || 0) : 0;
+      const newPriority = priorities[status as keyof typeof priorities] || 0;
+      const existingPriority = existingEntry ? (priorities[existingEntry.status as keyof typeof priorities] || 0) : 0;
 
       if (newPriority >= existingPriority) {
-        statuses[key] = { status: area.status, sourceId: area.id, sourceName: area.name, sourceType: 'area' };
-        console.log(`  > Grid Cell ${key} updated by Area '${area.name}' with status '${area.status}'.`);
-      } else if (existingEntry) { // Check if existingEntry is defined before accessing its status
-        console.log(`  > Grid Cell ${key} NOT updated by Area '${area.name}' (Existing status '${existingEntry.status}' from '${existingEntry.sourceType}' has higher priority).`);
+        statuses[key] = { status: status, deviceId: name, deviceName: name };
+        console.log(`    -> Grid Cell (0-based key) ${key} UPDATED by Device '${name}' with status '${status}'.`);
+      } else {
+        console.log(`    -> Grid Cell (0-based key) ${key} NOT updated. Existing status '${existingEntry.status}' from '${existingEntry.deviceName}' has higher priority.`);
       }
     } else {
-      console.log(`  > Area '${area.name}' maps outside current grid view.`);
+      console.log(`    -> Device '${name}' (defined for 0-based R${zeroBasedRow},C${zeroBasedCol}) is OUTSIDE current visible grid (Max 0-based R${gridProps.rows -1}, C${gridProps.cols -1}).`);
     }
   }
-  console.log("-----------------------------------------------------------");
-
-  const cellsForJsonDebug = [];
-  for (const key in statuses) {
-    if (Object.prototype.hasOwnProperty.call(statuses, key)) {
-      const [rowStr, colStr] = key.split('-');
-      const statusInfo = statuses[key];
-      let color = 'unknown';
-      switch (statusInfo.status) {
-        case 'connected': color = 'green'; break;
-        case 'error': color = 'yellow'; break;
-        case 'disconnected': color = 'red'; break;
-      }
-      cellsForJsonDebug.push({
-        row: parseInt(rowStr, 10),
-        col: parseInt(colStr, 10),
-        status: statusInfo.status,
-        color: color,
-        sourceId: statusInfo.sourceId,
-        sourceName: statusInfo.sourceName,
-        sourceType: statusInfo.sourceType
-      });
-    }
-  }
-  console.log("--- Final Combined Active Grid Cells (JSON String Debug) ---");
-  console.log(JSON.stringify(cellsForJsonDebug, null, 2));
-  console.log("---------------------------------------------------------");
-
+  console.log("--- [cellStatusesForOverlay - Modified for 1-based JSON] Finished. Statuses generated:", Object.keys(statuses).length > 0 ? JSON.stringify(statuses) : "None");
   return statuses;
 });
 
 
-const handleGridCellClick = (cell: { row: number; col: number; }) => {
+const handleGridCellClick = (cell: { row: number; col: number; }) => { // cell is 0-based from GridOverlay
   if (interactionMode.value !== 'select') return;
   if (isPdfCurrentlyPanning.value) return;
 
-  const cellKey = `${cell.row}-${cell.col}`;
-  const statusInfo = cellStatusesForOverlay.value[cellKey];
+  const zeroBasedCellKey = `${cell.row}-${cell.col}`; // cell.row and cell.col are 0-based
+  console.log(`[index.vue/handleGridCellClick] Clicked cell (0-based from event): R${cell.row},C${cell.col}. Key: ${zeroBasedCellKey}.`);
+  const statusInfo = cellStatusesForOverlay.value[zeroBasedCellKey];
+  console.log(`[index.vue/handleGridCellClick] StatusInfo for key '${zeroBasedCellKey}':`, statusInfo ? JSON.parse(JSON.stringify(statusInfo)) : 'undefined');
+
 
   if (selectedGridCell.value?.row === cell.row && selectedGridCell.value?.col === cell.col) {
     selectedGridCell.value = null;
+    isGridCellModalOpen.value = false;
   } else {
-    selectedGridCell.value = cell;
+    selectedGridCell.value = cell; // Store 0-based row/col
     modalCellData.value = {
-      id: statusInfo?.sourceId || `cell-${cell.row}-${cell.col}`,
-      row: cell.row,
-      col: cell.col,
-      status: statusInfo?.status
+      id: statusInfo?.deviceId || `cell_R${cell.row + 1}_C${cell.col + 1}`, // Use deviceId or generate a 1-based ID for display
+      row: cell.row, // Store 0-based row for internal consistency if needed elsewhere
+      col: cell.col, // Store 0-based col
+      status: statusInfo?.status,
+      deviceName: statusInfo?.deviceName
     };
+    console.log('[index.vue/handleGridCellClick] Modal data set to:', JSON.parse(JSON.stringify(modalCellData.value)));
     isGridCellModalOpen.value = true;
   }
 };
@@ -406,5 +443,6 @@ const handleSaveCellData = () => {
 </script>
 
 <style scoped>
-.pdf-main-area { }
+.pdf-main-area {
+}
 </style>

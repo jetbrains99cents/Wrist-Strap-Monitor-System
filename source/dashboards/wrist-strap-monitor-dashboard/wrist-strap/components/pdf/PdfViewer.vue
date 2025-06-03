@@ -35,7 +35,7 @@ const props = defineProps({
   pdfMaxRenderScale: {type: Number, default: 5.0},
   pdfMinRenderScale: {type: Number, default: 0.2},
   pdfZoomStep: {type: Number, default: 0.2},
-  interactionMode: { type: String as () => InteractionMode, default: 'pan' }
+  interactionMode: {type: String as () => InteractionMode, default: 'pan'}
 });
 
 const emit = defineEmits<{
@@ -106,13 +106,31 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
 
   const canvasEl = pdfCanvasElementRef.value;
   const viewportEl = pdfViewportRef.value;
-  if (!canvasEl || !viewportEl) { errorMsg.value = "[PdfViewer/renderPage] Canvas or viewport element not found."; console.error(errorMsg.value); isRenderingPage.value = false; return; }
+  if (!canvasEl || !viewportEl) {
+    errorMsg.value = "[PdfViewer/renderPage] Canvas or viewport element not found.";
+    console.error(errorMsg.value);
+    isRenderingPage.value = false;
+    return;
+  }
   const currentDocInstance = pdfDoc;
-  if (!currentDocInstance) { errorMsg.value = "[PdfViewer/renderPage] PDF document not loaded."; console.error(errorMsg.value); isRenderingPage.value = false; return; }
+  if (!currentDocInstance) {
+    errorMsg.value = "[PdfViewer/renderPage] PDF document not loaded.";
+    console.error(errorMsg.value);
+    isRenderingPage.value = false;
+    return;
+  }
 
-  if (renderTask) { try { renderTask.cancel(); console.log("[PdfViewer/renderPage] Previous renderTask cancelled."); } catch (e) { /* ignore */ } renderTask = null; }
+  if (renderTask) {
+    try {
+      renderTask.cancel();
+      console.log("[PdfViewer/renderPage] Previous renderTask cancelled.");
+    } catch (e) { /* ignore */
+    }
+    renderTask = null;
+  }
 
-  isRenderingPage.value = true; errorMsg.value = null;
+  isRenderingPage.value = true;
+  errorMsg.value = null;
 
   try {
     console.log(`[PdfViewer/renderPage] Getting page ${pageNum}`);
@@ -136,7 +154,12 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
     }
 
     const context = canvasEl.getContext('2d');
-    if (!context) { errorMsg.value = '[PdfViewer/renderPage] Failed to get 2D context from canvas.'; console.error(errorMsg.value); isRenderingPage.value = false; return; }
+    if (!context) {
+      errorMsg.value = '[PdfViewer/renderPage] Failed to get 2D context from canvas.';
+      console.error(errorMsg.value);
+      isRenderingPage.value = false;
+      return;
+    }
 
     console.log(`[PdfViewer/renderPage] Setting canvas dimensions: W=${viewport.width}, H=${viewport.height}`);
     canvasEl.height = viewport.height;
@@ -178,23 +201,52 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
     emit('rendered');
   } catch (err: any) {
     if (renderTask) renderTask = null;
-    if (err.name === 'RenderingCancelledException') { console.log("[PdfViewer/renderPage] Rendering cancelled."); }
-    else { errorMsg.value = `[PdfViewer/renderPage] Error: ${err.message || 'Unknown error'}`; console.error("[PdfViewer/renderPage] Exception:", err); }
-  } finally { isRenderingPage.value = false; console.log("[PdfViewer/renderPage] Finished.");}
+    if (err.name === 'RenderingCancelledException') {
+      console.log("[PdfViewer/renderPage] Rendering cancelled.");
+    } else {
+      errorMsg.value = `[PdfViewer/renderPage] Error: ${err.message || 'Unknown error'}`;
+      console.error("[PdfViewer/renderPage] Exception:", err);
+    }
+  } finally {
+    isRenderingPage.value = false;
+    console.log("[PdfViewer/renderPage] Finished.");
+  }
 }
 
 async function loadPdf() {
   console.log("[PdfViewer/loadPdf] Called with src:", props.src);
-  if (!props.src) { errorMsg.value = "[PdfViewer/loadPdf] No PDF source."; console.error(errorMsg.value); loading.value = false; return; }
-  loading.value = true; errorMsg.value = null;
-  if (renderTask) { try { renderTask.cancel(); } catch (e) {} renderTask = null; }
-  if (pdfDoc) { try { await pdfDoc.destroy(); } catch (e) {} pdfDoc = null; }
+  if (!props.src) {
+    errorMsg.value = "[PdfViewer/loadPdf] No PDF source.";
+    console.error(errorMsg.value);
+    loading.value = false;
+    return;
+  }
+  loading.value = true;
+  errorMsg.value = null;
+  if (renderTask) {
+    try {
+      renderTask.cancel();
+    } catch (e) {
+    }
+    renderTask = null;
+  }
+  if (pdfDoc) {
+    try {
+      await pdfDoc.destroy();
+    } catch (e) {
+    }
+    pdfDoc = null;
+  }
 
-  numPages.value = 0; currentPage.value = 1;
+  numPages.value = 0;
+  currentPage.value = 1;
   currentPdfJsRenderScale.value = ensureValidScale(props.initialPdfRenderScale, "loadPdf initial scale");
-  panX.value = 0; panY.value = 0;
-  actualCanvasWidth_internal.value = 0; actualCanvasHeight_internal.value = 0;
-  pdfPageOriginalWidth_internal.value = 0; pdfPageOriginalHeight_internal.value = 0;
+  panX.value = 0;
+  panY.value = 0;
+  actualCanvasWidth_internal.value = 0;
+  actualCanvasHeight_internal.value = 0;
+  pdfPageOriginalWidth_internal.value = 0;
+  pdfPageOriginalHeight_internal.value = 0;
   console.log("[PdfViewer/loadPdf] Initial state reset. Current render scale set to:", currentPdfJsRenderScale.value);
 
   try {
@@ -203,12 +255,17 @@ async function loadPdf() {
     }
     console.log("[PdfViewer/loadPdf] Getting document...");
     const loadedDoc = await pdfjsLib.getDocument(props.src).promise;
-    if (!loadedDoc) { pdfDoc = null; errorMsg.value = "[PdfViewer/loadPdf] Failed to load PDF document (loadedDoc is null)."; console.error(errorMsg.value); } else {
-      pdfDoc = loadedDoc; numPages.value = loadedDoc.numPages;
+    if (!loadedDoc) {
+      pdfDoc = null;
+      errorMsg.value = "[PdfViewer/loadPdf] Failed to load PDF document (loadedDoc is null).";
+      console.error(errorMsg.value);
+    } else {
+      pdfDoc = loadedDoc;
+      numPages.value = loadedDoc.numPages;
       console.log(`[PdfViewer/loadPdf] Document loaded. Pages: ${numPages.value}`);
       if (numPages.value > 0) {
         const firstPage = await pdfDoc.getPage(1);
-        const viewportScale1 = firstPage.getViewport({ scale: 1.0 });
+        const viewportScale1 = firstPage.getViewport({scale: 1.0});
         console.log(`[PdfViewer/loadPdf] Original viewport (scale 1.0): W=${viewportScale1.width}, H=${viewportScale1.height}`);
 
         const originalWidth = viewportScale1.width;
@@ -227,13 +284,20 @@ async function loadPdf() {
           await renderPage(currentPage.value, currentPdfJsRenderScale.value);
         }
       } else {
-        errorMsg.value = "[PdfViewer/loadPdf] PDF has no pages."; console.warn(errorMsg.value);
+        errorMsg.value = "[PdfViewer/loadPdf] PDF has no pages.";
+        console.warn(errorMsg.value);
       }
     }
   } catch (err: any) {
-    pdfDoc = null; errorMsg.value = `[PdfViewer/loadPdf] Exception: ${err.message || 'Unknown error'}`; console.error("[PdfViewer/loadPdf] Exception:", err);
+    pdfDoc = null;
+    errorMsg.value = `[PdfViewer/loadPdf] Exception: ${err.message || 'Unknown error'}`;
+    console.error("[PdfViewer/loadPdf] Exception:", err);
   } finally {
-    loading.value = false; if (!errorMsg.value && pdfDoc) { emit('loaded'); console.log("[PdfViewer/loadPdf] 'loaded' event emitted.");}
+    loading.value = false;
+    if (!errorMsg.value && pdfDoc) {
+      emit('loaded');
+      console.log("[PdfViewer/loadPdf] 'loaded' event emitted.");
+    }
     console.log("[PdfViewer/loadPdf] Finished.");
   }
 }
@@ -277,31 +341,107 @@ const changeZoom = (newScaleInput: number) => {
   }
 };
 
-const documentMouseMoveHandler = (event: MouseEvent) => { if (!isDragging.value) return; event.preventDefault(); const dx = event.clientX - dragStartX.value; const dy = event.clientY - dragStartY.value; panX.value = startPanX.value + dx; panY.value = startPanY.value + dy;};
-const documentMouseUpHandler = (event: MouseEvent) => { if (!isDragging.value) { document.removeEventListener('mousemove', documentMouseMoveHandler, true); document.removeEventListener('mouseup', documentMouseUpHandler, true); return; } isDragging.value = false; emit('panend'); if (pdfViewportRef.value && props.interactionMode === 'pan') { pdfViewportRef.value.style.cursor = 'grab'; } document.removeEventListener('mousemove', documentMouseMoveHandler, true); document.removeEventListener('mouseup', documentMouseUpHandler, true);};
-const handleMouseDown = (event: MouseEvent) => {
-  if (props.interactionMode !== 'pan') { return; }
-  if (!pdfViewportRef.value || !(event.target === pdfViewportRef.value || event.target === pdfCanvasElementRef.value)) { return; }
+const documentMouseMoveHandler = (event: MouseEvent) => {
+  if (!isDragging.value) return;
   event.preventDefault();
-  if (event.button !== 0) { return; }
-  isDragging.value = true; emit('panstart');
-  dragStartX.value = event.clientX; dragStartY.value = event.clientY;
-  startPanX.value = panX.value; startPanY.value = panY.value;
+  const dx = event.clientX - dragStartX.value;
+  const dy = event.clientY - dragStartY.value;
+  panX.value = startPanX.value + dx;
+  panY.value = startPanY.value + dy;
+};
+const documentMouseUpHandler = (event: MouseEvent) => {
+  if (!isDragging.value) {
+    document.removeEventListener('mousemove', documentMouseMoveHandler, true);
+    document.removeEventListener('mouseup', documentMouseUpHandler, true);
+    return;
+  }
+  isDragging.value = false;
+  emit('panend');
+  if (pdfViewportRef.value && props.interactionMode === 'pan') {
+    pdfViewportRef.value.style.cursor = 'grab';
+  }
+  document.removeEventListener('mousemove', documentMouseMoveHandler, true);
+  document.removeEventListener('mouseup', documentMouseUpHandler, true);
+};
+const handleMouseDown = (event: MouseEvent) => {
+  if (props.interactionMode !== 'pan') {
+    return;
+  }
+  if (!pdfViewportRef.value || !(event.target === pdfViewportRef.value || event.target === pdfCanvasElementRef.value)) {
+    return;
+  }
+  event.preventDefault();
+  if (event.button !== 0) {
+    return;
+  }
+  isDragging.value = true;
+  emit('panstart');
+  dragStartX.value = event.clientX;
+  dragStartY.value = event.clientY;
+  startPanX.value = panX.value;
+  startPanY.value = panY.value;
   if (pdfViewportRef.value) pdfViewportRef.value.style.cursor = 'grabbing';
   document.addEventListener('mousemove', documentMouseMoveHandler, true);
   document.addEventListener('mouseup', documentMouseUpHandler, true);
 };
-const handleMouseLeave = (event: MouseEvent) => { if (props.interactionMode !== 'pan') return; if (isDragging.value && event.buttons === 0) { documentMouseUpHandler(event); } else if (!isDragging.value && pdfViewportRef.value) { pdfViewportRef.value.style.cursor = 'grab'; }};
-const handleWheelZoom = (event: WheelEvent) => { event.preventDefault(); let newScaleDelta = props.pdfZoomStep * (event.ctrlKey ? 1.5 : 1); let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "wheelZoom currentScale"); if (event.deltaY < 0) { changeZoom(currentScale + newScaleDelta); } else { changeZoom(currentScale - newScaleDelta); } };
-const triggerZoomIn = () => { let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "zoomIn currentScale"); changeZoom(currentScale + props.pdfZoomStep);};
-const triggerZoomOut = () => { let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "zoomOut currentScale"); changeZoom(currentScale - props.pdfZoomStep);};
-const triggerFullReset = () => { if (pdfDoc) { currentPage.value = 1; changeZoom(props.initialPdfRenderScale); } else { currentPdfJsRenderScale.value = ensureValidScale(props.initialPdfRenderScale, "fullReset non-doc"); panX.value = 0; panY.value = 0; actualCanvasWidth_internal.value = 0; actualCanvasHeight_internal.value = 0; pdfPageOriginalWidth_internal.value = 0; pdfPageOriginalHeight_internal.value = 0;} };
-const applyManualScale = (newScale: number) => { changeZoom(newScale); };
-const triggerGoToPage = (pageNumber: number) => { if (pageNumber >= 1 && pageNumber <= numPages.value && pageNumber !== currentPage.value && pdfDoc) { currentPage.value = pageNumber; } };
+const handleMouseLeave = (event: MouseEvent) => {
+  if (props.interactionMode !== 'pan') return;
+  if (isDragging.value && event.buttons === 0) {
+    documentMouseUpHandler(event);
+  } else if (!isDragging.value && pdfViewportRef.value) {
+    pdfViewportRef.value.style.cursor = 'grab';
+  }
+};
+const handleWheelZoom = (event: WheelEvent) => {
+  event.preventDefault();
+  let newScaleDelta = props.pdfZoomStep * (event.ctrlKey ? 1.5 : 1);
+  let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "wheelZoom currentScale");
+  if (event.deltaY < 0) {
+    changeZoom(currentScale + newScaleDelta);
+  } else {
+    changeZoom(currentScale - newScaleDelta);
+  }
+};
+const triggerZoomIn = () => {
+  let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "zoomIn currentScale");
+  changeZoom(currentScale + props.pdfZoomStep);
+};
+const triggerZoomOut = () => {
+  let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "zoomOut currentScale");
+  changeZoom(currentScale - props.pdfZoomStep);
+};
+const triggerFullReset = () => {
+  if (pdfDoc) {
+    currentPage.value = 1;
+    changeZoom(props.initialPdfRenderScale);
+  } else {
+    currentPdfJsRenderScale.value = ensureValidScale(props.initialPdfRenderScale, "fullReset non-doc");
+    panX.value = 0;
+    panY.value = 0;
+    actualCanvasWidth_internal.value = 0;
+    actualCanvasHeight_internal.value = 0;
+    pdfPageOriginalWidth_internal.value = 0;
+    pdfPageOriginalHeight_internal.value = 0;
+  }
+};
+const applyManualScale = (newScale: number) => {
+  changeZoom(newScale);
+};
+const triggerGoToPage = (pageNumber: number) => {
+  if (pageNumber >= 1 && pageNumber <= numPages.value && pageNumber !== currentPage.value && pdfDoc) {
+    currentPage.value = pageNumber;
+  }
+};
 
 
-onMounted(() => { loadPdf(); });
-watch(() => props.src, (newSrc, oldSrc) => { if (newSrc && newSrc !== oldSrc) { loadPdf(); } });
+onMounted(() => {
+  loadPdf();
+});
+watch(() => props.src, (newSrc, oldSrc) => {
+  if (newSrc && newSrc !== oldSrc) {
+    loadPdf();
+  }
+});
 watch(currentPage, (newPage, oldPage) => {
   if (newPage !== oldPage && newPage >= 1 && newPage <= numPages.value && pdfDoc) {
     renderPage(newPage, currentPdfJsRenderScale.value); // currentPdfJsRenderScale should be valid due to guards
@@ -311,8 +451,21 @@ onUnmounted(() => {
   document.removeEventListener('mousemove', documentMouseMoveHandler, true);
   document.removeEventListener('mouseup', documentMouseUpHandler, true);
   if (renderDebounceTimer) clearTimeout(renderDebounceTimer);
-  if (renderTask) { try { renderTask.cancel(); } catch (e) { /* ignore */ } renderTask = null; }
-  if (pdfDoc) { try { pdfDoc.destroy(); } catch (e) { console.error('Error destroying PDF document on unmount:', e); } pdfDoc = null; }
+  if (renderTask) {
+    try {
+      renderTask.cancel();
+    } catch (e) { /* ignore */
+    }
+    renderTask = null;
+  }
+  if (pdfDoc) {
+    try {
+      pdfDoc.destroy();
+    } catch (e) {
+      console.error('Error destroying PDF document on unmount:', e);
+    }
+    pdfDoc = null;
+  }
 });
 
 defineExpose({
@@ -335,9 +488,41 @@ defineExpose({
 </script>
 
 <style scoped>
-.pdf-viewer-wrapper { background-color: #f0f0f0; } html.dark .pdf-viewer-wrapper { background-color: #2d3748; }
-.pdf-canvas { display: block; }
-.loading-indicator, .error-indicator { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 1rem 1.5rem; background-color: rgba(0, 0, 0, 0.8); color: white; border-radius: 0.5rem; z-index: 10; font-family: 'ABeeZee', sans-serif; text-align: center; pointer-events: none; }
-.error-indicator { background-color: rgba(220, 38, 38, 0.9); }
-.loading-indicator.bottom-16 { bottom: 4rem; top: auto; transform: translateX(-50%); left: 50%; }
+.pdf-viewer-wrapper {
+  background-color: #f0f0f0;
+}
+
+html.dark .pdf-viewer-wrapper {
+  background-color: #2d3748;
+}
+
+.pdf-canvas {
+  display: block;
+}
+
+.loading-indicator, .error-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1rem 1.5rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  border-radius: 0.5rem;
+  z-index: 10;
+  font-family: 'ABeeZee', sans-serif;
+  text-align: center;
+  pointer-events: none;
+}
+
+.error-indicator {
+  background-color: rgba(220, 38, 38, 0.9);
+}
+
+.loading-indicator.bottom-16 {
+  bottom: 4rem;
+  top: auto;
+  transform: translateX(-50%);
+  left: 50%;
+}
 </style>
