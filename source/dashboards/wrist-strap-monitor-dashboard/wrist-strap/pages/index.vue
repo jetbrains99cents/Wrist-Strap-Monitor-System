@@ -123,8 +123,9 @@
           </div>
         </template>
         <div v-if="modalCellData" class="p-4">
-          <p>You selected cell at: </p>
-          <p>Row: {{ modalCellData.row + 1 }}, Column: {{ modalCellData.col + 1 }}</p>
+          <p>You selected cell at (0-based): </p>
+          <!-- MODIFIED: Display 0-based coordinates -->
+          <p>Row: {{ modalCellData.row }}, Column: {{ modalCellData.col }}</p>
           <p>Device Name: {{ modalCellData.deviceName || 'N/A' }}</p>
           <p class="mt-4">Use this modal to set purposes for this square.</p>
           <p v-if="modalCellData.status" class="mt-2">Device Status: {{ modalCellData.status }}</p>
@@ -149,8 +150,8 @@ type InteractionMode = 'pan' | 'select';
 
 interface GridCellDeviceData {
   name: string;
-  row: number;    // Grid row index (NOW 1-based in JSON)
-  col: number;    // Grid column index (NOW 1-based in JSON)
+  row: number;    // Grid row index (0-based in JSON)
+  col: number;    // Grid column index (0-based in JSON)
   status: 'connected' | 'error' | 'disconnected' | 'warning';
 }
 
@@ -289,24 +290,24 @@ const isGridCellModalOpen = ref(false);
 const modalCellData = ref<{ id: string; row: number; col: number; status?: string; deviceName?: string } | null>(null);
 
 
-// MODIFIED: deviceDataStreamJson now uses 1-based indexing for row and col
+// deviceDataStreamJson uses 0-based indexing for row and col
 const deviceDataStreamJson = `[
+  { "name": "device_cell_0_0", "row": 0, "col": 0, "status": "connected" },
+  { "name": "device_cell_0_1", "row": 0, "col": 1, "status": "disconnected" },
+  { "name": "device_cell_1_0", "row": 1, "col": 0, "status": "warning" },
   { "name": "device_cell_1_1", "row": 1, "col": 1, "status": "connected" },
-  { "name": "device_cell_1_2", "row": 1, "col": 2, "status": "disconnected" },
-  { "name": "device_cell_2_1", "row": 2, "col": 1, "status": "warning" },
-  { "name": "device_cell_2_2", "row": 2, "col": 2, "status": "connected" },
-  { "name": "device_cell_6_6_error", "row": 6, "col": 6, "status": "error" }
+  { "name": "device_cell_5_5_error", "row": 5, "col": 5, "status": "error" }
 ]`;
 
 const deviceDataStream = ref<GridCellDeviceData[]>([]);
 
 onMounted(() => {
   console.log("[index.vue/onMounted] Component mounted.");
-  console.log("--- Device Data Stream JSON (1-based Grid Coords) ---");
+  console.log("--- Device Data Stream JSON (0-based Grid Coords) ---");
   console.log(deviceDataStreamJson);
   try {
     deviceDataStream.value = JSON.parse(deviceDataStreamJson);
-    console.log("--- Parsed Device Data Stream (1-based Grid Coords) ---");
+    console.log("--- Parsed Device Data Stream (0-based Grid Coords) ---");
     console.log(JSON.stringify(deviceDataStream.value, null, 2));
   } catch (e) {
     console.error("Failed to parse deviceDataStreamJson:", e);
@@ -348,7 +349,7 @@ const computedGridOverlayProps = computed(() => {
   };
 });
 
-// MODIFIED: cellStatusesForOverlay to handle 1-based JSON data
+// cellStatusesForOverlay uses 0-based JSON data
 const cellStatusesForOverlay = computed(() => {
   const statuses: Record<string, { status: string, deviceId: string, deviceName: string }> = {};
   const priorities: Record<string, number> = { error: 4, disconnected: 3, warning: 2, connected: 1 };
@@ -358,33 +359,24 @@ const cellStatusesForOverlay = computed(() => {
     return {};
   }
 
-  console.log(`\n--- [cellStatusesForOverlay - Modified for 1-based JSON] Processing ---`);
+  console.log(`\n--- [cellStatusesForOverlay - Using 0-based JSON] Processing ---`);
   console.log(`   Visible Grid Dimensions: ${gridProps.rows} Rows, ${gridProps.cols} Cols`);
 
   for (const device of deviceDataStream.value) {
-    // device.row and device.col are now 1-based from JSON
-    const oneBasedRow = device.row;
-    const oneBasedCol = device.col;
+    const zeroBasedRow = device.row; // Data is already 0-based
+    const zeroBasedCol = device.col; // Data is already 0-based
     const status = device.status;
     const name = device.name;
 
-    // Validate 1-based row/col from data
-    if (typeof oneBasedRow !== 'number' || typeof oneBasedCol !== 'number' || oneBasedRow < 1 || oneBasedCol < 1) {
-      console.warn(`  [Device: ${name}] Invalid 1-based row/col in data: R${oneBasedRow},C${oneBasedCol}. Skipping.`);
+    if (typeof zeroBasedRow !== 'number' || typeof zeroBasedCol !== 'number' || zeroBasedRow < 0 || zeroBasedCol < 0) {
+      console.warn(`  [Device: ${name}] Invalid 0-based row/col in data: R${zeroBasedRow},C${zeroBasedCol}. Skipping.`);
       continue;
     }
 
-    // Convert to 0-based for internal keying and boundary checks
-    const zeroBasedRow = oneBasedRow - 1;
-    const zeroBasedCol = oneBasedCol - 1;
+    console.log(`  Device: ${name}, JSON Coords (0-based): (R:${zeroBasedRow}, C:${zeroBasedCol}), Status: ${status}`);
 
-    console.log(`  Device: ${name}, JSON Coords (1-based): (R:${oneBasedRow}, C:${oneBasedCol}), Status: ${status}`);
-    console.log(`    Converted to 0-based for internal use: (R:${zeroBasedRow}, C:${zeroBasedCol})`);
-
-
-    // Check if the 0-based row/col is within the currently VISIBLE grid dimensions
     if (zeroBasedCol < gridProps.cols && zeroBasedRow < gridProps.rows) {
-      const key = `${zeroBasedRow}-${zeroBasedCol}`; // Key is 0-based
+      const key = `${zeroBasedRow}-${zeroBasedCol}`;
       const existingEntry = statuses[key];
       const newPriority = priorities[status as keyof typeof priorities] || 0;
       const existingPriority = existingEntry ? (priorities[existingEntry.status as keyof typeof priorities] || 0) : 0;
@@ -399,7 +391,7 @@ const cellStatusesForOverlay = computed(() => {
       console.log(`    -> Device '${name}' (defined for 0-based R${zeroBasedRow},C${zeroBasedCol}) is OUTSIDE current visible grid (Max 0-based R${gridProps.rows -1}, C${gridProps.cols -1}).`);
     }
   }
-  console.log("--- [cellStatusesForOverlay - Modified for 1-based JSON] Finished. Statuses generated:", Object.keys(statuses).length > 0 ? JSON.stringify(statuses) : "None");
+  console.log("--- [cellStatusesForOverlay - Using 0-based JSON] Finished. Statuses generated:", Object.keys(statuses).length > 0 ? JSON.stringify(statuses) : "None");
   return statuses;
 });
 
@@ -408,7 +400,7 @@ const handleGridCellClick = (cell: { row: number; col: number; }) => { // cell i
   if (interactionMode.value !== 'select') return;
   if (isPdfCurrentlyPanning.value) return;
 
-  const zeroBasedCellKey = `${cell.row}-${cell.col}`; // cell.row and cell.col are 0-based
+  const zeroBasedCellKey = `${cell.row}-${cell.col}`;
   console.log(`[index.vue/handleGridCellClick] Clicked cell (0-based from event): R${cell.row},C${cell.col}. Key: ${zeroBasedCellKey}.`);
   const statusInfo = cellStatusesForOverlay.value[zeroBasedCellKey];
   console.log(`[index.vue/handleGridCellClick] StatusInfo for key '${zeroBasedCellKey}':`, statusInfo ? JSON.parse(JSON.stringify(statusInfo)) : 'undefined');
@@ -418,11 +410,12 @@ const handleGridCellClick = (cell: { row: number; col: number; }) => { // cell i
     selectedGridCell.value = null;
     isGridCellModalOpen.value = false;
   } else {
-    selectedGridCell.value = cell; // Store 0-based row/col
+    selectedGridCell.value = cell;
     modalCellData.value = {
-      id: statusInfo?.deviceId || `cell_R${cell.row + 1}_C${cell.col + 1}`, // Use deviceId or generate a 1-based ID for display
-      row: cell.row, // Store 0-based row for internal consistency if needed elsewhere
-      col: cell.col, // Store 0-based col
+      // MODIFIED: Fallback ID also uses 0-based for consistency if desired, or keep +1 for display only
+      id: statusInfo?.deviceId || `cell_R${cell.row}_C${cell.col}`,
+      row: cell.row,
+      col: cell.col,
       status: statusInfo?.status,
       deviceName: statusInfo?.deviceName
     };
