@@ -11,10 +11,14 @@
   },
   "dependencies": {
     "@panzoom/panzoom": "^4.6.0",
+    "chart.js": "^4.4.9",
+    "chartjs-plugin-zoom": "^2.2.0",
     "nuxt": "^3.17.4",
     "pdfjs-dist": "^5.2.133",
     "vue": "^3.5.15",
-    "vue-router": "^4.5.1"
+    "vue-chartjs": "^5.3.2",
+    "vue-router": "^4.5.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@iconify-json/heroicons": "^1.2.2",
