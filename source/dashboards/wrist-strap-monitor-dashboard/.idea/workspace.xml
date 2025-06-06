@@ -5,16 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1920967b-ce8e-42f0-b6c9-49e2d29d39a4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/wrist-strap/composables/stores/userStore.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/layouts/empty.vue" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/middleware/auth.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/pages/login.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/test_main.http" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../documentation/design/work reports/Báo cáo tiến độ - Hệ thống giám sát ổ xả tĩnh điện.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../documentation/design/work reports/Báo cáo tiến độ - Hệ thống giám sát ổ xả tĩnh điện.pptx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../documentation/design/work reports/Wrist Strap Monitor System.xlsx" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/uv.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/uv.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,30 +40,32 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_interpreter_path": "node",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.sync",
-    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2024.3.5\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_interpreter_path&quot;: &quot;node&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\WebStorm 2024.3.5\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "vue.recent.templates": [
-      "Vue Composition API Component"
+  &quot;keyToStringList&quot;: {
+    &quot;vue.recent.templates&quot;: [
+      &quot;Vue Composition API Component&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Working\Wrist Strap Monitor System\source\dashboards\wrist-strap-monitor-dashboard\wrist-strap" />
+      <recent name="D:\Working\Wrist Strap Monitor System\source\dashboards\wrist-strap-monitor-dashboard\wrist-strap\components\pdf" />
       <recent name="D:\Working\Wrist Strap Monitor System\source\dashboards\wrist-strap-monitor-dashboard\wrist-strap\composables\stores" />
     </key>
   </component>
@@ -93,7 +94,8 @@
       <workItem from="1749001954755" duration="5188000" />
       <workItem from="1749094102723" duration="21698000" />
       <workItem from="1749170889457" duration="916000" />
-      <workItem from="1749172920664" duration="13106000" />
+      <workItem from="1749172920664" duration="13687000" />
+      <workItem from="1749199103902" duration="7267000" />
     </task>
     <servers />
   </component>

@@ -1,4 +1,4 @@
-import { useUserStore } from '~/composables/stores/userStore';
+import { useUserStore } from '~/stores/userStore';
 
 export default defineNuxtRouteMiddleware((to, from) => {
     // This middleware runs on every route change.

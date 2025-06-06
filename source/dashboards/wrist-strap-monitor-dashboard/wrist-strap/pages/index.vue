@@ -50,14 +50,20 @@
             <span>%</span>
           </div>
           <UButtonGroup size="xs" orientation="horizontal">
-            <UButton label="100%" @click="setQuickZoom(100)" :variant="zoomInputPercentage === 100 ? 'solid' : 'outline'" />
-            <UButton label="200%" @click="setQuickZoom(200)" :variant="zoomInputPercentage === 200 ? 'solid' : 'outline'" />
-            <UButton label="300%" @click="setQuickZoom(300)" :variant="zoomInputPercentage === 300 ? 'solid' : 'outline'" />
-            <UButton label="400%" @click="setQuickZoom(400)" :variant="zoomInputPercentage === 400 ? 'solid' : 'outline'" />
-            <UButton label="500%" @click="setQuickZoom(500)" :variant="zoomInputPercentage === 500 ? 'solid' : 'outline'" />
+            <UButton label="100%" @click="setQuickZoom(100)"
+                     :variant="zoomInputPercentage === 100 ? 'solid' : 'outline'"/>
+            <UButton label="200%" @click="setQuickZoom(200)"
+                     :variant="zoomInputPercentage === 200 ? 'solid' : 'outline'"/>
+            <UButton label="300%" @click="setQuickZoom(300)"
+                     :variant="zoomInputPercentage === 300 ? 'solid' : 'outline'"/>
+            <UButton label="400%" @click="setQuickZoom(400)"
+                     :variant="zoomInputPercentage === 400 ? 'solid' : 'outline'"/>
+            <UButton label="500%" @click="setQuickZoom(500)"
+                     :variant="zoomInputPercentage === 500 ? 'solid' : 'outline'"/>
           </UButtonGroup>
 
-          <span v-if="pdfViewerComponentRef?.totalPages?.value > 1" class="text-xs text-gray-600 dark:text-gray-400 ml-2"> {{
+          <span v-if="pdfViewerComponentRef?.totalPages?.value > 1"
+                class="text-xs text-gray-600 dark:text-gray-400 ml-2"> {{
               pageLabel
             }}: {{ pdfViewerComponentRef?.currentPageNum?.value }} / {{
               pdfViewerComponentRef?.totalPages?.value
@@ -267,6 +273,7 @@ import {ref, computed, watch, onMounted, nextTick, onUnmounted} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
 import PdfViewer from '~/components/pdf/PdfViewer.vue';
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
+import {definePageMeta} from "#imports";
 
 // THIS IS THE NEW LINE TO PROTECT THE PAGE
 definePageMeta({
@@ -468,11 +475,9 @@ const setQuickZoom = (percentage: number) => {
   }
 };
 
-// NEW: Method to handle the reset view button click
 const handleResetView = () => {
   if (pdfViewerComponentRef.value) {
     pdfViewerComponentRef.value.resetZoomAndPan();
-    // After resetting, explicitly set the zoom to 100%
     setQuickZoom(100);
   }
 };
@@ -607,7 +612,6 @@ const formatDateForTooltip = (isoString: string): string => {
 };
 
 const generateDeviceData = (count = 40): DeviceData[] => {
-  console.groupCollapsed(`[generateDeviceData] Generating ${count} mock grid devices`);
   const data: DeviceData[] = [];
   const statuses: LogStatus[] = ["Connected", "Error", "Disconnected", "Warning", "Info", "Voltage reading failed", "Configured", "Reset"];
   const eventTypes: EventCategory[] = ["Connection", "Sensor Reading", "Alert", "User action", "System"];
@@ -656,7 +660,6 @@ const generateDeviceData = (count = 40): DeviceData[] => {
     };
     data.push(deviceEntry);
   }
-  console.groupEnd();
   return data;
 };
 
@@ -665,9 +668,7 @@ const handleKeydown = (event: KeyboardEvent) => {
   if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
     return;
   }
-
   if (event.repeat) return;
-
   if (event.key === 'Shift') {
     event.preventDefault();
     isPanMode.value = !isPanMode.value;
@@ -675,9 +676,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 onMounted(() => {
-  console.log("[index.vue/onMounted] Component mounted.");
   deviceDataStream.value = generateDeviceData();
-
   availableDevices.value = [
     {id: 'unique-master-dev-001', name: 'ESP32 Sensor Alpha'},
     {id: 'unique-master-dev-002', name: 'ESP32 Sensor Beta'},
@@ -688,13 +687,10 @@ onMounted(() => {
   ];
   const uniqueDeviceIds = new Set<string>();
   availableDevices.value = availableDevices.value.filter(device => {
-    if (uniqueDeviceIds.has(device.id)) {
-      return false;
-    }
+    if (uniqueDeviceIds.has(device.id)) return false;
     uniqueDeviceIds.add(device.id);
     return true;
   });
-
   window.addEventListener('keydown', handleKeydown);
 });
 
@@ -705,29 +701,24 @@ onUnmounted(() => {
 
 const computedGridOverlayProps = computed(() => {
   const viewer = pdfViewerComponentRef.value;
-  if (!viewer || typeof viewer.getCanvasActualWidth !== 'function' || typeof viewer.getCanvasActualHeight !== 'function' ||
-      typeof viewer.getCanvasPanX !== 'function' || typeof viewer.getCanvasPanY !== 'function') {
-    return {
-      visible: false,
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      rows: 0,
-      cols: 0,
-      cellWidth: BASE_CELL_SIZE_PX,
-      cellHeight: BASE_CELL_SIZE_PX
-    };
-  }
+  if (!viewer) return {
+    visible: false,
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    rows: 0,
+    cols: 0,
+    cellWidth: BASE_CELL_SIZE_PX,
+    cellHeight: BASE_CELL_SIZE_PX
+  };
+
   const panXVal = viewer.getCanvasPanX();
   const panYVal = viewer.getCanvasPanY();
   const actualWidthVal = viewer.getCanvasActualWidth();
   const actualHeightVal = viewer.getCanvasActualHeight();
 
-  if (!Number.isFinite(actualWidthVal) || actualWidthVal <= 0 ||
-      !Number.isFinite(actualHeightVal) || actualHeightVal <= 0 ||
-      !Number.isFinite(panXVal) || !Number.isFinite(panYVal) ||
-      BASE_CELL_SIZE_PX <= 0) {
+  if (!Number.isFinite(actualWidthVal) || actualWidthVal <= 0 || !Number.isFinite(actualHeightVal) || actualHeightVal <= 0 || !Number.isFinite(panXVal) || !Number.isFinite(panYVal)) {
     return {
       visible: false,
       x: 0,
@@ -740,21 +731,10 @@ const computedGridOverlayProps = computed(() => {
       cellHeight: BASE_CELL_SIZE_PX
     };
   }
+
   const cols = Math.max(0, Math.floor(actualWidthVal / BASE_CELL_SIZE_PX));
   const rows = Math.max(0, Math.floor(actualHeightVal / BASE_CELL_SIZE_PX));
-  if (cols <= 0 || rows <= 0) {
-    return {
-      visible: false,
-      x: panXVal,
-      y: panYVal,
-      width: actualWidthVal,
-      height: actualHeightVal,
-      rows: 0,
-      cols: 0,
-      cellWidth: BASE_CELL_SIZE_PX,
-      cellHeight: BASE_CELL_SIZE_PX
-    };
-  }
+
   return {
     visible: true,
     x: panXVal,
@@ -771,26 +751,16 @@ const computedGridOverlayProps = computed(() => {
 const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
   const statuses: Record<string, GridCellStatus> = {};
   const gridProps = computedGridOverlayProps.value;
-  if (!gridProps.visible || gridProps.rows === 0 || gridProps.cols === 0) {
-    return {};
-  }
+  if (!gridProps.visible) return {};
+
   for (const device of deviceDataStream.value) {
-    const row = device.coordinates.row;
-    const col = device.coordinates.col;
-    const status = device.last_event.status || 'Warning';
-    const name = device.device_name;
-    const deviceGridId = device.id;
-
-    if (row === undefined || col === undefined || row < 0 || col < 0) {
-      continue;
-    }
-
-    if (col < gridProps.cols && row < gridProps.rows) {
+    const {row, col} = device.coordinates;
+    if (row >= 0 && col >= 0 && row < gridProps.rows && col < gridProps.cols) {
       const key = `${row}-${col}`;
       statuses[key] = {
-        status,
-        deviceId: deviceGridId,
-        deviceName: name,
+        status: device.last_event.status || 'Warning',
+        deviceId: device.id,
+        deviceName: device.device_name,
         installationArea: device.installation_area,
         lastEventType: device.last_event.type,
         createdAtFormatted: formatDateForTooltip(device.created_at),
@@ -802,56 +772,33 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
 });
 
 const resetModalState = () => {
-  console.log("[resetModalState] Resetting modal state.");
   isCreatingNewDeviceInModal.value = false;
   modalSelectedDeviceId.value = undefined;
   newDeviceForm.value = {name: '', installation_area: undefined};
 };
 
 const closeAndResetModal = () => {
-  console.log("[closeAndResetModal] Closing modal and resetting state.");
   isGridCellModalOpen.value = false;
   resetModalState();
 };
 
 
 const handleGridCellClick = (cell: { row: number; col: number; }) => {
-  console.groupCollapsed(`[handleGridCellClick] Cell R${cell.row},C${cell.col} clicked.`);
-  if (interactionMode.value !== 'select') {
-    console.log("  Mode is not 'select'. Aborting.");
-    console.groupEnd();
-    return;
-  }
-  if (isPdfCurrentlyPanning.value) {
-    console.log("  PDF is panning. Aborting.");
-    console.groupEnd();
-    return;
-  }
+  if (interactionMode.value !== 'select' || isPdfCurrentlyPanning.value) return;
 
   resetModalState();
 
   const existingDeviceOnCell = deviceDataStream.value.find(d => d.coordinates.row === cell.row && d.coordinates.col === cell.col);
-  console.log("  Existing device on cell:", existingDeviceOnCell ? JSON.parse(JSON.stringify(existingDeviceOnCell)) : "None");
 
-  modalCellData.value = {
-    row: cell.row,
-    col: cell.col,
-    device: existingDeviceOnCell
-  };
+  modalCellData.value = {row: cell.row, col: cell.col, device: existingDeviceOnCell};
 
   if (existingDeviceOnCell) {
     const selectableMatch = availableDevices.value.find(ad => ad.id === existingDeviceOnCell.id);
     if (selectableMatch) {
       modalSelectedDeviceId.value = selectableMatch.id;
-      console.log(`  Pre-selecting device from available list: ID='${selectableMatch.id}', Name='${selectableMatch.name}'`);
-    } else {
-      console.log(`  Device '${existingDeviceOnCell.device_name}' (ID: ${existingDeviceOnCell.id}) on cell is not in 'availableDevices'.`);
     }
   }
-
   isGridCellModalOpen.value = true;
-  console.log("  Modal opened. Modal data:", JSON.parse(JSON.stringify(modalCellData.value)));
-  console.groupEnd();
 };
 
 const getLocalizedStatus = (status?: LogStatus): string => {
@@ -887,25 +834,19 @@ const handleCellMouseEnter = (payload: { row: number; col: number; event: MouseE
   if (tooltipHideTimeout) clearTimeout(tooltipHideTimeout);
   const cellKey = `${payload.row}-${payload.col}`;
   const cellData = cellStatusesForOverlay.value[cellKey];
-
-  if (cellData && cellData.deviceName) {
-    let text = `${tooltipNameLabel.value}: ${cellData.deviceName}`;
+  let text = `${tooltipCellLabel.value}: ${modalRowLabel.value} ${payload.row}, ${modalColLabel.value} ${payload.col}`;
+  if (cellData) {
+    text = `${tooltipNameLabel.value}: ${cellData.deviceName}`;
     if (cellData.installationArea) text += `\n${tooltipAreaLabel.value}: ${cellData.installationArea}`;
     if (cellData.status) text += `\n${tooltipLastEventStatusLabel.value}: ${getLocalizedStatus(cellData.status)}`;
-    if (cellData.lastEventType) text += `\n${tooltipLastEventTypeLabel.value}: ${cellData.lastEventType}`;
-    if (cellData.createdAtFormatted) text += `\n${tooltipCreatedAtLabel.value}: ${cellData.createdAtFormatted}`;
-    if (cellData.installedAtFormatted) text += `\n${tooltipInstalledAtLabel.value}: ${cellData.installedAtFormatted}`;
-    sharedTooltipText.value = text;
-  } else {
-    sharedTooltipText.value = `${tooltipCellLabel.value}: ${modalRowLabel.value} ${payload.row}, ${modalColLabel.value} ${payload.col}`;
   }
+  sharedTooltipText.value = text;
 
-  const rect = (payload.event.target as HTMLElement).getBoundingClientRect();
   sharedTooltipStyle.value = {
     top: `${payload.event.clientY - 10}px`,
     left: `${payload.event.clientX + 15}px`,
     transform: 'translateY(-100%)',
-    visibility: 'visible',
+    visibility: 'visible'
   };
   sharedTooltipVisible.value = true;
 };
@@ -918,12 +859,7 @@ const handleCellMouseLeave = () => {
 
 
 const handleSaveCellAssignment = () => {
-  console.groupCollapsed("[handleSaveCellAssignment] Attempting to save cell assignment.");
-  if (!modalCellData.value) {
-    console.warn("  No modalCellData available. Aborting.");
-    console.groupEnd();
-    return;
-  }
+  if (!modalCellData.value) return;
 
   const {row, col} = modalCellData.value;
   let newGridDeviceData: DeviceData;
@@ -931,92 +867,52 @@ const handleSaveCellAssignment = () => {
   const currentScale = pdfViewerComponentRef.value?.currentScale.value || 1.0;
 
   if (isCreatingNewDeviceInModal.value) {
-    console.log("  Mode: Creating new device from form:", JSON.parse(JSON.stringify(newDeviceForm.value)));
-    if (!newDeviceForm.value.name.trim()) {
-      console.warn("  New device name is empty. Aborting.");
-      alert(currentLanguage.value === 'vi' ? 'Tên thiết bị không được để trống.' : 'Device name cannot be empty.');
-      console.groupEnd();
+    if (!newDeviceForm.value.name.trim() || !newDeviceForm.value.installation_area) {
+      alert(currentLanguage.value === 'vi' ? 'Tên và khu vực không được để trống.' : 'Name and area cannot be empty.');
       return;
     }
-    if (!newDeviceForm.value.installation_area) {
-      console.warn("  New device installation area is not selected/empty. Aborting.");
-      alert(currentLanguage.value === 'vi' ? 'Khu vực lắp đặt không được để trống.' : 'Installation area cannot be empty.');
-      console.groupEnd();
-      return;
-    }
-    const newDeviceUniqueId = `dev-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 9)}`;
-
+    const newDeviceUniqueId = `dev-${Date.now().toString(36)}`;
     newGridDeviceData = {
       id: newDeviceUniqueId,
       device_name: newDeviceForm.value.name.trim(),
       coordinates: {row, col},
       installation_area: newDeviceForm.value.installation_area,
-      mac_address: undefined,
-      wifi_ssid: "WIFI_NEW_DEVICE_SETUP",
-      firmware_version: "1.0.0-default",
-      last_event: {
-        type: 'System',
-        status: 'Configured',
-        value: 'Device newly created and placed on grid.'
-      },
+      last_event: {type: 'System', status: 'Configured', value: 'Device created.'},
       scale_at_creation_time: currentScale,
       created_at: nowISO,
       installed_at: nowISO,
     };
-
-    availableDevices.value.push({
-      id: newGridDeviceData.id,
-      name: newGridDeviceData.device_name,
-    });
-    console.log('  New device prepared for grid & added to availableDevices list:', JSON.parse(JSON.stringify(newGridDeviceData)));
-
+    availableDevices.value.push({id: newGridDeviceData.id, name: newGridDeviceData.device_name});
   } else {
-    console.log("  Mode: Assigning existing device from selectable list.");
     if (!modalSelectedDeviceId.value) {
-      console.warn("  No existing device selected from list. Aborting.");
-      alert(currentLanguage.value === 'vi' ? 'Vui lòng chọn một thiết bị hiện có.' : 'Please select an existing device.');
-      console.groupEnd();
+      alert(currentLanguage.value === 'vi' ? 'Vui lòng chọn một thiết bị.' : 'Please select a device.');
       return;
     }
     const selectedDeviceMaster = availableDevices.value.find(d => d.id === modalSelectedDeviceId.value);
-    if (!selectedDeviceMaster) {
-      console.warn(`  Selected device ID '${modalSelectedDeviceId.value}' not found in availableDevices. Aborting.`);
-      console.groupEnd();
-      return;
-    }
+    if (!selectedDeviceMaster) return;
 
     const existingDeviceOnAnyCell = deviceDataStream.value.find(d => d.id === selectedDeviceMaster.id);
-
     newGridDeviceData = {
+      ...existingDeviceOnAnyCell,
       id: selectedDeviceMaster.id,
       device_name: selectedDeviceMaster.name,
       coordinates: {row, col},
-      installation_area: existingDeviceOnAnyCell?.installation_area || modalCellData.value.device?.installation_area || "Default Assigned Area",
-      mac_address: existingDeviceOnAnyCell?.mac_address,
-      wifi_ssid: existingDeviceOnAnyCell?.wifi_ssid || "FACTORY_WIFI_ASSIGNED",
-      firmware_version: existingDeviceOnAnyCell?.firmware_version || "1.x.x",
+      installation_area: existingDeviceOnAnyCell?.installation_area || "Default Area",
       last_event: existingDeviceOnAnyCell?.last_event || {
         type: 'System',
         status: 'Info',
-        value: `Device ${selectedDeviceMaster.name} assigned/moved to cell R${row},C${col}`
+        value: `Moved to cell R${row},C${col}`
       },
-      scale_at_creation_time: currentScale,
+      scale_at_creation_time: existingDeviceOnAnyCell?.scale_at_creation_time || currentScale,
       created_at: existingDeviceOnAnyCell?.created_at || nowISO,
       installed_at: nowISO,
     };
-    console.log('  Existing device selected, grid entry prepared/updated:', JSON.parse(JSON.stringify(newGridDeviceData)));
   }
 
-  deviceDataStream.value = deviceDataStream.value.filter(d =>
-      !((d.coordinates.row === row && d.coordinates.col === col) || d.id === newGridDeviceData.id)
-  );
-
+  deviceDataStream.value = deviceDataStream.value.filter(d => d.id !== newGridDeviceData.id && (d.coordinates.row !== row || d.coordinates.col !== col));
   deviceDataStream.value.push(newGridDeviceData);
 
-  console.log(`  Device '${newGridDeviceData.device_name}' (ID: ${newGridDeviceData.id}) assignment processed for cell R${row},C${col}.`);
-  console.log("  Current deviceDataStream (first 5):", JSON.parse(JSON.stringify(deviceDataStream.value.slice(0, 5), null, 2)));
   closeAndResetModal();
-  console.groupEnd();
 };
 
 </script>
