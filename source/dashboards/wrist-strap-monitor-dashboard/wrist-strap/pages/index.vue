@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-1 min-h-0 overflow-hidden">
     <aside
-        class="hidden md:flex md:flex-col bg-gray-100 dark:bg-dark-surface border-r border-gray-200 dark:border-dark-border p-4 w-60 lg:w-64 overflow-y-auto shrink-0"
+        class="hidden md:flex md:flex-col bg-gray-100 dark:bg-dark-surface border-r border-ray-200 dark:border-dark-border p-4 w-60 lg:w-64 overflow-y-auto shrink-0"
         aria-label="Desktop Dashboard Navigation"
     >
       <UVerticalNavigation :links="localizedNavigationItems"
@@ -37,7 +37,7 @@
             <UIcon name="i-heroicons-magnifying-glass-minus-20-solid" class="h-4 w-4 mr-1"/>
             {{ zoomOutLabel }}
           </UButton>
-          <UButton size="sm" @click="pdfViewerComponentRef?.resetZoomAndPan()"
+          <UButton size="sm" @click="handleResetView"
                    :disabled="pdfViewerComponentRef?.isRendering?.value">
             <UIcon name="i-heroicons-arrows-pointing-out-20-solid" class="h-4 w-4 mr-1"/>
             {{ resetViewLabel }}
@@ -46,17 +46,25 @@
             <span>{{ scaleLabel }}:</span>
             <UInput v-model.number="zoomInputPercentage" type="number" size="xs" class="w-20 text-center"
                     @change="applyManualZoomToViewer" @keyup.enter="applyManualZoomToViewer" :min="minZoomPercentage"
-                    :max="maxZoomPercentage" :disabled="pdfViewerComponentRef?.isRendering?.value"/>
+                    :disabled="pdfViewerComponentRef?.isRendering?.value"/>
             <span>%</span>
           </div>
-          <span v-if="pdfViewerComponentRef?.totalPages?.value > 1" class="text-xs text-gray-600 dark:text-gray-400"> {{
+          <UButtonGroup size="xs" orientation="horizontal">
+            <UButton label="100%" @click="setQuickZoom(100)" :variant="zoomInputPercentage === 100 ? 'solid' : 'outline'" />
+            <UButton label="200%" @click="setQuickZoom(200)" :variant="zoomInputPercentage === 200 ? 'solid' : 'outline'" />
+            <UButton label="300%" @click="setQuickZoom(300)" :variant="zoomInputPercentage === 300 ? 'solid' : 'outline'" />
+            <UButton label="400%" @click="setQuickZoom(400)" :variant="zoomInputPercentage === 400 ? 'solid' : 'outline'" />
+            <UButton label="500%" @click="setQuickZoom(500)" :variant="zoomInputPercentage === 500 ? 'solid' : 'outline'" />
+          </UButtonGroup>
+
+          <span v-if="pdfViewerComponentRef?.totalPages?.value > 1" class="text-xs text-gray-600 dark:text-gray-400 ml-2"> {{
               pageLabel
             }}: {{ pdfViewerComponentRef?.currentPageNum?.value }} / {{
               pdfViewerComponentRef?.totalPages?.value
             }} </span>
           <span
               v-if="pdfViewerComponentRef?.currentScale?.value && Number.isFinite(pdfViewerComponentRef.currentScale.value)"
-              class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline"> {{
+              class="text-xs text-gray-500 dark:text-gray-400 hidden sm:inline ml-2"> {{
               renderLabel
             }}: {{ pdfViewerComponentRef.currentScale.value.toFixed(1) }}x </span>
         </div>
@@ -84,6 +92,8 @@
               :interaction-mode="interactionMode"
               :cell-statuses="cellStatusesForOverlay"
               @cell-click="handleGridCellClick"
+              @cell-mouse-enter="handleCellMouseEnter"
+              @cell-mouse-leave="handleCellMouseLeave"
               :tooltip-name-label="tooltipNameLabel"
               :tooltip-area-label="tooltipAreaLabel"
               :tooltip-last-event-status-label="tooltipLastEventStatusLabel"
@@ -253,10 +263,15 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch, onMounted, nextTick} from 'vue';
+import {ref, computed, watch, onMounted, nextTick, onUnmounted} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
 import PdfViewer from '~/components/pdf/PdfViewer.vue';
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
+
+// THIS IS THE NEW LINE TO PROTECT THE PAGE
+definePageMeta({
+  middleware: 'auth'
+});
 
 type InteractionMode = 'pan' | 'select';
 
@@ -351,6 +366,13 @@ const totalPagesForPdf = ref(0);
 const isPanMode = ref(true);
 const interactionMode = computed<InteractionMode>(() => isPanMode.value ? 'pan' : 'select');
 
+// --- Shared Tooltip State ---
+const sharedTooltipText = ref('');
+const sharedTooltipVisible = ref(false);
+const sharedTooltipStyle = ref<Record<string, string | number>>({});
+let tooltipHideTimeout: ReturnType<typeof setTimeout> | null = null;
+
+
 // --- Translations ---
 const openMenuAriaLabel = computed(() => currentLanguage.value === 'vi' ? 'Mở menu điều hướng' : 'Open navigation menu');
 const mobileMenuTitleLabel = computed(() => currentLanguage.value === 'vi' ? 'Menu bản đồ' : 'Map menu');
@@ -369,7 +391,6 @@ const zoomOutLabel = computed(() => currentLanguage.value === 'vi' ? 'Thu nhỏ'
 const resetViewLabel = computed(() => currentLanguage.value === 'vi' ? 'Đặt lại chế độ xem' : 'Reset view');
 
 const cellAssignmentModalTitleLabel = computed(() => currentLanguage.value === 'vi' ? 'Thông tin & Gán thiết bị cho Ô' : 'Cell Information & Device Assignment');
-const youSelectedCellAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Bạn đã chọn ô tại' : 'You selected cell at');
 const modalRowLabel = computed(() => currentLanguage.value === 'vi' ? 'Hàng' : 'Row');
 const modalColLabel = computed(() => currentLanguage.value === 'vi' ? 'Cột' : 'Column');
 const assignExistingDeviceLabel = computed(() => currentLanguage.value === 'vi' ? 'Gán thiết bị hiện có' : 'Assign existing device');
@@ -387,7 +408,6 @@ const closeButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Đóng
 const saveAssignmentButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Lưu gán' : 'Save assignment');
 const modalDeviceLastEventStatusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái sự kiện cuối' : 'Last event status');
 const currentInstallationAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt hiện tại' : 'Current installation area');
-const modalMacAddressLabel = computed(() => currentLanguage.value === 'vi' ? 'Địa chỉ MAC' : 'MAC address');
 const modalFirmwareVersionLabel = computed(() => currentLanguage.value === 'vi' ? 'Phiên bản Firmware' : 'Firmware version');
 const modalWifiSsidLabel = computed(() => currentLanguage.value === 'vi' ? 'Wi-Fi SSID' : 'Wi-Fi SSID');
 const modalScaleAtCreationLabel = computed(() => currentLanguage.value === 'vi' ? 'Tỉ lệ khi tạo' : 'Scale at creation');
@@ -410,30 +430,50 @@ const tooltipCellLabel = computed(() => currentLanguage.value === 'vi' ? 'Ô' : 
 
 
 const minZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.minScale * 100) : 20);
-const maxZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.maxScale * 100) : 500);
+const maxZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.maxScale * 1000) : 1000);
 
 const applyManualZoomToViewer = () => {
   const viewer = pdfViewerComponentRef.value;
   if (viewer) {
     const currentZoomInputVal = zoomInputPercentage.value;
-    if (typeof currentZoomInputVal === 'number' && !isNaN(currentZoomInputVal)) {
-      const newScale = currentZoomInputVal / 100;
+    if (!isNaN(currentZoomInputVal)) {
+      const newScale = Math.max(viewer.minScale, Math.min(currentZoomInputVal / 100, viewer.maxScale));
       if (Number.isFinite(newScale) && newScale > 0) {
         viewer.setPdfScale(newScale);
+        zoomInputPercentage.value = Math.round(newScale * 100);
       } else {
-        if (viewer.currentScale?.value && Number.isFinite(viewer.currentScale.value) && viewer.currentScale.value > 0) {
-          zoomInputPercentage.value = Math.round(viewer.currentScale.value * 100);
+        const currentViewerScale = viewer.currentScale?.value;
+        if (currentViewerScale && Number.isFinite(currentViewerScale) && currentViewerScale > 0) {
+          zoomInputPercentage.value = Math.round(currentViewerScale * 100);
         } else {
           zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100);
         }
       }
     } else {
-      if (viewer.currentScale?.value && Number.isFinite(viewer.currentScale.value) && viewer.currentScale.value > 0) {
-        zoomInputPercentage.value = Math.round(viewer.currentScale.value * 100);
+      const currentViewerScale = viewer.currentScale?.value;
+      if (currentViewerScale && Number.isFinite(currentViewerScale) && currentViewerScale > 0) {
+        zoomInputPercentage.value = Math.round(currentViewerScale * 100);
       } else {
         zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100);
       }
     }
+  }
+};
+
+const setQuickZoom = (percentage: number) => {
+  if (pdfViewerComponentRef.value) {
+    const scale = percentage / 100;
+    zoomInputPercentage.value = percentage;
+    pdfViewerComponentRef.value.setPdfScale(scale);
+  }
+};
+
+// NEW: Method to handle the reset view button click
+const handleResetView = () => {
+  if (pdfViewerComponentRef.value) {
+    pdfViewerComponentRef.value.resetZoomAndPan();
+    // After resetting, explicitly set the zoom to 100%
+    setQuickZoom(100);
   }
 };
 
@@ -527,7 +567,6 @@ const modalSelectedDeviceId = ref<string | undefined>(undefined);
 const newDeviceForm = ref({
   name: '',
   installation_area: undefined as string | undefined,
-  // mac_address removed
 });
 const availableDevices = ref<SelectableDevice[]>([]);
 const availableInstallationAreas = ref<string[]>(["POL", "FLW", "CG A", "CG B", "QA Main", "Storage X", "Production Line 1", "Production Line 2", "Maintenance Bay", "Office Area"]);
@@ -603,7 +642,7 @@ const generateDeviceData = (count = 40): DeviceData[] => {
       device_name: deviceName,
       coordinates: {row, col},
       installation_area: availableInstallationAreas.value[Math.floor(Math.random() * availableInstallationAreas.value.length)],
-      // mac_address removed from direct generation here, can be added in save if needed
+      mac_address: `00:1A:BB:CC:DD:${String(i).padStart(2, '0')}`,
       wifi_ssid: `FACTORY_WIFI_${String.fromCharCode(65 + (i % 3))}`,
       firmware_version: `1.${i % 5}.${i % 9}`,
       last_event: {
@@ -616,18 +655,28 @@ const generateDeviceData = (count = 40): DeviceData[] => {
       installed_at: installedDate.toISOString(),
     };
     data.push(deviceEntry);
-    console.log(`  Created Grid Device: ID=${deviceEntry.id}, Name=${deviceEntry.device_name}, Area=${deviceEntry.installation_area}, Coords=R${row}C${col}, Last Event Status=${eventStatus}`);
   }
-  console.log(`Generated ${data.length} mock devices for deviceDataStream.`);
   console.groupEnd();
   return data;
 };
 
+const handleKeydown = (event: KeyboardEvent) => {
+  const target = event.target as HTMLElement;
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+    return;
+  }
+
+  if (event.repeat) return;
+
+  if (event.key === 'Shift') {
+    event.preventDefault();
+    isPanMode.value = !isPanMode.value;
+  }
+};
 
 onMounted(() => {
   console.log("[index.vue/onMounted] Component mounted.");
   deviceDataStream.value = generateDeviceData();
-  console.log("[onMounted] Initial grid devices (first 3):", JSON.parse(JSON.stringify(deviceDataStream.value.slice(0, 3))));
 
   availableDevices.value = [
     {id: 'unique-master-dev-001', name: 'ESP32 Sensor Alpha'},
@@ -646,8 +695,11 @@ onMounted(() => {
     return true;
   });
 
-  console.log("[onMounted] Initialized availableInstallationAreas:", JSON.parse(JSON.stringify(availableInstallationAreas.value)));
-  console.log("[onMounted] Initialized availableDevices (master list):", JSON.parse(JSON.stringify(availableDevices.value)));
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
 });
 
 
@@ -722,16 +774,14 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
   if (!gridProps.visible || gridProps.rows === 0 || gridProps.cols === 0) {
     return {};
   }
-  // console.groupCollapsed(`[cellStatusesForOverlay] Processing ${deviceDataStream.value.length} devices for grid display.`);
   for (const device of deviceDataStream.value) {
     const row = device.coordinates.row;
     const col = device.coordinates.col;
-    const status = device.last_event.status || 'warning';
+    const status = device.last_event.status || 'Warning';
     const name = device.device_name;
     const deviceGridId = device.id;
 
-    if (typeof row !== 'number' || typeof col !== 'number' || row < 0 || col < 0) {
-      // console.warn(`  Skipping device '${name}' (ID: ${deviceGridId}) due to invalid coordinates: R${row},C${col}.`);
+    if (row === undefined || col === undefined || row < 0 || col < 0) {
       continue;
     }
 
@@ -743,12 +793,11 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
         deviceName: name,
         installationArea: device.installation_area,
         lastEventType: device.last_event.type,
-        createdAtFormatted: formatDateForTooltip(device.created_at), // Use new formatter for tooltips
-        installedAtFormatted: formatDateForTooltip(device.installed_at) // Use new formatter for tooltips
+        createdAtFormatted: formatDateForTooltip(device.created_at),
+        installedAtFormatted: formatDateForTooltip(device.installed_at)
       };
     }
   }
-  // console.groupEnd();
   return statuses;
 });
 
@@ -834,6 +883,40 @@ const getLocalizedStatus = (status?: LogStatus): string => {
   return status;
 };
 
+const handleCellMouseEnter = (payload: { row: number; col: number; event: MouseEvent }) => {
+  if (tooltipHideTimeout) clearTimeout(tooltipHideTimeout);
+  const cellKey = `${payload.row}-${payload.col}`;
+  const cellData = cellStatusesForOverlay.value[cellKey];
+
+  if (cellData && cellData.deviceName) {
+    let text = `${tooltipNameLabel.value}: ${cellData.deviceName}`;
+    if (cellData.installationArea) text += `\n${tooltipAreaLabel.value}: ${cellData.installationArea}`;
+    if (cellData.status) text += `\n${tooltipLastEventStatusLabel.value}: ${getLocalizedStatus(cellData.status)}`;
+    if (cellData.lastEventType) text += `\n${tooltipLastEventTypeLabel.value}: ${cellData.lastEventType}`;
+    if (cellData.createdAtFormatted) text += `\n${tooltipCreatedAtLabel.value}: ${cellData.createdAtFormatted}`;
+    if (cellData.installedAtFormatted) text += `\n${tooltipInstalledAtLabel.value}: ${cellData.installedAtFormatted}`;
+    sharedTooltipText.value = text;
+  } else {
+    sharedTooltipText.value = `${tooltipCellLabel.value}: ${modalRowLabel.value} ${payload.row}, ${modalColLabel.value} ${payload.col}`;
+  }
+
+  const rect = (payload.event.target as HTMLElement).getBoundingClientRect();
+  sharedTooltipStyle.value = {
+    top: `${payload.event.clientY - 10}px`,
+    left: `${payload.event.clientX + 15}px`,
+    transform: 'translateY(-100%)',
+    visibility: 'visible',
+  };
+  sharedTooltipVisible.value = true;
+};
+
+const handleCellMouseLeave = () => {
+  tooltipHideTimeout = setTimeout(() => {
+    sharedTooltipVisible.value = false;
+  }, 100);
+};
+
+
 const handleSaveCellAssignment = () => {
   console.groupCollapsed("[handleSaveCellAssignment] Attempting to save cell assignment.");
   if (!modalCellData.value) {
@@ -868,9 +951,8 @@ const handleSaveCellAssignment = () => {
       device_name: newDeviceForm.value.name.trim(),
       coordinates: {row, col},
       installation_area: newDeviceForm.value.installation_area,
-      // mac_address, wifi_ssid, firmware_version are defaults for a newly created device from modal
-      mac_address: `NEW-MAC-${newDeviceUniqueId.slice(-4)}`,
-      wifi_ssid: "WIFI_PENDING_CONFIG",
+      mac_address: undefined,
+      wifi_ssid: "WIFI_NEW_DEVICE_SETUP",
       firmware_version: "1.0.0-default",
       last_event: {
         type: 'System',
@@ -903,7 +985,6 @@ const handleSaveCellAssignment = () => {
       return;
     }
 
-    // Find if this device was already on the grid to carry over its existing details
     const existingDeviceOnAnyCell = deviceDataStream.value.find(d => d.id === selectedDeviceMaster.id);
 
     newGridDeviceData = {
@@ -911,7 +992,7 @@ const handleSaveCellAssignment = () => {
       device_name: selectedDeviceMaster.name,
       coordinates: {row, col},
       installation_area: existingDeviceOnAnyCell?.installation_area || modalCellData.value.device?.installation_area || "Default Assigned Area",
-      mac_address: existingDeviceOnAnyCell?.mac_address, // Keep original MAC if exists
+      mac_address: existingDeviceOnAnyCell?.mac_address,
       wifi_ssid: existingDeviceOnAnyCell?.wifi_ssid || "FACTORY_WIFI_ASSIGNED",
       firmware_version: existingDeviceOnAnyCell?.firmware_version || "1.x.x",
       last_event: existingDeviceOnAnyCell?.last_event || {
@@ -941,6 +1022,5 @@ const handleSaveCellAssignment = () => {
 </script>
 
 <style scoped>
-.pdf-main-area {
-}
+/* No custom CSS as all styling is done via Tailwind classes */
 </style>

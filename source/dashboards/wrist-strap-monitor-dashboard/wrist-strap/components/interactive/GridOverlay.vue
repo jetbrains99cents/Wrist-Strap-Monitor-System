@@ -7,8 +7,9 @@
       gridTemplateRows: `repeat(${rows}, ${cellHeight}px)`,
       width: `${cols * cellWidth}px`,
       height: `${rows * cellHeight}px`,
-      pointerEvents: 'none',
+      pointerEvents: 'auto',
     }"
+      @mouseleave="onOverlayMouseLeave"
   >
     <div
         v-for="r_idx in rows"
@@ -16,39 +17,28 @@
         class="grid-row-group"
         :style="{ display: 'contents' }"
     >
-      <UTooltip
+      <!-- UTooltip removed, using native title for performance testing -->
+      <div
           v-for="c_idx in cols"
-          :key="`tooltip-cell-${r_idx - 1}-${c_idx - 1}`"
-          :text="getCellTooltip(r_idx - 1, c_idx - 1)"
-          :popper="{ placement: 'top', arrow: true }"
-          :ui="{
-          base: 'invisible md:visible h-auto max-w-xs px-3 py-2 rounded-lg shadow-lg text-sm font-medium whitespace-pre-line',
-          background: 'bg-white dark:bg-gray-900',
-          color: 'text-gray-900 dark:text-white',
-          ring: 'ring-1 ring-gray-200 dark:ring-gray-800',
-          arrow: {
-            base: 'before:bg-gray-200 dark:before:bg-gray-800',
-          }
-        }"
+          :key="`cell-${r_idx - 1}-${c_idx - 1}`"
+          class="grid-cell box-border"
+          :class="getCellClasses(r_idx - 1, c_idx - 1)"
+          :style="{
+           width: `${cellWidth}px`,
+           height: `${cellHeight}px`,
+           pointerEvents: (isPdfPanning || interactionMode === 'pan') ? 'none' : 'auto',
+         }"
+          role="button"
+          tabindex="0"
+          :aria-label="`Grid cell row ${r_idx} column ${c_idx}`"
+          :title="getCellTooltipText(r_idx - 1, c_idx - 1)"
+          @click="onCellClick(r_idx - 1, c_idx - 1)"
+          @keydown.enter="onCellClick(r_idx - 1, c_idx - 1)"
+          @keydown.space="onCellClick(r_idx - 1, c_idx - 1)"
+          @mouseenter="onCellMouseEnter(r_idx - 1, c_idx - 1, $event)"
+          @mouseleave="onCellMouseLeave"
       >
-        <div
-            :key="`cell-${r_idx - 1}-${c_idx - 1}`"
-            class="grid-cell box-border"
-            :class="getCellClasses(r_idx - 1, c_idx - 1)"
-            :style="{
-             width: `${cellWidth}px`,
-             height: `${cellHeight}px`,
-             pointerEvents: (isPdfPanning || interactionMode === 'pan') ? 'none' : 'auto',
-           }"
-            role="button"
-            tabindex="0"
-            :aria-label="`Grid cell row ${r_idx} column ${c_idx}`"
-            @click="onCellClick(r_idx - 1, c_idx - 1)"
-            @keydown.enter="onCellClick(r_idx - 1, c_idx - 1)"
-            @keydown.space="onCellClick(r_idx - 1, c_idx - 1)"
-        >
-        </div>
-      </UTooltip>
+      </div>
     </div>
   </div>
 </template>
@@ -58,7 +48,6 @@ import {computed} from 'vue';
 
 type InteractionMode = 'pan' | 'select';
 
-// --- Data Structures (Matching index.vue) ---
 type LogStatus =
     "Connected"
     | "Disconnected"
@@ -91,7 +80,6 @@ interface Props {
   isPdfPanning: boolean;
   interactionMode: InteractionMode;
   cellStatuses: Record<string, GridCellStatusInfo>;
-  // MODIFIED: Added props for translated labels
   tooltipNameLabel: string;
   tooltipAreaLabel: string;
   tooltipLastEventStatusLabel: string;
@@ -99,20 +87,35 @@ interface Props {
   tooltipCreatedAtLabel: string;
   tooltipInstalledAtLabel: string;
   tooltipCellLabel: string;
-  tooltipRowLabel: string; // Added for empty cell tooltip
-  tooltipColLabel: string; // Added for empty cell tooltip
+  tooltipRowLabel: string;
+  tooltipColLabel: string;
 }
 
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'cell-click', payload: { row: number; col: number }): void;
+  (e: 'cell-mouse-enter', payload: { row: number; col: number; event: MouseEvent }): void;
+  (e: 'cell-mouse-leave'): void;
 }>();
 
 const onCellClick = (rowIndex: number, colIndex: number) => {
   if (props.interactionMode !== 'select' || props.isPdfPanning) return;
   emit('cell-click', {row: rowIndex, col: colIndex});
 };
+
+const onCellMouseEnter = (rowIndex: number, colIndex: number, event: MouseEvent) => {
+  if (props.interactionMode !== 'select' || props.isPdfPanning) return;
+  emit('cell-mouse-enter', {row: rowIndex, col: colIndex, event});
+};
+
+const onCellMouseLeave = () => {
+  emit('cell-mouse-leave');
+};
+const onOverlayMouseLeave = () => {
+  emit('cell-mouse-leave');
+}
+
 
 const isSelected = (rowIndex: number, colIndex: number) => {
   return props.selectedCell && props.selectedCell.row === rowIndex && props.selectedCell.col === colIndex;
@@ -134,14 +137,13 @@ const getCellClasses = (r: number, c: number) => {
     classes['bg-yellow-400'] = true;
     classes['dark:bg-yellow-500'] = true;
     classes['opacity-60'] = true;
-    classes['blinking-cell'] = true;
+    // classes['blinking-cell'] = true; // Blinking disabled
   } else if (status) {
     const statusClass = status.toLowerCase().replace(/\s+/g, '-');
     classes[`cell-status-${statusClass}`] = true;
     classes['border-gray-500'] = true;
     classes['dark:border-gray-600'] = true;
     classes['opacity-50'] = true;
-    classes['blinking-cell'] = true;
   } else {
     classes['border-blue-500'] = true;
     classes['dark:border-yellow-400'] = true;
@@ -156,8 +158,7 @@ const getCellClasses = (r: number, c: number) => {
   return classes;
 }
 
-// MODIFIED: getCellTooltip to use props for labels
-const getCellTooltip = (r: number, c: number): string => {
+const getCellTooltipText = (r: number, c: number): string => {
   const key = `${r}-${c}`;
   const cellInfo = props.cellStatuses[key];
   if (cellInfo && cellInfo.deviceName) {
@@ -167,9 +168,6 @@ const getCellTooltip = (r: number, c: number): string => {
       tooltipLines.push(`${props.tooltipAreaLabel}: ${cellInfo.installationArea}`);
     }
     if (cellInfo.status) {
-      // The status itself might need to be localized in index.vue before being passed
-      // or a getLocalizedStatus function passed as prop/imported here.
-      // For now, assuming cellInfo.status is already the display-ready string.
       tooltipLines.push(`${props.tooltipLastEventStatusLabel}: ${cellInfo.status}`);
     }
     if (cellInfo.lastEventType) {
@@ -239,17 +237,15 @@ const getCellTooltip = (r: number, c: number): string => {
 }
 
 
-/* Blinking Animation */
+/* Blinking Animation Commented Out */
+/*
 @keyframes blink {
-  0%, 100% {
-    opacity: inherit;
-  }
-  50% {
-    opacity: 0.2;
-  }
+  0%, 100% { opacity: inherit; }
+  50% { opacity: 0.2; }
 }
 
 .blinking-cell {
   animation: blink 1.5s infinite ease-in-out;
 }
+*/
 </style>

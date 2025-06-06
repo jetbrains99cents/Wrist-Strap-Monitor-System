@@ -1,0 +1,193 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.4.0 Safari/537.36" version="27.0.9">
+  <diagram name="System Design" id="e7e014a7-5840-1c2e-5031-d8a46d1fe8dd">
+    <mxGraphModel dx="2081" dy="1061" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="SS4Ie7MstghxOS68mwkX-52" value="" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;movable=0;resizable=0;rotatable=0;deletable=0;editable=0;locked=1;connectable=0;" edge="1" parent="1" source="7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="344.5" y="200" as="sourcePoint" />
+            <mxPoint x="525" y="195" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-73" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="90" y="130" as="sourcePoint" />
+            <mxPoint x="440" y="130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-78" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Click on circular menu item&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-73">
+          <mxGeometry x="-0.0704" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-75" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="440" y="180" as="sourcePoint" />
+            <mxPoint x="810" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-79" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Redirect to dashboard&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-75">
+          <mxGeometry x="-0.0723" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-88" value="MongoDB" style="fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1610" y="30" width="239.5" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-89" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="SS4Ie7MstghxOS68mwkX-88">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1730" y="1020" as="sourcePoint" />
+            <mxPoint x="1700" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-95" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="810" y="230" as="sourcePoint" />
+            <mxPoint x="90" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-96" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Prompt user type their email&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-95">
+          <mxGeometry x="-0.0723" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-85" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1270" y="550" as="sourcePoint" />
+            <mxPoint x="809.75" y="550" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-86" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;If user email is granted, send email which contains&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;&amp;nbsp;verification code to user email&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 16px;&quot;&gt;If user checked backup checkbox, skip above line&lt;/font&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-85">
+          <mxGeometry x="-0.0723" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-90" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1270" y="440" as="sourcePoint" />
+            <mxPoint x="1730" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-91" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;Query data, evaluate if user email is granted&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;with corresponding field in DB&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;Also return backup code if checkbox checked&lt;/span&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-90">
+          <mxGeometry x="-0.1552" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-99" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="810" y="630" as="sourcePoint" />
+            <mxPoint x="90" y="630" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-100" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Prompt user type verification code&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-99">
+          <mxGeometry x="-0.0723" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-102" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="90" y="690" as="sourcePoint" />
+            <mxPoint x="810" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-103" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;User types verification code and presses enter&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-102">
+          <mxGeometry x="-0.1552" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-104" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="810" y="770" as="sourcePoint" />
+            <mxPoint x="1270" y="770" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-105" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;Send user typed verification code to service&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;to validate, if its ok, send JWT back&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;Also allow user uses emergency/backup&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;verification codes&lt;/span&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-104">
+          <mxGeometry x="-0.1552" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-64" value="Wrist Strap Monitor Dashboard" style="fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="710" y="30" width="199.75" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-70" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="SS4Ie7MstghxOS68mwkX-64">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="810" y="1010" as="sourcePoint" />
+            <mxPoint x="809.3499999999999" y="90.65573770491801" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-93" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="810" y="379.9978688524591" as="sourcePoint" />
+            <mxPoint x="1270" y="379.9978688524591" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-94" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;Send authorization request&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-93">
+          <mxGeometry x="-0.1552" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-63" value="Landing page" style="fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="380" y="30" width="119.5" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-69" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="SS4Ie7MstghxOS68mwkX-63">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="440" y="1010" as="sourcePoint" />
+            <mxPoint x="470" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-66" value="User" style="fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="50" y="30" width="80" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-68" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="SS4Ie7MstghxOS68mwkX-66">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="90" y="1010" as="sourcePoint" />
+            <mxPoint x="230" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-97" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="90" y="320" as="sourcePoint" />
+            <mxPoint x="810" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-98" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;User types their email and presses enter&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;User can also check use emergency/backup checkbox&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;font-size: 16px;&quot;&gt;to enter code which is predefined/allocated before&lt;/span&gt;&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-97">
+          <mxGeometry x="-0.1552" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-65" value="Wrist Strap Web API Service" style="fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="30" width="239.5" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-71" value="" style="endArrow=none;dashed=1;html=1;rounded=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" target="SS4Ie7MstghxOS68mwkX-65">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1270" y="1010" as="sourcePoint" />
+            <mxPoint x="1240" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-108" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="90" y="860" as="sourcePoint" />
+            <mxPoint x="810" y="860" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-109" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;Future uses&lt;/font&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-108">
+          <mxGeometry x="-0.0704" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-110" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="810" y="920" as="sourcePoint" />
+            <mxPoint x="1270" y="920" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SS4Ie7MstghxOS68mwkX-111" value="&lt;span style=&quot;font-size: 16px;&quot;&gt;Send request along with saved JWT&lt;/span&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="SS4Ie7MstghxOS68mwkX-110">
+          <mxGeometry x="-0.1552" y="-3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

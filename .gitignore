@@ -272,3 +272,6 @@ factory-layout.svg
 # *.tfstate
 # *.tfstate.backup
 # .terraform.lock.hcl
+
+# Ignore Microsoft Office temporary files
+~$*
