@@ -1,13 +1,20 @@
 [project]
 name = "wrist-strap-web-api"
 version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.13"
-dependencies = [
-    "fastapi>=0.115.12",
-    "jose>=1.0.0",
-    "pydantic-settings>=2.9.1",
-    "pyjwt>=2.10.1",
-    "pymongo>=4.13.0",
-    "uvicorn>=0.34.3",
+description = "API for the Wrist Strap Monitor System"
+authors = [
+    { name = "Tan Nguyen", email = "tan.nguyenthanhduy@vn.sharp-world.com" },
 ]
+dependencies = [
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.29.0",
+    "pymongo>=4.8.0",
+    "PyJWT[cryptography]>=2.8.0",
+    "pydantic-settings>=2.2.1",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
+
+[tool.pdm]
+distribution = false
