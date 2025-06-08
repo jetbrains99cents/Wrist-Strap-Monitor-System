@@ -26,14 +26,20 @@ export default defineNuxtConfig({
     devServer: {
         port: 3001,
         host: '0.0.0.0',
-        https: true // <--- ADD THIS LINE
+        https: {
+            key: './localhost+2-key.pem', // Path to your key file
+            cert: './localhost+2.pem'     // Path to your cert file
+        }
     },
 
     // --- ADDED: Runtime Configuration for API Base URL ---
     runtimeConfig: {
         // Public keys are exposed to the client-side
         public: {
-            apiBase: 'https://172.16.9.183:3003' // Your FastAPI backend API URL
+            apiBase: 'https://172.16.9.183:3002',
+            // --- ADD THIS NEW LINE ---
+            // This will be true when you run `npm run dev` and false for `npm run build`
+            loggingEnabled: process.env.NODE_ENV === 'development'
         }
     },
     // --- END ADDED SECTION ---

@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+# --- CORRECTED: Import the main api_router, not individual endpoints ---
 from app.api.v1.api import api_router
 from app.core.config import settings
 
@@ -12,9 +13,8 @@ app = FastAPI(
 
 # Configure CORS
 origins = [
+    "https://172.16.9.183:3001",
     "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    # Add your frontend production URL here in the future
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -24,9 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include the main API router
+# --- CORRECTED: Include the single main router with the version prefix ---
 app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/")
 def read_root():
-    return {"message": f"Welcome to the {settings.DATABASE_NAME} API"}
+    return {"message": f"Welcome to the {settings.database_name} API"}

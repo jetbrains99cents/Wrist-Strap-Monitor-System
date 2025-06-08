@@ -271,97 +271,27 @@
 <script setup lang="ts">
 import {ref, computed, watch, onMounted, nextTick, onUnmounted} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
+import {useLogger} from '~/composables/useLogger';
 import PdfViewer from '~/components/pdf/PdfViewer.vue';
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
 import {definePageMeta} from "#imports";
 
-// THIS IS THE NEW LINE TO PROTECT THE PAGE
 definePageMeta({
   middleware: 'auth'
 });
 
 type InteractionMode = 'pan' | 'select';
-
-// --- Data Structures ---
-type LogStatus =
-    "Connected"
-    | "Disconnected"
-    | "Voltage reading failed"
-    | "Info"
-    | "Warning"
-    | "Error"
-    | "Critical"
-    | "Configured"
-    | "Reset";
+type LogStatus = "Connected" | "Disconnected" | "Voltage reading failed" | "Info" | "Warning" | "Error" | "Critical" | "Configured" | "Reset";
 type EventCategory = "Connection" | "Sensor Reading" | "Alert" | "User action" | "System";
+interface EventDetails { type: EventCategory; status?: LogStatus; value: string | Record<string, any>; }
+interface DeviceData { id: string; device_name: string; coordinates: { row: number; col: number }; installation_area: string; mac_address?: string; wifi_ssid?: string; firmware_version?: string; last_event: EventDetails; scale_at_creation_time: number; created_at: string; installed_at: string; }
+interface GridCellStatus { status: LogStatus; deviceId: string; deviceName: string; installationArea?: string; lastEventType?: EventCategory; createdAtFormatted?: string; installedAtFormatted?: string; }
+interface SelectableDevice { id: string; name: string; }
+interface ModalDisplayData { row: number; col: number; device?: DeviceData; }
+interface PdfViewerExposed { zoomIn: () => void; zoomOut: () => void; resetZoomAndPan: () => void; setPdfScale: (scale: number) => void; goToPage: (page: number) => void; reloadPdf: () => void; currentScale: { value: number }; currentPageNum: { value: number }; totalPages: { value: number }; isRendering: { value: boolean }; isLoading: { value: boolean }; minScale: number; maxScale: number; getCanvasActualWidth: () => number; getCanvasActualHeight: () => number; getCanvasPanX: () => number; getCanvasPanY: () => number; getPdfPageOriginalWidth: () => number; getPdfPageOriginalHeight: () => number; initialPdfRenderScale?: number; }
 
-interface EventDetails {
-  type: EventCategory;
-  status?: LogStatus;
-  value: string | Record<string, any>;
-}
-
-interface DeviceData {
-  id: string;
-  device_name: string;
-  coordinates: { row: number; col: number };
-  installation_area: string;
-  mac_address?: string;
-  wifi_ssid?: string;
-  firmware_version?: string;
-  last_event: EventDetails;
-  scale_at_creation_time: number;
-  created_at: string;
-  installed_at: string;
-}
-
-interface GridCellStatus {
-  status: LogStatus;
-  deviceId: string;
-  deviceName: string;
-  installationArea?: string;
-  lastEventType?: EventCategory;
-  createdAtFormatted?: string;
-  installedAtFormatted?: string;
-}
-
-interface SelectableDevice {
-  id: string;
-  name: string;
-}
-
-interface ModalDisplayData {
-  row: number;
-  col: number;
-  device?: DeviceData;
-}
-
-
-interface PdfViewerExposed {
-  zoomIn: () => void;
-  zoomOut: () => void;
-  resetZoomAndPan: () => void;
-  setPdfScale: (scale: number) => void;
-  goToPage: (page: number) => void;
-  reloadPdf: () => void;
-  currentScale: { value: number };
-  currentPageNum: { value: number };
-  totalPages: { value: number };
-  isRendering: { value: boolean };
-  isLoading: { value: boolean };
-  minScale: number;
-  maxScale: number;
-  getCanvasActualWidth: () => number;
-  getCanvasActualHeight: () => number;
-  getCanvasPanX: () => number;
-  getCanvasPanY: () => number;
-  getPdfPageOriginalWidth: () => number;
-  getPdfPageOriginalHeight: () => number;
-  initialPdfRenderScale?: number;
-}
-
+const logger = useLogger();
 const {currentLanguage} = useLanguage();
-
 
 const isMobileMenuOpen = ref(false);
 const pdfViewerComponentRef = ref<PdfViewerExposed | null>(null);
@@ -369,34 +299,24 @@ const isPdfCurrentlyPanning = ref(false);
 const zoomInputPercentage = ref(100);
 const currentPageInput = ref(1);
 const totalPagesForPdf = ref(0);
-
 const isPanMode = ref(true);
 const interactionMode = computed<InteractionMode>(() => isPanMode.value ? 'pan' : 'select');
-
-// --- Shared Tooltip State ---
 const sharedTooltipText = ref('');
 const sharedTooltipVisible = ref(false);
 const sharedTooltipStyle = ref<Record<string, string | number>>({});
 let tooltipHideTimeout: ReturnType<typeof setTimeout> | null = null;
 
-
-// --- Translations ---
 const openMenuAriaLabel = computed(() => currentLanguage.value === 'vi' ? 'Mở menu điều hướng' : 'Open navigation menu');
 const mobileMenuTitleLabel = computed(() => currentLanguage.value === 'vi' ? 'Menu bản đồ' : 'Map menu');
 const viewModeBaseLabel = computed(() => currentLanguage.value === 'vi' ? 'Chế độ xem' : 'View mode');
-const currentInteractionModeLabel = computed(() => {
-  return interactionMode.value === 'pan' ? (currentLanguage.value === 'vi' ? 'Kéo bản đồ' : 'Pan map') : (currentLanguage.value === 'vi' ? 'Chọn ô' : 'Select cell');
-});
-const interactionModeToggleAriaLabel = computed(() => {
-  return isPanMode.value ? (currentLanguage.value === 'vi' ? 'Chuyển sang chế độ chọn ô' : 'Switch to select cell mode') : (currentLanguage.value === 'vi' ? 'Chuyển sang chế độ kéo bản đồ' : 'Switch to pan map mode');
-});
+const currentInteractionModeLabel = computed(() => interactionMode.value === 'pan' ? (currentLanguage.value === 'vi' ? 'Kéo bản đồ' : 'Pan map') : (currentLanguage.value === 'vi' ? 'Chọn ô' : 'Select cell'));
+const interactionModeToggleAriaLabel = computed(() => isPanMode.value ? (currentLanguage.value === 'vi' ? 'Chuyển sang chế độ chọn ô' : 'Switch to select cell mode') : (currentLanguage.value === 'vi' ? 'Chuyển sang chế độ kéo bản đồ' : 'Switch to pan map mode'));
 const scaleLabel = computed(() => currentLanguage.value === 'vi' ? 'Tỉ lệ' : 'Scale');
 const pageLabel = computed(() => currentLanguage.value === 'vi' ? 'Trang' : 'Page');
 const renderLabel = computed(() => currentLanguage.value === 'vi' ? 'Kết xuất' : 'Render');
 const zoomInLabel = computed(() => currentLanguage.value === 'vi' ? 'Phóng to' : 'Zoom in');
 const zoomOutLabel = computed(() => currentLanguage.value === 'vi' ? 'Thu nhỏ' : 'Zoom out');
 const resetViewLabel = computed(() => currentLanguage.value === 'vi' ? 'Đặt lại chế độ xem' : 'Reset view');
-
 const cellAssignmentModalTitleLabel = computed(() => currentLanguage.value === 'vi' ? 'Thông tin & Gán thiết bị cho Ô' : 'Cell Information & Device Assignment');
 const modalRowLabel = computed(() => currentLanguage.value === 'vi' ? 'Hàng' : 'Row');
 const modalColLabel = computed(() => currentLanguage.value === 'vi' ? 'Cột' : 'Column');
@@ -414,7 +334,6 @@ const noCellDataAvailableLabel = computed(() => currentLanguage.value === 'vi' ?
 const closeButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Đóng' : 'Close');
 const saveAssignmentButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Lưu gán' : 'Save assignment');
 const modalDeviceLastEventStatusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái sự kiện cuối' : 'Last event status');
-const currentInstallationAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt hiện tại' : 'Current installation area');
 const modalFirmwareVersionLabel = computed(() => currentLanguage.value === 'vi' ? 'Phiên bản Firmware' : 'Firmware version');
 const modalWifiSsidLabel = computed(() => currentLanguage.value === 'vi' ? 'Wi-Fi SSID' : 'Wi-Fi SSID');
 const modalScaleAtCreationLabel = computed(() => currentLanguage.value === 'vi' ? 'Tỉ lệ khi tạo' : 'Scale at creation');
@@ -425,8 +344,6 @@ const noDeviceAssignedToCellLabel = computed(() => currentLanguage.value === 'vi
 const selectedCellInfoLabel = computed(() => currentLanguage.value === 'vi' ? 'Thông tin ô đã chọn' : 'Selected cell info');
 const modalDeviceNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên thiết bị' : 'Device name');
 const modalDeviceAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt' : 'Installation area');
-
-// Tooltip Labels
 const tooltipNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên' : 'Name');
 const tooltipAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực' : 'Area');
 const tooltipLastEventStatusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái sự kiện cuối' : 'Last Event Status');
@@ -434,7 +351,6 @@ const tooltipLastEventTypeLabel = computed(() => currentLanguage.value === 'vi' 
 const tooltipCreatedAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày tạo' : 'Created At');
 const tooltipInstalledAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày lắp đặt' : 'Installed At');
 const tooltipCellLabel = computed(() => currentLanguage.value === 'vi' ? 'Ô' : 'Cell');
-
 
 const minZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.minScale * 100) : 20);
 const maxZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.maxScale * 1000) : 1000);
@@ -483,10 +399,11 @@ const handleResetView = () => {
 };
 
 const handlePdfRendered = () => {
-  console.log('[index.vue] PDF Page Rendered');
+  logger.log('[index.vue] PDF Page Rendered');
 };
+
 const handlePdfLoaded = async () => {
-  console.log('[index.vue] PDF Loaded event received.');
+  logger.log('[index.vue] PDF Loaded event received.');
   await nextTick();
   if (pdfViewerComponentRef.value) {
     const currentScaleVal = pdfViewerComponentRef.value.currentScale.value;
@@ -516,41 +433,11 @@ watch(() => pdfViewerComponentRef.value?.totalPages?.value, (newTotal) => {
 
 const rawNavigationItems = ref([
   {id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/'},
-  {
-    id: 'device-list',
-    label_en: 'Device List',
-    label_vi: 'Danh sách thiết bị',
-    icon: 'i-heroicons-queue-list-solid',
-    to: '/device-list'
-  },
-  {
-    id: 'device-management',
-    label_en: 'Device Management',
-    label_vi: 'Quản lý thiết bị',
-    icon: 'i-heroicons-cog-8-tooth-solid',
-    to: '/device-management'
-  },
-  {
-    id: 'production-plan',
-    label_en: 'Production Plan\n& Working Time',
-    label_vi: 'Kế hoạch & Thời gian\nsản xuất',
-    icon: 'i-heroicons-calendar-days-solid',
-    to: '/production-plan'
-  },
-  {
-    id: 'data-visualization',
-    label_en: 'Data Visualization',
-    label_vi: 'Trực quan hóa dữ liệu',
-    icon: 'i-heroicons-chart-pie-solid',
-    to: '/data-visualization'
-  },
-  {
-    id: 'data-analysis',
-    label_en: 'Data Analysis',
-    label_vi: 'Phân tích dữ liệu',
-    icon: 'i-heroicons-presentation-chart-line-solid',
-    to: '/data-analysis'
-  },
+  {id: 'device-list', label_en: 'Device List', label_vi: 'Danh sách thiết bị', icon: 'i-heroicons-queue-list-solid', to: '/device-list'},
+  {id: 'device-management', label_en: 'Device Management', label_vi: 'Quản lý thiết bị', icon: 'i-heroicons-cog-8-tooth-solid', to: '/device-management'},
+  {id: 'production-plan', label_en: 'Production Plan\n& Working Time', label_vi: 'Kế hoạch & Thời gian\nsản xuất', icon: 'i-heroicons-calendar-days-solid', to: '/production-plan'},
+  {id: 'data-visualization', label_en: 'Data Visualization', label_vi: 'Trực quan hóa dữ liệu', icon: 'i-heroicons-chart-pie-solid', to: '/data-visualization'},
+  {id: 'data-analysis', label_en: 'Data Analysis', label_vi: 'Phân tích dữ liệu', icon: 'i-heroicons-presentation-chart-line-solid', to: '/data-analysis'},
 ]);
 const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({
   id: item.id,
@@ -564,36 +451,19 @@ const BASE_CELL_SIZE_PX = 50;
 const selectedGridCell = ref<{ row: number; col: number } | null>(null);
 const isGridCellModalOpen = ref(false);
 const modalCellData = ref<ModalDisplayData | null>(null);
-
-
-// --- Modal Device Assignment State ---
 const isCreatingNewDeviceInModal = ref(false);
 const modalSelectedDeviceId = ref<string | undefined>(undefined);
-const newDeviceForm = ref({
-  name: '',
-  installation_area: undefined as string | undefined,
-});
+const newDeviceForm = ref({name: '', installation_area: undefined as string | undefined,});
 const availableDevices = ref<SelectableDevice[]>([]);
 const availableInstallationAreas = ref<string[]>(["POL", "FLW", "CG A", "CG B", "QA Main", "Storage X", "Production Line 1", "Production Line 2", "Maintenance Bay", "Office Area"]);
-
-const areaOptionsForModal = computed(() => {
-  return availableInstallationAreas.value.map(area => ({label: area, value: area}));
-});
-
-const availableDeviceOptionsForModal = computed(() => {
-  return availableDevices.value.map(d => ({id: d.id, name: d.name}));
-});
-
-
+const areaOptionsForModal = computed(() => availableInstallationAreas.value.map(area => ({label: area, value: area})));
+const availableDeviceOptionsForModal = computed(() => availableDevices.value.map(d => ({id: d.id, name: d.name})));
 const deviceDataStream = ref<DeviceData[]>([]);
 
 const formatDateForDisplay = (isoString: string): string => {
   if (!isoString) return 'N/A';
   try {
-    const date = new Date(isoString);
-    return date.toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US', {
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    });
+    return new Date(isoString).toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
   } catch (e) {
     return 'Invalid Date';
   }
@@ -602,10 +472,7 @@ const formatDateForDisplay = (isoString: string): string => {
 const formatDateForTooltip = (isoString: string): string => {
   if (!isoString) return 'N/A';
   try {
-    const date = new Date(isoString);
-    return date.toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US', {
-      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
+    return new Date(isoString).toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   } catch (e) {
     return 'Invalid Date';
   }
@@ -615,7 +482,6 @@ const generateDeviceData = (count = 40): DeviceData[] => {
   const data: DeviceData[] = [];
   const statuses: LogStatus[] = ["Connected", "Error", "Disconnected", "Warning", "Info", "Voltage reading failed", "Configured", "Reset"];
   const eventTypes: EventCategory[] = ["Connection", "Sensor Reading", "Alert", "User action", "System"];
-
   const maxRows = 20;
   const maxCols = 30;
   const usedCells = new Set<string>();
@@ -631,12 +497,6 @@ const generateDeviceData = (count = 40): DeviceData[] => {
 
     const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
     let eventStatus: LogStatus | undefined = statuses[Math.floor(Math.random() * statuses.length)];
-    let eventValue: string | Record<string, any> = `Event value for ${eventType} at ${new Date().toLocaleTimeString()}`;
-    if (eventType === 'Connection') eventStatus = Math.random() > 0.5 ? "Connected" : "Disconnected";
-    else if (eventType === 'System') eventStatus = Math.random() > 0.5 ? "Configured" : "Reset";
-    else if (eventType === 'Sensor Reading') eventStatus = Math.random() > 0.05 ? "Info" : "Voltage reading failed";
-
-
     const deviceName = `Device ${i}`;
     const installedDate = new Date(now.getTime() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000);
     const deviceId = `dev-instance-${Date.now().toString(36).slice(-4)}-${i}`;
@@ -649,11 +509,7 @@ const generateDeviceData = (count = 40): DeviceData[] => {
       mac_address: `00:1A:BB:CC:DD:${String(i).padStart(2, '0')}`,
       wifi_ssid: `FACTORY_WIFI_${String.fromCharCode(65 + (i % 3))}`,
       firmware_version: `1.${i % 5}.${i % 9}`,
-      last_event: {
-        type: eventType,
-        status: eventStatus,
-        value: eventValue,
-      },
+      last_event: { type: eventType, status: eventStatus, value: "Event value" },
       scale_at_creation_time: parseFloat((Math.random() * 4 + 1).toFixed(1)),
       created_at: new Date(installedDate.getTime() - Math.floor(Math.random() * 5) * 24 * 60 * 60 * 1000).toISOString(),
       installed_at: installedDate.toISOString(),
@@ -664,12 +520,10 @@ const generateDeviceData = (count = 40): DeviceData[] => {
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
-  const target = event.target as HTMLElement;
-  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-    return;
-  }
-  if (event.repeat) return;
   if (event.key === 'Shift') {
+    const target = event.target as HTMLElement;
+    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
+    if (event.repeat) return;
     event.preventDefault();
     isPanMode.value = !isPanMode.value;
   }
@@ -680,9 +534,6 @@ onMounted(() => {
   availableDevices.value = [
     {id: 'unique-master-dev-001', name: 'ESP32 Sensor Alpha'},
     {id: 'unique-master-dev-002', name: 'ESP32 Sensor Beta'},
-    {id: 'unique-master-dev-003', name: 'Temperature Probe Gamma'},
-    {id: 'unique-master-dev-004', name: 'Lighting Controller Delta'},
-    {id: 'unique-master-dev-005', name: 'Motion Sensor Epsilon'},
     ...deviceDataStream.value.slice(0, 5).map(d => ({id: d.id, name: d.device_name})),
   ];
   const uniqueDeviceIds = new Set<string>();
@@ -698,54 +549,24 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
 });
 
-
 const computedGridOverlayProps = computed(() => {
   const viewer = pdfViewerComponentRef.value;
-  if (!viewer) return {
-    visible: false,
-    x: 0,
-    y: 0,
-    width: 0,
-    height: 0,
-    rows: 0,
-    cols: 0,
-    cellWidth: BASE_CELL_SIZE_PX,
-    cellHeight: BASE_CELL_SIZE_PX
-  };
-
+  if (!viewer) {
+    return { visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: 50, cellHeight: 50 };
+  }
   const panXVal = viewer.getCanvasPanX();
   const panYVal = viewer.getCanvasPanY();
   const actualWidthVal = viewer.getCanvasActualWidth();
   const actualHeightVal = viewer.getCanvasActualHeight();
 
-  if (!Number.isFinite(actualWidthVal) || actualWidthVal <= 0 || !Number.isFinite(actualHeightVal) || actualHeightVal <= 0 || !Number.isFinite(panXVal) || !Number.isFinite(panYVal)) {
-    return {
-      visible: false,
-      x: 0,
-      y: 0,
-      width: 0,
-      height: 0,
-      rows: 0,
-      cols: 0,
-      cellWidth: BASE_CELL_SIZE_PX,
-      cellHeight: BASE_CELL_SIZE_PX
-    };
+  if (!Number.isFinite(actualWidthVal) || actualWidthVal <= 0 || !Number.isFinite(actualHeightVal) || actualHeightVal <= 0) {
+    return { visible: false, x: panXVal, y: panYVal, width: 0, height: 0, rows: 0, cols: 0, cellWidth: 50, cellHeight: 50 };
   }
 
   const cols = Math.max(0, Math.floor(actualWidthVal / BASE_CELL_SIZE_PX));
   const rows = Math.max(0, Math.floor(actualHeightVal / BASE_CELL_SIZE_PX));
 
-  return {
-    visible: true,
-    x: panXVal,
-    y: panYVal,
-    width: actualWidthVal,
-    height: actualHeightVal,
-    rows: rows,
-    cols: cols,
-    cellWidth: BASE_CELL_SIZE_PX,
-    cellHeight: BASE_CELL_SIZE_PX
-  };
+  return { visible: true, x: panXVal, y: panYVal, width: actualWidthVal, height: actualHeightVal, rows, cols, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX };
 });
 
 const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
@@ -754,7 +575,7 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
   if (!gridProps.visible) return {};
 
   for (const device of deviceDataStream.value) {
-    const {row, col} = device.coordinates;
+    const { row, col } = device.coordinates;
     if (row >= 0 && col >= 0 && row < gridProps.rows && col < gridProps.cols) {
       const key = `${row}-${col}`;
       statuses[key] = {
@@ -764,7 +585,7 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
         installationArea: device.installation_area,
         lastEventType: device.last_event.type,
         createdAtFormatted: formatDateForTooltip(device.created_at),
-        installedAtFormatted: formatDateForTooltip(device.installed_at)
+        installedAtFormatted: formatDateForTooltip(device.installed_at),
       };
     }
   }
@@ -782,16 +603,11 @@ const closeAndResetModal = () => {
   resetModalState();
 };
 
-
 const handleGridCellClick = (cell: { row: number; col: number; }) => {
   if (interactionMode.value !== 'select' || isPdfCurrentlyPanning.value) return;
-
   resetModalState();
-
   const existingDeviceOnCell = deviceDataStream.value.find(d => d.coordinates.row === cell.row && d.coordinates.col === cell.col);
-
   modalCellData.value = {row: cell.row, col: cell.col, device: existingDeviceOnCell};
-
   if (existingDeviceOnCell) {
     const selectableMatch = availableDevices.value.find(ad => ad.id === existingDeviceOnCell.id);
     if (selectableMatch) {
@@ -804,28 +620,8 @@ const handleGridCellClick = (cell: { row: number; col: number; }) => {
 const getLocalizedStatus = (status?: LogStatus): string => {
   if (!status) return 'N/A';
   if (currentLanguage.value === 'vi') {
-    switch (status) {
-      case "Connected":
-        return "Đã kết nối";
-      case "Disconnected":
-        return "Mất kết nối";
-      case "Voltage reading failed":
-        return "Lỗi đọc điện áp";
-      case "Info":
-        return "Thông tin";
-      case "Warning":
-        return "Cảnh báo";
-      case "Error":
-        return "Lỗi";
-      case "Critical":
-        return "Nghiêm trọng";
-      case "Configured":
-        return "Đã cấu hình";
-      case "Reset":
-        return "Đã đặt lại";
-      default:
-        return status;
-    }
+    const statusMap: Record<LogStatus, string> = { "Connected": "Đã kết nối", "Disconnected": "Mất kết nối", "Voltage reading failed": "Lỗi đọc điện áp", "Info": "Thông tin", "Warning": "Cảnh báo", "Error": "Lỗi", "Critical": "Nghiêm trọng", "Configured": "Đã cấu hình", "Reset": "Đã đặt lại" };
+    return statusMap[status] || status;
   }
   return status;
 };
@@ -841,13 +637,7 @@ const handleCellMouseEnter = (payload: { row: number; col: number; event: MouseE
     if (cellData.status) text += `\n${tooltipLastEventStatusLabel.value}: ${getLocalizedStatus(cellData.status)}`;
   }
   sharedTooltipText.value = text;
-
-  sharedTooltipStyle.value = {
-    top: `${payload.event.clientY - 10}px`,
-    left: `${payload.event.clientX + 15}px`,
-    transform: 'translateY(-100%)',
-    visibility: 'visible'
-  };
+  sharedTooltipStyle.value = { top: `${payload.event.clientY - 10}px`, left: `${payload.event.clientX + 15}px`, transform: 'translateY(-100%)', visibility: 'visible' };
   sharedTooltipVisible.value = true;
 };
 
@@ -856,7 +646,6 @@ const handleCellMouseLeave = () => {
     sharedTooltipVisible.value = false;
   }, 100);
 };
-
 
 const handleSaveCellAssignment = () => {
   if (!modalCellData.value) return;
@@ -893,16 +682,12 @@ const handleSaveCellAssignment = () => {
 
     const existingDeviceOnAnyCell = deviceDataStream.value.find(d => d.id === selectedDeviceMaster.id);
     newGridDeviceData = {
-      ...existingDeviceOnAnyCell,
+      ...existingDeviceOnAnyCell!,
       id: selectedDeviceMaster.id,
       device_name: selectedDeviceMaster.name,
       coordinates: {row, col},
       installation_area: existingDeviceOnAnyCell?.installation_area || "Default Area",
-      last_event: existingDeviceOnAnyCell?.last_event || {
-        type: 'System',
-        status: 'Info',
-        value: `Moved to cell R${row},C${col}`
-      },
+      last_event: existingDeviceOnAnyCell?.last_event || {type: 'System', status: 'Info', value: `Moved to cell R${row},C${col}`},
       scale_at_creation_time: existingDeviceOnAnyCell?.scale_at_creation_time || currentScale,
       created_at: existingDeviceOnAnyCell?.created_at || nowISO,
       installed_at: nowISO,
@@ -914,7 +699,6 @@ const handleSaveCellAssignment = () => {
 
   closeAndResetModal();
 };
-
 </script>
 
 <style scoped>

@@ -159,13 +159,14 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useLanguage } from '~/composables/useLanguage';
+import { useLogger } from '~/composables/useLogger';
 
+const logger = useLogger();
 const { currentLanguage } = useLanguage();
 
 const isMobileMenuOpen = ref(false);
-const isSaveSuccessDialogOpen = ref(false); // MODIFIED: For success dialog
+const isSaveSuccessDialogOpen = ref(false);
 
-// --- Sidebar Navigation Items ---
 const rawNavigationItems = ref([
   { id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/' },
   { id: 'device-list', label_en: 'Device List', label_vi: 'Danh sách thiết bị', icon: 'i-heroicons-queue-list-solid', to: '/device-list' },
@@ -181,7 +182,6 @@ const localizedNavigationItems = computed(() => rawNavigationItems.value.map(ite
   to: item.to,
 })));
 
-// --- Page Title and UI Text Translations ---
 const pageTitle = computed(() => currentLanguage.value === 'vi' ? 'Kế hoạch Sản xuất & Thời gian Làm việc' : 'Production Plan & Working Time');
 const workingTimeAlertTitle = computed(() => currentLanguage.value === 'vi' ? 'Cài đặt thông báo - Thời gian làm việc' : 'Alert setting - Working time');
 const productionPlanAlertTitle = computed(() => currentLanguage.value === 'vi' ? 'Cài đặt thông báo - Kế hoạch sản xuất' : 'Alert setting - Production plan');
@@ -190,7 +190,6 @@ const noAlertFromLabel = computed(() => currentLanguage.value === 'vi' ? 'Không
 const toLabel = computed(() => currentLanguage.value === 'vi' ? 'đến' : 'to');
 const saveSettingsLabel = computed(() => currentLanguage.value === 'vi' ? 'Lưu cài đặt' : 'Save Settings');
 const mobileMenuTitle = computed(() => currentLanguage.value === 'vi' ? 'Menu' : 'Menu');
-
 const fromHourLabel = computed(() => currentLanguage.value === 'vi' ? 'Giờ bắt đầu' : 'From Hour');
 const fromMinuteLabel = computed(() => currentLanguage.value === 'vi' ? 'Phút bắt đầu' : 'From Minute');
 const fromTimePeriodLabel = computed(() => currentLanguage.value === 'vi' ? 'Buổi bắt đầu' : 'From Period');
@@ -198,59 +197,32 @@ const toHourLabel = computed(() => currentLanguage.value === 'vi' ? 'Giờ kết
 const toMinuteLabel = computed(() => currentLanguage.value === 'vi' ? 'Phút kết thúc' : 'To Minute');
 const toTimePeriodLabel = computed(() => currentLanguage.value === 'vi' ? 'Buổi kết thúc' : 'To Period');
 const dateLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày' : 'Date');
-
-// MODIFIED: Translations for success dialog
 const saveSuccessTitle = computed(() => currentLanguage.value === 'vi' ? 'Thành công' : 'Success');
 const saveSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Cài đặt đã được lưu.' : 'Settings have been saved.');
 const closeButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Đóng' : 'Close');
-
 
 useHead({ title: pageTitle });
 watch(pageTitle, (newTitle) => {
   useHead({ title: `${newTitle} - Wrist Strap Dashboard | IoT Hub` });
 });
 
-// --- Settings Data Structure ---
-interface SelectTimeSetting {
-  hour: string;
-  minute: string;
-  period: 'AM' | 'PM';
-}
-interface WorkingShiftSetting {
-  from: SelectTimeSetting;
-  to: SelectTimeSetting;
-}
-
-interface ProductionShiftDateTimeSetting {
-  date: string | undefined;
-  from: SelectTimeSetting;
-  to: SelectTimeSetting;
-}
+interface SelectTimeSetting { hour: string; minute: string; period: 'AM' | 'PM'; }
+interface WorkingShiftSetting { from: SelectTimeSetting; to: SelectTimeSetting; }
+interface ProductionShiftDateTimeSetting { date: string | undefined; from: SelectTimeSetting; to: SelectTimeSetting; }
 
 const createDefaultSelectTime = (): SelectTimeSetting => ({ hour: '00', minute: '00', period: 'AM' });
 const createDefaultWorkingShift = (): WorkingShiftSetting => ({ from: createDefaultSelectTime(), to: createDefaultSelectTime() });
-const createDefaultProductionShiftDateTime = (): ProductionShiftDateTimeSetting => ({
-  date: undefined,
-  from: createDefaultSelectTime(),
-  to: createDefaultSelectTime(),
-});
+const createDefaultProductionShiftDateTime = (): ProductionShiftDateTimeSetting => ({ date: undefined, from: createDefaultSelectTime(), to: createDefaultSelectTime() });
 
-const settings = ref<{
-  workingTime: WorkingShiftSetting[];
-  productionPlan: ProductionShiftDateTimeSetting[];
-}>({
+const settings = ref<{ workingTime: WorkingShiftSetting[]; productionPlan: ProductionShiftDateTimeSetting[]; }>({
   workingTime: Array(3).fill(null).map(() => createDefaultWorkingShift()),
   productionPlan: Array(3).fill(null).map(() => createDefaultProductionShiftDateTime()),
 });
 
 const hourOptions = Array.from({ length: 12 }, (_, i) => ({ label: (i + 1).toString().padStart(2, '0'), value: (i + 1).toString().padStart(2, '0') }));
 const minuteOptions = Array.from({ length: 60 }, (_, i) => ({ label: i.toString().padStart(2, '0'), value: i.toString().padStart(2, '0') }));
-const amPmOptions = [
-  { label: 'AM', value: 'AM' },
-  { label: 'PM', value: 'PM' }
-];
+const amPmOptions = [ { label: 'AM', value: 'AM' }, { label: 'PM', value: 'PM' }];
 
-// --- Mock API Data and Loading Logic ---
 const mockApiSettingsJson = `{
   "workingTime": [
     { "from": { "hour": "08", "minute": "00", "period": "AM" }, "to": { "hour": "12", "minute": "00", "period": "PM" } },
@@ -265,7 +237,7 @@ const mockApiSettingsJson = `{
 }`;
 
 onMounted(() => {
-  console.log("Attempting to load settings from mock API...");
+  logger.log("Attempting to load settings from mock API...");
   try {
     const loadedSettings = JSON.parse(mockApiSettingsJson);
 
@@ -283,19 +255,17 @@ onMounted(() => {
           settings.value.productionPlan[index] = {
             ...createDefaultProductionShiftDateTime(),
             ...loadedShift,
-            date: loadedShift.date === null ? undefined : loadedShift.date, // Ensure undefined for null dates
+            date: loadedShift.date === null ? undefined : loadedShift.date,
           };
         }
       });
     }
-    console.log("Settings loaded and applied to UI:", JSON.parse(JSON.stringify(settings.value)));
+    logger.log("Settings loaded and applied to UI:", JSON.parse(JSON.stringify(settings.value)));
   } catch (error) {
-    console.error("Failed to load or parse mock API settings:", error);
+    logger.error("Failed to load or parse mock API settings:", error);
   }
 });
 
-
-// --- Save Settings Logic ---
 const saveSettings = () => {
   const apiPayload = {
     workingTime: settings.value.workingTime.map(shift => ({ ...shift })),
@@ -306,61 +276,19 @@ const saveSettings = () => {
     })),
   };
 
-  let isValid = true;
-  settings.value.productionPlan.forEach((shift, index) => {
-    if (!isValid) return;
-    if (shift.date) {
-      const fromDateStr = shift.date;
-
-      if (fromDateStr) {
-        const fromHour24 = parseInt(shift.from.hour) % 12 + (shift.from.period === 'PM' && shift.from.hour !== '12' ? 12 : (shift.from.period === 'AM' && shift.from.hour === '12' ? -12 : 0) );
-        const toHour24 = parseInt(shift.to.hour) % 12 + (shift.to.period === 'PM' && shift.to.hour !== '12' ? 12 : (shift.to.period === 'AM' && shift.to.hour === '12' ? -12 : 0) );
-
-        const correctedFromHour24 = (shift.from.period === 'AM' && shift.from.hour === '12') ? 0 : fromHour24;
-        const correctedToHour24 = (shift.to.period === 'AM' && shift.to.hour === '12') ? 0 : toHour24;
-
-        const fromMinutesTotal = correctedFromHour24 * 60 + parseInt(shift.from.minute);
-        const toMinutesTotal = correctedToHour24 * 60 + parseInt(shift.to.minute);
-
-        if (fromMinutesTotal >= toMinutesTotal) {
-          // isValid = false; // Uncomment to enable this validation
-          // alert(`${productionPlanAlertTitle.value} - ${shiftSettingLabel.value} ${index + 1}: "${toLabel.value}" ${currentLanguage.value === 'vi' ? 'thời gian phải sau' : 'time must be after'} "${noAlertFromLabel.value}" ${currentLanguage.value === 'vi' ? 'thời gian.' : 'time.'}`);
-        }
-      }
-    }
-  });
-
-
-  if (!isValid) return;
-
   const settingsJson = JSON.stringify(apiPayload, null, 2);
-  console.log("Settings to be sent to API:"); // Kept for debugging
-  console.log(settingsJson);
+  logger.log("Settings to be sent to API:");
+  logger.log(settingsJson);
 
-  isSaveSuccessDialogOpen.value = true; // MODIFIED: Open dialog instead of alert
+  isSaveSuccessDialogOpen.value = true;
 };
-
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4a5568;
-}
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
-}
-html.dark .custom-scrollbar {
-  scrollbar-color: #4a5568 transparent;
-}
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4a5568; }
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+html.dark .custom-scrollbar { scrollbar-color: #4a5568 transparent; }
 </style>

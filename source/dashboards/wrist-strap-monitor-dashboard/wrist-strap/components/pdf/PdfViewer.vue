@@ -26,8 +26,11 @@
 import {ref, onMounted, onUnmounted, watch, nextTick, computed} from 'vue';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
 import PdfjsWorkerPath from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { useLogger } from '~/composables/useLogger'; // <-- 1. Import the logger
 
 type InteractionMode = 'pan' | 'select';
+
+const logger = useLogger(); // <-- 2. Initialize the logger
 
 const props = defineProps({
   src: {type: String, required: true},
@@ -75,8 +78,7 @@ const pdfPageOriginalHeight_internal = ref(0);
 const ensureValidScale = (scale: number, context: string): number => {
   let validScale = scale;
   if (isNaN(validScale) || !Number.isFinite(validScale) || validScale <= 0) {
-    console.warn(`[PdfViewer/${context}] Invalid scale detected: ${scale}. Falling back.`);
-    // Try current scale if valid, then initial, then 1.0
+    logger.warn(`[PdfViewer/${context}] Invalid scale detected: ${scale}. Falling back.`);
     if (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) {
       validScale = currentPdfJsRenderScale.value;
     } else if (Number.isFinite(props.initialPdfRenderScale) && props.initialPdfRenderScale > 0) {
@@ -84,22 +86,21 @@ const ensureValidScale = (scale: number, context: string): number => {
     } else {
       validScale = 1.0;
     }
-    console.warn(`[PdfViewer/${context}] Fallback scale: ${validScale}`);
+    logger.warn(`[PdfViewer/${context}] Fallback scale: ${validScale}`);
   }
-  // Clamp within min/max bounds
   let clampedScale = Math.max(props.pdfMinRenderScale, Math.min(props.pdfMaxRenderScale, validScale));
-  return parseFloat(clampedScale.toFixed(2)); // Standardize to 2 decimal places
+  return parseFloat(clampedScale.toFixed(2));
 };
 
 
 async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
-  console.log(`[PdfViewer/renderPage] Called with pageNum: ${pageNum}, pdfScaleToRenderInput: ${pdfScaleToRenderInput}`);
+  logger.log(`[PdfViewer/renderPage] Called with pageNum: ${pageNum}, pdfScaleToRenderInput: ${pdfScaleToRenderInput}`);
   const pdfScaleToRender = ensureValidScale(pdfScaleToRenderInput, "renderPage entry");
-  console.log(`[PdfViewer/renderPage] Validated pdfScaleToRender: ${pdfScaleToRender}`);
+  logger.log(`[PdfViewer/renderPage] Validated pdfScaleToRender: ${pdfScaleToRender}`);
 
   if (pdfScaleToRender <= 0) {
     errorMsg.value = `[PdfViewer/renderPage] Critically invalid scale after validation: ${pdfScaleToRender}. Aborting render.`;
-    console.error(errorMsg.value);
+    logger.error(errorMsg.value);
     isRenderingPage.value = false;
     return;
   }
@@ -108,14 +109,14 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
   const viewportEl = pdfViewportRef.value;
   if (!canvasEl || !viewportEl) {
     errorMsg.value = "[PdfViewer/renderPage] Canvas or viewport element not found.";
-    console.error(errorMsg.value);
+    logger.error(errorMsg.value);
     isRenderingPage.value = false;
     return;
   }
   const currentDocInstance = pdfDoc;
   if (!currentDocInstance) {
     errorMsg.value = "[PdfViewer/renderPage] PDF document not loaded.";
-    console.error(errorMsg.value);
+    logger.error(errorMsg.value);
     isRenderingPage.value = false;
     return;
   }
@@ -123,7 +124,7 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
   if (renderTask) {
     try {
       renderTask.cancel();
-      console.log("[PdfViewer/renderPage] Previous renderTask cancelled.");
+      logger.log("[PdfViewer/renderPage] Previous renderTask cancelled.");
     } catch (e) { /* ignore */
     }
     renderTask = null;
@@ -133,49 +134,48 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
   errorMsg.value = null;
 
   try {
-    console.log(`[PdfViewer/renderPage] Getting page ${pageNum}`);
+    logger.log(`[PdfViewer/renderPage] Getting page ${pageNum}`);
     const page = await currentDocInstance.getPage(pageNum);
-    console.log(`[PdfViewer/renderPage] Getting viewport with scale: ${pdfScaleToRender}`);
+    logger.log(`[PdfViewer/renderPage] Getting viewport with scale: ${pdfScaleToRender}`);
     const viewport = page.getViewport({scale: pdfScaleToRender});
-    console.log(`[PdfViewer/renderPage] Viewport received: W=${viewport.width}, H=${viewport.height}, Scale=${viewport.scale}`);
+    logger.log(`[PdfViewer/renderPage] Viewport received: W=${viewport.width}, H=${viewport.height}, Scale=${viewport.scale}`);
 
     if (isNaN(viewport.width) || !Number.isFinite(viewport.width) || viewport.width <= 0 ||
         isNaN(viewport.height) || !Number.isFinite(viewport.height) || viewport.height <= 0) {
       errorMsg.value = `[PdfViewer/renderPage] PDF page generated invalid viewport WxH: ${viewport.width}x${viewport.height} at scale ${pdfScaleToRender}.`;
-      console.error(errorMsg.value, "Viewport object:", viewport);
+      logger.error(errorMsg.value, "Viewport object:", viewport);
       isRenderingPage.value = false;
       if (canvasEl) {
         canvasEl.width = (Number.isFinite(actualCanvasWidth_internal.value) && actualCanvasWidth_internal.value > 0) ? actualCanvasWidth_internal.value : 1;
         canvasEl.height = (Number.isFinite(actualCanvasHeight_internal.value) && actualCanvasHeight_internal.value > 0) ? actualCanvasHeight_internal.value : 1;
-        console.log(`[PdfViewer/renderPage] Canvas dimensions reset to avoid NaN: W=${canvasEl.width}, H=${canvasEl.height}`);
+        logger.log(`[PdfViewer/renderPage] Canvas dimensions reset to avoid NaN: W=${canvasEl.width}, H=${canvasEl.height}`);
       }
-      // Do not update currentPdfJsRenderScale.value with a scale that led to invalid viewport
       return;
     }
 
     const context = canvasEl.getContext('2d');
     if (!context) {
       errorMsg.value = '[PdfViewer/renderPage] Failed to get 2D context from canvas.';
-      console.error(errorMsg.value);
+      logger.error(errorMsg.value);
       isRenderingPage.value = false;
       return;
     }
 
-    console.log(`[PdfViewer/renderPage] Setting canvas dimensions: W=${viewport.width}, H=${viewport.height}`);
+    logger.log(`[PdfViewer/renderPage] Setting canvas dimensions: W=${viewport.width}, H=${viewport.height}`);
     canvasEl.height = viewport.height;
     canvasEl.width = viewport.width;
 
-    console.log(`[PdfViewer/renderPage] Updating internal reactive dimensions.`);
+    logger.log(`[PdfViewer/renderPage] Updating internal reactive dimensions.`);
     actualCanvasWidth_internal.value = canvasEl.width;
     actualCanvasHeight_internal.value = canvasEl.height;
-    currentPdfJsRenderScale.value = pdfScaleToRender; // Scale is validated and led to valid viewport
+    currentPdfJsRenderScale.value = pdfScaleToRender;
 
     const renderContext = {canvasContext: context, viewport: viewport};
-    console.log("[PdfViewer/renderPage] Starting PDF.js page.render task.");
+    logger.log("[PdfViewer/renderPage] Starting PDF.js page.render task.");
     renderTask = page.render(renderContext);
     await renderTask.promise;
     renderTask = null;
-    console.log("[PdfViewer/renderPage] PDF.js page.render task completed.");
+    logger.log("[PdfViewer/renderPage] PDF.js page.render task completed.");
 
     await nextTick();
 
@@ -196,28 +196,28 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
 
     panX.value = Number.isFinite(newPanX) ? newPanX : 0;
     panY.value = Number.isFinite(newPanY) ? newPanY : 0;
-    console.log(`[PdfViewer/renderPage] Pan updated: X=${panX.value}, Y=${panY.value}`);
+    logger.log(`[PdfViewer/renderPage] Pan updated: X=${panX.value}, Y=${panY.value}`);
 
     emit('rendered');
   } catch (err: any) {
     if (renderTask) renderTask = null;
     if (err.name === 'RenderingCancelledException') {
-      console.log("[PdfViewer/renderPage] Rendering cancelled.");
+      logger.log("[PdfViewer/renderPage] Rendering cancelled.");
     } else {
       errorMsg.value = `[PdfViewer/renderPage] Error: ${err.message || 'Unknown error'}`;
-      console.error("[PdfViewer/renderPage] Exception:", err);
+      logger.error("[PdfViewer/renderPage] Exception:", err);
     }
   } finally {
     isRenderingPage.value = false;
-    console.log("[PdfViewer/renderPage] Finished.");
+    logger.log("[PdfViewer/renderPage] Finished.");
   }
 }
 
 async function loadPdf() {
-  console.log("[PdfViewer/loadPdf] Called with src:", props.src);
+  logger.log("[PdfViewer/loadPdf] Called with src:", props.src);
   if (!props.src) {
     errorMsg.value = "[PdfViewer/loadPdf] No PDF source.";
-    console.error(errorMsg.value);
+    logger.error(errorMsg.value);
     loading.value = false;
     return;
   }
@@ -226,15 +226,13 @@ async function loadPdf() {
   if (renderTask) {
     try {
       renderTask.cancel();
-    } catch (e) {
-    }
+    } catch (e) { /* ignore */ }
     renderTask = null;
   }
   if (pdfDoc) {
     try {
       await pdfDoc.destroy();
-    } catch (e) {
-    }
+    } catch (e) { /* ignore */ }
     pdfDoc = null;
   }
 
@@ -247,97 +245,95 @@ async function loadPdf() {
   actualCanvasHeight_internal.value = 0;
   pdfPageOriginalWidth_internal.value = 0;
   pdfPageOriginalHeight_internal.value = 0;
-  console.log("[PdfViewer/loadPdf] Initial state reset. Current render scale set to:", currentPdfJsRenderScale.value);
+  logger.log("[PdfViewer/loadPdf] Initial state reset. Current render scale set to:", currentPdfJsRenderScale.value);
 
   try {
     if (typeof window !== 'undefined' && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = PdfjsWorkerPath;
     }
-    console.log("[PdfViewer/loadPdf] Getting document...");
+    logger.log("[PdfViewer/loadPdf] Getting document...");
     const loadedDoc = await pdfjsLib.getDocument(props.src).promise;
     if (!loadedDoc) {
       pdfDoc = null;
       errorMsg.value = "[PdfViewer/loadPdf] Failed to load PDF document (loadedDoc is null).";
-      console.error(errorMsg.value);
+      logger.error(errorMsg.value);
     } else {
       pdfDoc = loadedDoc;
       numPages.value = loadedDoc.numPages;
-      console.log(`[PdfViewer/loadPdf] Document loaded. Pages: ${numPages.value}`);
+      logger.log(`[PdfViewer/loadPdf] Document loaded. Pages: ${numPages.value}`);
       if (numPages.value > 0) {
         const firstPage = await pdfDoc.getPage(1);
         const viewportScale1 = firstPage.getViewport({scale: 1.0});
-        console.log(`[PdfViewer/loadPdf] Original viewport (scale 1.0): W=${viewportScale1.width}, H=${viewportScale1.height}`);
+        logger.log(`[PdfViewer/loadPdf] Original viewport (scale 1.0): W=${viewportScale1.width}, H=${viewportScale1.height}`);
 
         const originalWidth = viewportScale1.width;
         const originalHeight = viewportScale1.height;
 
         if (!Number.isFinite(originalWidth) || originalWidth <= 0 || !Number.isFinite(originalHeight) || originalHeight <= 0) {
           errorMsg.value = `[PdfViewer/loadPdf] PDF page 1 has invalid original dimensions: W=${originalWidth}, H=${originalHeight}.`;
-          console.error(errorMsg.value);
+          logger.error(errorMsg.value);
           pdfPageOriginalWidth_internal.value = 0;
           pdfPageOriginalHeight_internal.value = 0;
         } else {
           pdfPageOriginalWidth_internal.value = originalWidth;
           pdfPageOriginalHeight_internal.value = originalHeight;
-          console.log(`[PdfViewer/loadPdf] Stored original PDF WxH: ${pdfPageOriginalWidth_internal.value}x${pdfPageOriginalHeight_internal.value}`);
-          // Ensure the currentPdfJsRenderScale (which was set from initialPdfRenderScale) is used for the first render.
+          logger.log(`[PdfViewer/loadPdf] Stored original PDF WxH: ${pdfPageOriginalWidth_internal.value}x${pdfPageOriginalHeight_internal.value}`);
           await renderPage(currentPage.value, currentPdfJsRenderScale.value);
         }
       } else {
         errorMsg.value = "[PdfViewer/loadPdf] PDF has no pages.";
-        console.warn(errorMsg.value);
+        logger.warn(errorMsg.value);
       }
     }
   } catch (err: any) {
     pdfDoc = null;
     errorMsg.value = `[PdfViewer/loadPdf] Exception: ${err.message || 'Unknown error'}`;
-    console.error("[PdfViewer/loadPdf] Exception:", err);
+    logger.error("[PdfViewer/loadPdf] Exception:", err);
   } finally {
     loading.value = false;
     if (!errorMsg.value && pdfDoc) {
       emit('loaded');
-      console.log("[PdfViewer/loadPdf] 'loaded' event emitted.");
+      logger.log("[PdfViewer/loadPdf] 'loaded' event emitted.");
     }
-    console.log("[PdfViewer/loadPdf] Finished.");
+    logger.log("[PdfViewer/loadPdf] Finished.");
   }
 }
 
 const changeZoom = (newScaleInput: number) => {
-  console.log(`[PdfViewer/changeZoom] Called with newScaleInput: ${newScaleInput}`);
+  logger.log(`[PdfViewer/changeZoom] Called with newScaleInput: ${newScaleInput}`);
   let validatedInputScale = newScaleInput;
   if (isNaN(validatedInputScale) || !Number.isFinite(validatedInputScale)) {
-    console.warn(`[PdfViewer/changeZoom] Initial newScaleInput (${newScaleInput}) is invalid. Using fallback via ensureValidScale.`);
-    validatedInputScale = ensureValidScale(NaN, "changeZoom input correction"); // Pass NaN to get a safe default
+    logger.warn(`[PdfViewer/changeZoom] Initial newScaleInput (${newScaleInput}) is invalid. Using fallback via ensureValidScale.`);
+    validatedInputScale = ensureValidScale(NaN, "changeZoom input correction");
   }
 
   let rawTargetScale = Math.max(props.pdfMinRenderScale, Math.min(props.pdfMaxRenderScale, validatedInputScale));
-  let targetScale = parseFloat(rawTargetScale.toFixed(2)); // Standardize precision
-  console.log(`[PdfViewer/changeZoom] Clamped scale: ${rawTargetScale}, Parsed fixed(2): ${targetScale}`);
+  let targetScale = parseFloat(rawTargetScale.toFixed(2));
+  logger.log(`[PdfViewer/changeZoom] Clamped scale: ${rawTargetScale}, Parsed fixed(2): ${targetScale}`);
 
-  // Final validation of targetScale, ensure it's positive and finite
   if (isNaN(targetScale) || !Number.isFinite(targetScale) || targetScale <= 0) {
-    console.error(`[PdfViewer/changeZoom] Calculated targetScale is invalid: ${targetScale}. Applying robust fallback.`);
+    logger.error(`[PdfViewer/changeZoom] Calculated targetScale is invalid: ${targetScale}. Applying robust fallback.`);
     targetScale = ensureValidScale(NaN, "changeZoom targetScale robust fallback");
-    console.error(`[PdfViewer/changeZoom] Robust fallback targetScale: ${targetScale}`);
+    logger.error(`[PdfViewer/changeZoom] Robust fallback targetScale: ${targetScale}`);
   }
 
   const currentSafeRenderScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0)
       ? currentPdfJsRenderScale.value
       : ensureValidScale(NaN, "changeZoom currentSafeRenderScale fallback");
 
-  console.log(`[PdfViewer/changeZoom] Final targetScale: ${targetScale}, Current safe render scale: ${currentSafeRenderScale}`);
-  if (targetScale !== currentSafeRenderScale) { // Only re-render if the valid target is different
+  logger.log(`[PdfViewer/changeZoom] Final targetScale: ${targetScale}, Current safe render scale: ${currentSafeRenderScale}`);
+  if (targetScale !== currentSafeRenderScale) {
     if (renderDebounceTimer) clearTimeout(renderDebounceTimer);
-    console.log(`[PdfViewer/changeZoom] Debouncing renderPage with scale: ${targetScale}`);
+    logger.log(`[PdfViewer/changeZoom] Debouncing renderPage with scale: ${targetScale}`);
     renderDebounceTimer = setTimeout(() => {
       if (pdfDoc) {
         renderPage(currentPage.value, targetScale);
       } else {
-        console.warn("[PdfViewer/changeZoom] PDF document not available for debounced render.");
+        logger.warn("[PdfViewer/changeZoom] PDF document not available for debounced render.");
       }
     }, 100);
   } else {
-    console.log("[PdfViewer/changeZoom] Target scale is same as current valid scale. No zoom change needed.");
+    logger.log("[PdfViewer/changeZoom] Target scale is same as current valid scale. No zoom change needed.");
   }
 };
 
@@ -349,6 +345,7 @@ const documentMouseMoveHandler = (event: MouseEvent) => {
   panX.value = startPanX.value + dx;
   panY.value = startPanY.value + dy;
 };
+
 const documentMouseUpHandler = (event: MouseEvent) => {
   if (!isDragging.value) {
     document.removeEventListener('mousemove', documentMouseMoveHandler, true);
@@ -363,17 +360,13 @@ const documentMouseUpHandler = (event: MouseEvent) => {
   document.removeEventListener('mousemove', documentMouseMoveHandler, true);
   document.removeEventListener('mouseup', documentMouseUpHandler, true);
 };
+
 const handleMouseDown = (event: MouseEvent) => {
-  if (props.interactionMode !== 'pan') {
-    return;
-  }
-  if (!pdfViewportRef.value || !(event.target === pdfViewportRef.value || event.target === pdfCanvasElementRef.value)) {
-    return;
-  }
+  if (props.interactionMode !== 'pan') return;
+  if (!pdfViewportRef.value || !(event.target === pdfViewportRef.value || event.target === pdfCanvasElementRef.value)) return;
   event.preventDefault();
-  if (event.button !== 0) {
-    return;
-  }
+  if (event.button !== 0) return;
+
   isDragging.value = true;
   emit('panstart');
   dragStartX.value = event.clientX;
@@ -384,6 +377,7 @@ const handleMouseDown = (event: MouseEvent) => {
   document.addEventListener('mousemove', documentMouseMoveHandler, true);
   document.addEventListener('mouseup', documentMouseUpHandler, true);
 };
+
 const handleMouseLeave = (event: MouseEvent) => {
   if (props.interactionMode !== 'pan') return;
   if (isDragging.value && event.buttons === 0) {
@@ -392,6 +386,7 @@ const handleMouseLeave = (event: MouseEvent) => {
     pdfViewportRef.value.style.cursor = 'grab';
   }
 };
+
 const handleWheelZoom = (event: WheelEvent) => {
   event.preventDefault();
   let newScaleDelta = props.pdfZoomStep * (event.ctrlKey ? 1.5 : 1);
@@ -402,14 +397,17 @@ const handleWheelZoom = (event: WheelEvent) => {
     changeZoom(currentScale - newScaleDelta);
   }
 };
+
 const triggerZoomIn = () => {
   let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "zoomIn currentScale");
   changeZoom(currentScale + props.pdfZoomStep);
 };
+
 const triggerZoomOut = () => {
   let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "zoomOut currentScale");
   changeZoom(currentScale - props.pdfZoomStep);
 };
+
 const triggerFullReset = () => {
   if (pdfDoc) {
     currentPage.value = 1;
@@ -424,29 +422,33 @@ const triggerFullReset = () => {
     pdfPageOriginalHeight_internal.value = 0;
   }
 };
+
 const applyManualScale = (newScale: number) => {
   changeZoom(newScale);
 };
+
 const triggerGoToPage = (pageNumber: number) => {
   if (pageNumber >= 1 && pageNumber <= numPages.value && pageNumber !== currentPage.value && pdfDoc) {
     currentPage.value = pageNumber;
   }
 };
 
-
 onMounted(() => {
   loadPdf();
 });
+
 watch(() => props.src, (newSrc, oldSrc) => {
   if (newSrc && newSrc !== oldSrc) {
     loadPdf();
   }
 });
+
 watch(currentPage, (newPage, oldPage) => {
   if (newPage !== oldPage && newPage >= 1 && newPage <= numPages.value && pdfDoc) {
-    renderPage(newPage, currentPdfJsRenderScale.value); // currentPdfJsRenderScale should be valid due to guards
+    renderPage(newPage, currentPdfJsRenderScale.value);
   }
 });
+
 onUnmounted(() => {
   document.removeEventListener('mousemove', documentMouseMoveHandler, true);
   document.removeEventListener('mouseup', documentMouseUpHandler, true);
@@ -454,15 +456,14 @@ onUnmounted(() => {
   if (renderTask) {
     try {
       renderTask.cancel();
-    } catch (e) { /* ignore */
-    }
+    } catch (e) { /* ignore */ }
     renderTask = null;
   }
   if (pdfDoc) {
     try {
       pdfDoc.destroy();
     } catch (e) {
-      console.error('Error destroying PDF document on unmount:', e);
+      logger.error('Error destroying PDF document on unmount:', e);
     }
     pdfDoc = null;
   }
@@ -483,7 +484,7 @@ defineExpose({
   getCanvasPanY: () => panY.value,
   getPdfPageOriginalWidth: () => pdfPageOriginalWidth_internal.value,
   getPdfPageOriginalHeight: () => pdfPageOriginalHeight_internal.value,
-  initialPdfRenderScale: props.initialPdfRenderScale // Expose for index.vue zoom reset if needed
+  initialPdfRenderScale: props.initialPdfRenderScale
 });
 </script>
 

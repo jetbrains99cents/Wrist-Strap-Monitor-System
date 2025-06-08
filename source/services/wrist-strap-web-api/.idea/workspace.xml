@@ -5,9 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d4c20be-1ab7-41e6-a74c-6889261a0341" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/api/v1/endpoints/users.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/api/v1/endpoints/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/layouts/default.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/layouts/default.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/login.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/login.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/users.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/token.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/token.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,12 +40,16 @@
   "associatedIndex": 4
 }]]></component>
   <component name="ProjectId" id="2yAeqA8qJDdDAWVvDBYub7mlf8t" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "FastAPI.wrist-strap-web-api-secure.executor": "Run",
     "FastAPI.wrist-strap-web-api.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -43,7 +57,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
     "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "D:/Working/Wrist Strap Monitor System/source/services/wrist-strap-web-api/app/core",
+    "last_opened_file_path": "D:/Working/Wrist Strap Monitor System/source/services/wrist-strap-web-api/app/api/v1/endpoints",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -55,6 +69,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Working\Wrist Strap Monitor System\source\services\wrist-strap-web-api\app\api\v1\endpoints" />
       <recent name="D:\Working\Wrist Strap Monitor System\source\services\wrist-strap-web-api\app\core" />
       <recent name="D:\Working\Wrist Strap Monitor System\source\services\wrist-strap-web-api\app\crud" />
       <recent name="D:\Working\Wrist Strap Monitor System\source\services\wrist-strap-web-api\app\schemas" />
@@ -65,7 +80,24 @@
       <recent name="D:\Working\Wrist Strap Monitor System\source\services\wrist-strap-web-api\app" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="FastAPI.wrist-strap-web-api-secure">
+    <configuration name="wrist-strap-web-api-secure" type="Python.FastAPI">
+      <option name="additionalOptions" value="--reload --port 3002 --ssl-keyfile localhost+2-key.pem --ssl-certfile localhost+2.pem --host 0.0.0.0" />
+      <option name="file" value="D:\Working\Wrist Strap Monitor System\source\services\wrist-strap-web-api\main.py" />
+      <module name="wrist-strap-web-api" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="$PROJECT_DIR$/.venv/Scripts/python.exe" />
+      <option name="SDK_NAME" value="uv (wrist-strap-web-api)" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <method v="2" />
+    </configuration>
     <configuration name="wrist-strap-web-api" type="Python.FastAPI">
       <option name="file" value="D:\Working\Wrist Strap Monitor System\source\services\wrist-strap-web-api\main.py" />
       <module name="wrist-strap-web-api" />
@@ -82,6 +114,10 @@
       <option name="launchJavascriptDebuger" value="false" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="FastAPI.wrist-strap-web-api" />
+      <item itemvalue="FastAPI.wrist-strap-web-api-secure" />
+    </list>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -98,7 +134,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1749281993202</updated>
-      <workItem from="1749281994210" duration="7964000" />
+      <workItem from="1749281994210" duration="22145000" />
     </task>
     <servers />
   </component>
@@ -106,6 +142,7 @@
     <option name="version" value="3" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api.coverage" NAME="wrist-strap-web-api Coverage Results" MODIFIED="1749291087168" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api.coverage" NAME="wrist-strap-web-api Coverage Results" MODIFIED="1749351168385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api_secure.coverage" NAME="wrist-strap-web-api-secure Coverage Results" MODIFIED="1749373830398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>

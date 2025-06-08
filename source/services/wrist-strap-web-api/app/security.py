@@ -26,6 +26,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
+    """Dependency to get the current user from a JWT."""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -45,4 +46,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     user = user_crud.get_user_by_email(email=token_data.sub)
     if user is None:
         raise credentials_exception
+
+    # --- NEW: Log User Info on Successful Token Validation ---
+    print(f"[Security] Token validated successfully for user: {user.get('email')}")
+
     return user

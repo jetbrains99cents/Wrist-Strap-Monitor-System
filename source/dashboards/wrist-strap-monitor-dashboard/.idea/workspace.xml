@@ -5,11 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1920967b-ce8e-42f0-b6c9-49e2d29d39a4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/wrist-strap/components/layout/ActionStatusModal.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useActionStatusModal.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useLogger.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/layouts/empty.vue" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/middleware/auth.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/pages/login.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wrist-strap/plugins/api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wrist-strap/prod-server.mjs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/users.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/users.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/token.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/token.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,32 +46,36 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2xwaCexsWEMcvODBPA0WKcaYVqR" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\WebStorm 2024.3.5\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.Debug Application.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "settings.sync",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2024.3.5\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;vue.recent.templates&quot;: [
-      &quot;Vue Composition API Component&quot;
+  "keyToStringList": {
+    "vue.recent.templates": [
+      "Vue Composition API Component"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Working\Wrist Strap Monitor System\source\dashboards\wrist-strap-monitor-dashboard\wrist-strap" />
@@ -93,7 +111,7 @@
       <workItem from="1749172920664" duration="13687000" />
       <workItem from="1749199103902" duration="7990000" />
       <workItem from="1749265914429" duration="118000" />
-      <workItem from="1749266290015" duration="4926000" />
+      <workItem from="1749266290015" duration="17950000" />
     </task>
     <servers />
   </component>

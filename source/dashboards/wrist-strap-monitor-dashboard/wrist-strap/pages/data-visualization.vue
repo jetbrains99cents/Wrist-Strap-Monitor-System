@@ -160,6 +160,7 @@
 <script setup lang="ts">
 import {ref, computed, watch, onMounted} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
+import {useLogger} from '~/composables/useLogger';
 import {useColorMode} from '@vueuse/core';
 import {Line, Bar, Pie} from 'vue-chartjs'
 import {
@@ -175,7 +176,7 @@ import {
   ArcElement,
   Colors
 } from 'chart.js'
-import type {ChartOptions, Plugin, ChartType} from 'chart.js';
+import type {ChartOptions, Plugin} from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 
 const customCanvasBackgroundColor: Plugin = {
@@ -207,50 +208,20 @@ ChartJS.register(
     zoomPlugin
 );
 
-
 const {currentLanguage} = useLanguage();
 const colorMode = useColorMode();
+const logger = useLogger();
 
 const isMobileMenuOpen = ref(false);
 const chartComponentRef = ref<any | null>(null);
 
 const rawNavigationItems = ref([
   {id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/'},
-  {
-    id: 'device-list',
-    label_en: 'Device List',
-    label_vi: 'Danh sách thiết bị',
-    icon: 'i-heroicons-queue-list-solid',
-    to: '/device-list'
-  },
-  {
-    id: 'device-management',
-    label_en: 'Device Management',
-    label_vi: 'Quản lý thiết bị',
-    icon: 'i-heroicons-cog-8-tooth-solid',
-    to: '/device-management'
-  },
-  {
-    id: 'production-plan',
-    label_en: 'Production Plan\n& Working Time',
-    label_vi: 'Kế hoạch & Thời gian\nsản xuất',
-    icon: 'i-heroicons-calendar-days-solid',
-    to: '/production-plan'
-  },
-  {
-    id: 'data-visualization',
-    label_en: 'Data Visualization',
-    label_vi: 'Trực quan hóa dữ liệu',
-    icon: 'i-heroicons-chart-pie-solid',
-    to: '/data-visualization'
-  },
-  {
-    id: 'data-analysis',
-    label_en: 'Data Analysis',
-    label_vi: 'Phân tích dữ liệu',
-    icon: 'i-heroicons-presentation-chart-line-solid',
-    to: '/data-analysis'
-  },
+  {id: 'device-list', label_en: 'Device List', label_vi: 'Danh sách thiết bị', icon: 'i-heroicons-queue-list-solid', to: '/device-list' },
+  {id: 'device-management', label_en: 'Device Management', label_vi: 'Quản lý thiết bị', icon: 'i-heroicons-cog-8-tooth-solid', to: '/device-management' },
+  {id: 'production-plan', label_en: 'Production Plan\n& Working Time', label_vi: 'Kế hoạch & Thời gian\nsản xuất', icon: 'i-heroicons-calendar-days-solid', to: '/production-plan' },
+  {id: 'data-visualization', label_en: 'Data Visualization', label_vi: 'Trực quan hóa dữ liệu', icon: 'i-heroicons-chart-pie-solid', to: '/data-visualization' },
+  {id: 'data-analysis', label_en: 'Data Analysis', label_vi: 'Phân tích dữ liệu', icon: 'i-heroicons-presentation-chart-line-solid', to: '/data-analysis' },
 ]);
 const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({
   id: item.id,
@@ -283,13 +254,11 @@ const alertFrequenciesLabel = computed(() => currentLanguage.value === 'vi' ? 'T
 const deviceDistributionLabel = computed(() => currentLanguage.value === 'vi' ? 'Phân bố thiết bị' : 'Device Distribution');
 const deviceStatusOverviewLabel = computed(() => currentLanguage.value === 'vi' ? 'Tổng quan trạng thái thiết bị' : 'Device Status Overview');
 
-// MODIFIED: Chart control button labels casing
 const panEnableLabel = computed(() => currentLanguage.value === 'vi' ? 'Bật kéo' : 'Enable pan');
 const panDisableLabel = computed(() => currentLanguage.value === 'vi' ? 'Tắt kéo' : 'Disable pan');
 const zoomEnableLabel = computed(() => currentLanguage.value === 'vi' ? 'Bật thu phóng' : 'Enable zoom');
 const zoomDisableLabel = computed(() => currentLanguage.value === 'vi' ? 'Tắt thu phóng' : 'Disable zoom');
 const resetZoomLabel = computed(() => currentLanguage.value === 'vi' ? 'Đặt lại thu phóng' : 'Reset zoom');
-
 
 useHead({title: pageTitle});
 watch(pageTitle, (newTitle) => {
@@ -297,14 +266,8 @@ watch(pageTitle, (newTitle) => {
 });
 
 type DateRangeType = 'today' | '7days' | '30days' | 'all';
-type MetricTypeWithoutNull =
-    'connectionStatusTimeline'
-    | 'voltageReadings'
-    | 'alertFrequencies'
-    | 'deviceDistribution'
-    | 'deviceStatusOverview';
+type MetricTypeWithoutNull = 'connectionStatusTimeline' | 'voltageReadings' | 'alertFrequencies' | 'deviceDistribution' | 'deviceStatusOverview';
 type MetricType = MetricTypeWithoutNull | undefined;
-
 
 const selectedDateRange = ref<DateRangeType>('7days');
 const selectedArea = ref<string | undefined>(undefined);
@@ -317,11 +280,7 @@ const mockAreaList = [
   {label: 'Assembly Line A', value: 'assembly-a'},
 ];
 
-const areaOptions = computed(() => [
-  {label: areaFilterPlaceholder.value, value: undefined},
-  ...mockAreaList
-]);
-
+const areaOptions = computed(() => [{label: areaFilterPlaceholder.value, value: undefined}, ...mockAreaList]);
 const metricOptions = computed(() => [
   {label: connectionStatusTimelineLabel.value, value: 'connectionStatusTimeline' as MetricTypeWithoutNull},
   {label: voltageReadingsLabel.value, value: 'voltageReadings' as MetricTypeWithoutNull},
@@ -339,7 +298,6 @@ const keyMetrics = ref([
 
 const isLoadingChart = ref(false);
 const chartData = ref<{ labels: string[]; datasets: any[] }>({labels: [], datasets: []});
-
 const isPanEnabled = ref(true);
 const isZoomEnabled = ref(true);
 
@@ -357,105 +315,19 @@ const dynamicChartOptions = computed(() => {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      customCanvasBackgroundColor: {
-        color: chartCanvasBackgroundColor
-      },
-      colors: {
-        enabled: false
-      },
-      legend: {
-        position: 'top' as const,
-        labels: {
-          color: textColor,
-          font: {
-            size: legendFontSize
-          }
-        }
-      },
-      title: {
-        display: true,
-        text: selectedMetric.value ? (metricOptions.value.find(opt => opt.value === selectedMetric.value)?.label || 'Chart') : 'Chart',
-        color: textColor,
-        font: {
-          size: titleFontSize,
-          weight: 'bold' as const
-        },
-        padding: {
-          top: 10,
-          bottom: 20
-        }
-      },
-      tooltip: {
-        bodyColor: textColor,
-        titleColor: textColor,
-        backgroundColor: isDark ? 'rgba(55, 65, 81, 0.95)' : 'rgba(249, 250, 251, 0.95)',
-        borderColor: gridColor,
-        borderWidth: 1,
-        padding: 10,
-        titleFont: {
-          size: 14,
-        },
-        bodyFont: {
-          size: 13
-        }
-      },
-      zoom: {
-        pan: {
-          enabled: isPanEnabled.value,
-          mode: 'xy' as const,
-          threshold: 5,
-        },
-        zoom: {
-          wheel: {
-            enabled: isZoomEnabled.value,
-          },
-          pinch: {
-            enabled: isZoomEnabled.value
-          },
-          mode: 'xy' as const,
-        }
-      }
+      customCanvasBackgroundColor: { color: chartCanvasBackgroundColor },
+      colors: { enabled: false },
+      legend: { position: 'top' as const, labels: { color: textColor, font: { size: legendFontSize } } },
+      title: { display: true, text: selectedMetric.value ? (metricOptions.value.find(opt => opt.value === selectedMetric.value)?.label || 'Chart') : 'Chart', color: textColor, font: { size: titleFontSize, weight: 'bold' as const }, padding: { top: 10, bottom: 20 } },
+      tooltip: { bodyColor: textColor, titleColor: textColor, backgroundColor: isDark ? 'rgba(55, 65, 81, 0.95)' : 'rgba(249, 250, 251, 0.95)', borderColor: gridColor, borderWidth: 1, padding: 10, titleFont: { size: 14, }, bodyFont: { size: 13 } },
+      zoom: { pan: { enabled: isPanEnabled.value, mode: 'xy' as const, threshold: 5, }, zoom: { wheel: { enabled: isZoomEnabled.value, }, pinch: { enabled: isZoomEnabled.value }, mode: 'xy' as const, } }
     },
     scales: {
-      x: {
-        ticks: {
-          color: textColor,
-          font: {
-            size: tickFontSize
-          },
-          maxRotation: 45,
-          minRotation: 45,
-          autoSkip: false,
-          padding: 5,
-        },
-        grid: {
-          color: gridColor,
-        },
-        border: {
-          display: true,
-          color: scaleBorderColor
-        }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          color: textColor,
-          font: {
-            size: tickFontSize
-          }
-        },
-        grid: {
-          color: gridColor,
-        },
-        border: {
-          display: true,
-          color: scaleBorderColor
-        }
-      }
+      x: { ticks: { color: textColor, font: { size: tickFontSize }, maxRotation: 45, minRotation: 45, autoSkip: false, padding: 5, }, grid: { color: gridColor, }, border: { display: true, color: scaleBorderColor } },
+      y: { beginAtZero: true, ticks: { color: textColor, font: { size: tickFontSize } }, grid: { color: gridColor, }, border: { display: true, color: scaleBorderColor } }
     }
   };
 });
-
 
 const setDateRange = (range: DateRangeType) => {
   selectedDateRange.value = range;
@@ -464,55 +336,26 @@ const setDateRange = (range: DateRangeType) => {
 const generateLabelsForDateRange = (range: DateRangeType): string[] => {
   const now = new Date();
   const labels: string[] = [];
-  const formatDate = (d: Date) => d.toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US', {
-    month: 'short',
-    day: 'numeric'
-  });
+  const formatDate = (d: Date) => d.toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US', { month: 'short', day: 'numeric' });
   const formatHour = (h: number) => `${h.toString().padStart(2, '0')}:00`;
 
   switch (range) {
-    case 'today':
-      for (let i = 0; i < 24; i++) {
-        labels.push(formatHour(i));
-      }
-      break;
-    case '7days':
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - i);
-        labels.push(formatDate(d));
-      }
-      break;
-    case '30days':
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(now);
-        d.setDate(now.getDate() - i);
-        labels.push(formatDate(d));
-      }
-      break;
-    case 'all':
-    default:
-      return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    case 'today': for (let i = 0; i < 24; i++) { labels.push(formatHour(i)); } break;
+    case '7days': for (let i = 6; i >= 0; i--) { const d = new Date(now); d.setDate(now.getDate() - i); labels.push(formatDate(d)); } break;
+    case '30days': for (let i = 29; i >= 0; i--) { const d = new Date(now); d.setDate(now.getDate() - i); labels.push(formatDate(d)); } break;
+    case 'all': default: return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   }
   return labels;
 };
-
 
 const applyFilters = async () => {
   if (!selectedMetric.value) {
     chartData.value = {labels: [], datasets: []};
     return;
   }
-
   isLoadingChart.value = true;
-  console.log("Applying filters:", {
-    dateRange: selectedDateRange.value,
-    area: selectedArea.value,
-    metric: selectedMetric.value,
-  });
-
+  logger.log("Applying filters:", { dateRange: selectedDateRange.value, area: selectedArea.value, metric: selectedMetric.value, });
   await new Promise(resolve => setTimeout(resolve, 500));
-
   keyMetrics.value = [
     {id: 'activeDevices', label: totalActiveDevicesLabel, value: Math.floor(Math.random() * 100 + 50).toString()},
     {id: 'uptime', label: overallUptimeLabel, value: `${Math.floor(Math.random() * 10 + 90)}%`},
@@ -522,138 +365,44 @@ const applyFilters = async () => {
 
   const newLabels = generateLabelsForDateRange(selectedDateRange.value);
   let newDatasets: any[] = [];
-
-  const generateMockData = (length: number, min: number, max: number, toFixed?: number) => {
-    return Array.from({length}, () => {
-      const val = Math.random() * (max - min) + min;
-      return toFixed !== undefined ? val.toFixed(toFixed) : Math.floor(val);
-    });
-  };
-
-  const nuxtGreen = 'rgb(16, 185, 129)';
-  const nuxtGreenBg = 'rgba(16, 185, 129, 0.7)';
-  const nuxtBlue = 'rgb(59, 130, 246)';
-  const nuxtBlueBg = 'rgba(59, 130, 246, 0.7)';
-  const nuxtYellow = 'rgb(234, 179, 8)';
-  const nuxtYellowBg = 'rgba(234, 179, 8, 0.7)';
-  const nuxtRed = 'rgb(239, 68, 68)';
-  const nuxtRedBg = 'rgba(239, 68, 68, 0.7)';
-
+  const generateMockData = (length: number, min: number, max: number, toFixed?: number) => Array.from({length}, () => { const val = Math.random() * (max - min) + min; return toFixed !== undefined ? val.toFixed(toFixed) : Math.floor(val); });
+  const nuxtGreen = 'rgb(16, 185, 129)', nuxtGreenBg = 'rgba(16, 185, 129, 0.7)';
+  const nuxtBlue = 'rgb(59, 130, 246)', nuxtBlueBg = 'rgba(59, 130, 246, 0.7)';
+  const nuxtYellow = 'rgb(234, 179, 8)', nuxtYellowBg = 'rgba(234, 179, 8, 0.7)';
+  const nuxtRed = 'rgb(239, 68, 68)', nuxtRedBg = 'rgba(239, 68, 68, 0.7)';
 
   switch (selectedMetric.value) {
-    case 'connectionStatusTimeline':
-      newDatasets = [{
-        label: localizedNavigationItems.value.find(item => item.to === '/data-visualization')?.label || connectionStatusTimelineLabel.value,
-        data: generateMockData(newLabels.length, 50, 150),
-        borderColor: nuxtGreen,
-        backgroundColor: nuxtGreenBg,
-        tension: 0.1,
-        fill: true,
-      }];
-      break;
-    case 'voltageReadings':
-      newDatasets = [{
-        label: voltageReadingsLabel.value,
-        data: generateMockData(newLabels.length, 3.0, 3.5, 1),
-        borderColor: nuxtBlue,
-        backgroundColor: nuxtBlueBg,
-        tension: 0.1,
-        fill: false,
-      }];
-      break;
-    case 'alertFrequencies':
-      newDatasets = [{
-        label: alertFrequenciesLabel.value,
-        data: generateMockData(newLabels.length, 0, 20),
-        borderColor: nuxtYellow,
-        backgroundColor: nuxtYellowBg,
-      }];
-      break;
-    case 'deviceDistribution':
-      const areas = mockAreaList.map(a => a.label);
-      newDatasets = [{
-        label: deviceDistributionLabel.value,
-        data: areas.map(() => Math.floor(Math.random() * 30 + 5)),
-        backgroundColor: [nuxtGreenBg, nuxtBlueBg, nuxtYellowBg, nuxtRedBg, 'rgba(139, 92, 246, 0.7)'],
-      }];
-      chartData.value = {labels: areas, datasets: newDatasets};
-      isLoadingChart.value = false;
-      return;
-    case 'deviceStatusOverview':
-      const statuses = ['Online', 'Offline', 'Error/Warning'];
-      newDatasets = [{
-        label: deviceStatusOverviewLabel.value,
-        data: statuses.map(() => Math.floor(Math.random() * 100)),
-        backgroundColor: [nuxtGreenBg, nuxtRedBg, nuxtYellowBg],
-      }];
-      chartData.value = {labels: statuses, datasets: newDatasets};
-      isLoadingChart.value = false;
-      return;
-
-    default:
-      newDatasets = [];
+    case 'connectionStatusTimeline': newDatasets = [{ label: localizedNavigationItems.value.find(item => item.to === '/data-visualization')?.label || connectionStatusTimelineLabel.value, data: generateMockData(newLabels.length, 50, 150), borderColor: nuxtGreen, backgroundColor: nuxtGreenBg, tension: 0.1, fill: true, }]; break;
+    case 'voltageReadings': newDatasets = [{ label: voltageReadingsLabel.value, data: generateMockData(newLabels.length, 3.0, 3.5, 1), borderColor: nuxtBlue, backgroundColor: nuxtBlueBg, tension: 0.1, fill: false, }]; break;
+    case 'alertFrequencies': newDatasets = [{ label: alertFrequenciesLabel.value, data: generateMockData(newLabels.length, 0, 20), borderColor: nuxtYellow, backgroundColor: nuxtYellowBg, }]; break;
+    case 'deviceDistribution': const areas = mockAreaList.map(a => a.label); newDatasets = [{ label: deviceDistributionLabel.value, data: areas.map(() => Math.floor(Math.random() * 30 + 5)), backgroundColor: [nuxtGreenBg, nuxtBlueBg, nuxtYellowBg, nuxtRedBg, 'rgba(139, 92, 246, 0.7)'], }]; chartData.value = {labels: areas, datasets: newDatasets}; isLoadingChart.value = false; return;
+    case 'deviceStatusOverview': const statuses = ['Online', 'Offline', 'Error/Warning']; newDatasets = [{ label: deviceStatusOverviewLabel.value, data: statuses.map(() => Math.floor(Math.random() * 100)), backgroundColor: [nuxtGreenBg, nuxtRedBg, nuxtYellowBg], }]; chartData.value = {labels: statuses, datasets: newDatasets}; isLoadingChart.value = false; return;
+    default: newDatasets = [];
   }
   chartData.value = {labels: newLabels, datasets: newDatasets};
   isLoadingChart.value = false;
 };
 
-const togglePan = () => {
-  isPanEnabled.value = !isPanEnabled.value;
-};
-
-const toggleZoom = () => {
-  isZoomEnabled.value = !isZoomEnabled.value;
-};
-
+const togglePan = () => { isPanEnabled.value = !isPanEnabled.value; };
+const toggleZoom = () => { isZoomEnabled.value = !isZoomEnabled.value; };
 const resetChartZoom = () => {
   if (chartComponentRef.value && chartComponentRef.value.chart) {
     (chartComponentRef.value.chart as any).resetZoom();
   } else {
-    console.warn("Chart instance not available to reset zoom.");
+    logger.warn("Chart instance not available to reset zoom.");
   }
 };
 
-
-onMounted(() => {
-  applyFilters();
-});
-
-watch([selectedDateRange, selectedArea, selectedMetric], () => {
-  if (!isLoadingChart.value) {
-    applyFilters();
-  }
-}, {deep: true});
-
+onMounted(() => { applyFilters(); });
+watch([selectedDateRange, selectedArea, selectedMetric], () => { if (!isLoadingChart.value) { applyFilters(); } }, {deep: true});
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1; /* light-gray-400 */
-  border-radius: 4px;
-}
-
-html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4a5568; /* dark-gray-600 */
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent; /* thumb track */
-}
-
-html.dark .custom-scrollbar {
-  scrollbar-color: #4a5568 transparent; /* thumb track for dark mode */
-}
-
-.chart-container {
-  position: relative;
-}
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4a5568; }
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+html.dark .custom-scrollbar { scrollbar-color: #4a5568 transparent; }
+.chart-container { position: relative; }
 </style>

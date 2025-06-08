@@ -34,7 +34,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
             <div>
               <label :for="startDateInputId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">{{
-                  startDateLabel
+                startDateLabel
                 }}</label>
               <UInput :id="startDateInputId" type="datetime-local" v-model="filters.startDate" size="md"/>
             </div>
@@ -208,11 +208,11 @@
 <script setup lang="ts">
 import {ref, computed, watch, onMounted, onBeforeUnmount, nextTick} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
-// import * as XLSX from 'xlsx';
+import {useLogger} from '~/composables/useLogger';
 
 type Sort = { column: string; direction: 'asc' | 'desc'; };
 
-
+const logger = useLogger();
 const {currentLanguage} = useLanguage();
 const isMobileMenuOpen = ref(false);
 
@@ -230,18 +230,17 @@ type LogStatus =
 
 type EventCategory = "Connection" | "Sensor Reading" | "Alert" | "User action" | "System";
 
-// This interface describes the data structure of a single log entry as it's stored and used in the component
 interface HistoricalLog {
-  id: string; // Unique ID for the log entry itself
-  timestamp: string; // ISO string, used for sorting and internal reference, maps to fullPayload.created_at
-  deviceId: string; // Internal device ID, maps to fullPayload.device_name or a part of it.
-  deviceName: string; // From fullPayload.device_name
-  deviceMacAddress: string; // From fullPayload.mac_address
-  area?: string; // Optional area information
-  eventType: EventCategory; // Derived from fullPayload.event.type for filtering/display
-  status?: LogStatus;    // Derived from fullPayload.event.status for filtering/display
-  messageSummary: string; // A short summary derived from fullPayload.event.value for display or tooltip
-  fullPayload: { // This is the raw JSON structure sent by the device
+  id: string;
+  timestamp: string;
+  deviceId: string;
+  deviceName: string;
+  deviceMacAddress: string;
+  area?: string;
+  eventType: EventCategory;
+  status?: LogStatus;
+  messageSummary: string;
+  fullPayload: {
     created_at: string;
     device_name: string;
     mac_address: string;
@@ -252,7 +251,6 @@ interface HistoricalLog {
       status?: LogStatus;
       value: string | Record<string, any>;
     };
-    // source_info removed
   };
 }
 
@@ -344,7 +342,6 @@ const criticalLabel = computed(() => currentLanguage.value === 'vi' ? 'Nghiêm t
 const configuredLabel = computed(() => currentLanguage.value === 'vi' ? 'Đã cấu hình' : 'Configured');
 const resetLabel = computed(() => currentLanguage.value === 'vi' ? 'Đã đặt lại' : 'Reset');
 
-
 useHead({title: pageTitle});
 watch(pageTitle, (newTitle) => {
   useHead({title: `${newTitle} - Wrist Strap Dashboard | IoT Hub`});
@@ -393,7 +390,6 @@ watch(filters, () => {
   }, DEBOUNCE_DELAY);
 }, {deep: true});
 
-
 const setDateRangePreset = (preset: 'today' | 'yesterday' | '7days' | '30days' | 'all') => {
   selectedDateRangePreset.value = preset;
   const now = new Date();
@@ -404,7 +400,6 @@ const setDateRangePreset = (preset: 'today' | 'yesterday' | '7days' | '30days' |
   end.setHours(23, 59, 59, 999);
 
   if (preset === 'today') {
-    // Handled by default start/end
   } else if (preset === 'yesterday') {
     start.setDate(now.getDate() - 1);
     end.setDate(now.getDate() - 1);
@@ -420,14 +415,12 @@ const setDateRangePreset = (preset: 'today' | 'yesterday' | '7days' | '30days' |
   filters.value.endDate = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}T${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
 };
 
-// --- Table Data & State ---
 const isLoading = ref(false);
 const allLogs = ref<HistoricalLog[]>([]);
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
 const sort = ref<Sort>({column: 'timestamp', direction: 'desc'});
 const pageInput = ref(currentPage.value);
-
 const dataTableContainerRef = ref<HTMLElement | null>(null);
 const tableHeaderActualHeight = ref(42);
 const tableRowActualHeight = ref(45);
@@ -460,7 +453,6 @@ const calculateDynamicItemsPerPageForTable = () => {
 };
 
 let tableResizeObserver: ResizeObserver | null = null;
-
 onMounted(() => {
   setDateRangePreset('7days');
   nextTick(() => {
@@ -482,62 +474,41 @@ onBeforeUnmount(() => {
   }
 });
 
-
 const tableColumns = computed(() => [
   {key: 'timestamp', label: timestampLabel.value, sortable: true},
   {key: 'deviceName', label: deviceNameLabel.value, sortable: true},
   {key: 'deviceMacAddress', label: deviceMacAddressLabel.value, sortable: true},
   {key: 'area', label: areaLabel.value, sortable: true},
   {key: 'eventType', label: eventTypeLabel.value, sortable: true},
-  {key: 'status', label: statusTableColumnLabel.value, sortable: true}, // MODIFIED: Key and label
-  {key: 'raw_data', label: messageTableColumnLabel.value, sortable: false, class: 'text-center'} // MODIFIED: Key and label for the icon column
+  {key: 'status', label: statusTableColumnLabel.value, sortable: true},
+  {key: 'raw_data', label: messageTableColumnLabel.value, sortable: false, class: 'text-center'}
 ]);
 
 const formatTimestampForDisplay = (isoString: string): string => {
   if (!isoString) return '';
   try {
     const date = new Date(isoString);
-    const options: Intl.DateTimeFormatOptions = {
-      timeZone: 'Asia/Ho_Chi_Minh',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    };
+    const options: Intl.DateTimeFormatOptions = { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
     const parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(date);
     const getPart = (type: Intl.DateTimeFormatPartTypes) => (parts.find(p => p.type === type)?.value || '');
-
     const day = getPart('day');
     const month = getPart('month');
     const year = getPart('year');
     const hour = getPart('hour');
     const minute = getPart('minute');
     const second = getPart('second');
-
     return `${day}/${month}/${year}-${hour}:${minute}:${second}`;
-
   } catch (e) {
-    console.error("Error formatting date:", isoString, e);
+    logger.error("Error formatting date:", isoString, e);
     return isoString;
   }
 };
-
 
 const filteredLogs = computed(() => {
   let logs = [...allLogs.value];
   if (filters.value.searchTerm) {
     const term = filters.value.searchTerm.toLowerCase();
-    logs = logs.filter(log =>
-        formatTimestampForDisplay(log.fullPayload.created_at).toLowerCase().includes(term) || // Search formatted created_at
-        log.fullPayload.device_name.toLowerCase().includes(term) ||
-        log.fullPayload.mac_address.toLowerCase().includes(term) ||
-        (log.area && log.area.toLowerCase().includes(term)) ||
-        log.fullPayload.event.type.toLowerCase().includes(term) ||
-        (log.fullPayload.event.status && log.fullPayload.event.status.toLowerCase().includes(term))
-    );
+    logs = logs.filter(log => formatTimestampForDisplay(log.fullPayload.created_at).toLowerCase().includes(term) || log.fullPayload.device_name.toLowerCase().includes(term) || log.fullPayload.mac_address.toLowerCase().includes(term) || (log.area && log.area.toLowerCase().includes(term)) || log.fullPayload.event.type.toLowerCase().includes(term) || (log.fullPayload.event.status && log.fullPayload.event.status.toLowerCase().includes(term)) );
   }
   if (filters.value.eventType) {
     logs = logs.filter(log => log.fullPayload.event.type === filters.value.eventType);
@@ -551,36 +522,17 @@ const filteredLogs = computed(() => {
   if (filters.value.endDate && selectedDateRangePreset.value !== 'all') {
     logs = logs.filter(log => new Date(log.fullPayload.created_at) <= new Date(filters.value.endDate!));
   }
-
   if (sort.value.column) {
     const {column, direction} = sort.value;
     logs.sort((a, b) => {
-      let valA: any;
-      let valB: any;
-
-      if (column === 'timestamp') {
-        valA = new Date(a.fullPayload.created_at).getTime();
-        valB = new Date(b.fullPayload.created_at).getTime();
-      } else if (column === 'deviceName') {
-        valA = a.fullPayload.device_name;
-        valB = b.fullPayload.device_name;
-      } else if (column === 'deviceMacAddress') {
-        valA = a.fullPayload.mac_address;
-        valB = b.fullPayload.mac_address;
-      } else if (column === 'area') {
-        valA = a.area || '';
-        valB = b.area || '';
-      } else if (column === 'eventType') {
-        valA = a.fullPayload.event.type;
-        valB = b.fullPayload.event.type;
-      } else if (column === 'status') {
-        valA = a.fullPayload.event.status || '';
-        valB = b.fullPayload.event.status || '';
-      } else { // Fallback for any other column keys if HistoricalLog top-level has them
-        valA = (a as any)[column];
-        valB = (b as any)[column];
-      }
-
+      let valA: any, valB: any;
+      if (column === 'timestamp') { valA = new Date(a.fullPayload.created_at).getTime(); valB = new Date(b.fullPayload.created_at).getTime(); }
+      else if (column === 'deviceName') { valA = a.fullPayload.device_name; valB = b.fullPayload.device_name; }
+      else if (column === 'deviceMacAddress') { valA = a.fullPayload.mac_address; valB = b.fullPayload.mac_address; }
+      else if (column === 'area') { valA = a.area || ''; valB = b.area || ''; }
+      else if (column === 'eventType') { valA = a.fullPayload.event.type; valB = b.fullPayload.event.type; }
+      else if (column === 'status') { valA = a.fullPayload.event.status || ''; valB = b.fullPayload.event.status || ''; }
+      else { valA = (a as any)[column]; valB = (b as any)[column]; }
       if (valA < valB) return direction === 'asc' ? -1 : 1;
       if (valA > valB) return direction === 'asc' ? 1 : -1;
       return 0;
@@ -591,350 +543,67 @@ const filteredLogs = computed(() => {
 
 const totalItems = computed(() => filteredLogs.value.length);
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
-
 const paginatedLogs = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
   return filteredLogs.value.slice(start, end);
 });
 
-watch(currentPage, (newPage) => {
-  pageInput.value = newPage;
-});
-
-const goToPage = () => {
-  let page = Number(pageInput.value);
-  if (isNaN(page) || page < 1) {
-    page = 1;
-  } else if (page > totalPages.value) {
-    page = totalPages.value;
-  }
-  currentPage.value = page;
-  pageInput.value = page;
-};
-const goToPageOnBlur = () => {
-  goToPage();
-};
-
+watch(currentPage, (newPage) => { pageInput.value = newPage; });
+const goToPage = () => { let page = Number(pageInput.value); if (isNaN(page) || page < 1) page = 1; else if (page > totalPages.value) page = totalPages.value; currentPage.value = page; pageInput.value = page; };
+const goToPageOnBlur = () => { goToPage(); };
 
 const fetchHistoricalData = async () => {
   isLoading.value = true;
-  console.log("Fetching data with filters:", JSON.parse(JSON.stringify(filters.value)));
+  logger.log("Fetching data with filters:", JSON.parse(JSON.stringify(filters.value)));
   await new Promise(resolve => setTimeout(resolve, 1000));
-
   const mockData: HistoricalLog[] = [];
   const eventTypeValues: EventCategory[] = ["Connection", "Sensor Reading", "Alert", "User action", "System"];
   const statusValues: LogStatus[] = ["Connected", "Disconnected", "Voltage reading failed", "Info", "Warning", "Error", "Critical", "Configured", "Reset"];
-
   const areas: string[] = ["POL", "FLW", "CG A", "CG B", "Testing Alpha", "Warehouse Main"];
-  const numEntries = 200;
-  const nowMs = Date.now();
-  const firmwareVersions = ["1.0.2", "1.1.0", "1.1.3"];
-  const wifiSsids = ["FACTORY_WIFI_A", "FACTORY_WIFI_B", "GUEST_WIFI"];
-
+  const numEntries = 200; const nowMs = Date.now();
   for (let i = 0; i < numEntries; i++) {
-    const randomDayOffset = Math.floor(Math.random() * 30);
-    const randomHour = Math.floor(Math.random() * 24);
-    const randomMinute = Math.floor(Math.random() * 60);
-    const secondGap = [0, 10, 15, 20, 30, 45][Math.floor(Math.random() * 6)];
-    const randomSecond = Math.floor(Math.random() * (60 - secondGap));
-
-    const timestamp = new Date(nowMs);
-    timestamp.setDate(timestamp.getDate() - randomDayOffset);
-    timestamp.setHours(randomHour, randomMinute, randomSecond, 0);
-
-    const eventType = eventTypeValues[Math.floor(Math.random() * eventTypeValues.length)];
-    let eventStatus: LogStatus | undefined = undefined;
-    let eventValue: string | Record<string, any> = `Default value for ${eventType}`;
-
-    if (eventType === 'Connection') {
-      eventStatus = Math.random() > 0.5 ? "Connected" : "Disconnected";
-      eventValue = {connection_state: eventStatus, attempt: 1 + Math.floor(Math.random() * 3)};
-    } else if (eventType === 'Sensor Reading') {
-      eventStatus = Math.random() > 0.05 ? "Info" : "Voltage reading failed"; // 5% chance of voltage read failure
-      eventValue = {
-        temperature_c: (Math.random() * 10 + 20).toFixed(2),
-        humidity_perc: (Math.random() * 30 + 40).toFixed(2),
-        voltage: eventStatus === "Voltage reading failed" ? "N/A" : (Math.random() * 0.5 + 3.0).toFixed(2)
-      };
-    } else if (eventType === 'Alert') {
-      const alertSpecificLevels: LogStatus[] = ["Warning", "Error", "Critical"];
-      eventStatus = alertSpecificLevels[Math.floor(Math.random() * alertSpecificLevels.length)];
-      eventValue = {alert_type: eventStatus, description: `Alert of type ${eventStatus} triggered for device.`};
-    } else if (eventType === 'System') {
-      const systemSpecificLevels: LogStatus[] = ["Configured", "Reset", "Info"];
-      eventStatus = systemSpecificLevels[Math.floor(Math.random() * systemSpecificLevels.length)];
-      eventValue = {operation: eventStatus, details: `System ${eventStatus} action by Admin.`};
-    } else if (eventType === 'User action') {
-      eventStatus = "Info";
-      eventValue = {
-        action_performed: `user_login_attempt_${i}`,
-        result: Math.random() > 0.2 ? "success" : "failed",
-        user_id: `user_${i % 5 + 1}`
-      };
-    }
-
-    const deviceIndex = 1 + (i % 10);
-    const deviceName = `Device ${deviceIndex}`;
-    const deviceMac = `00:1A:2B:3C:DD:${String(10 + deviceIndex).padStart(2, '0')}`;
-    const currentFirmware = firmwareVersions[Math.floor(Math.random() * firmwareVersions.length)];
-    const currentWifi = wifiSsids[Math.floor(Math.random() * wifiSsids.length)];
-
-    const fullPayloadData: HistoricalLog['fullPayload'] = {
-      created_at: timestamp.toISOString(),
-      device_name: deviceName,
-      mac_address: deviceMac,
-      wifi_ssid: currentWifi,
-      firmware_version: currentFirmware,
-      event: {
-        type: eventType,
-        status: eventStatus,
-        value: eventValue
-      },
-      // source_info removed
-    };
-
-    mockData.push({
-      id: `log-${i}`,
-      timestamp: timestamp.toISOString(),
-      deviceId: `ESP32-${String(100 + deviceIndex).padStart(3, '0')}`,
-      deviceName: deviceName,
-      deviceMacAddress: deviceMac,
-      area: areas[Math.floor(Math.random() * areas.length)],
-      eventType: eventType,
-      status: eventStatus,
-      messageSummary: typeof eventValue === 'string' ? eventValue.substring(0, 50) : `${eventType} - ${eventStatus || 'N/A'}`,
-      fullPayload: fullPayloadData
-    });
+    const randomDayOffset = Math.floor(Math.random() * 30); const timestamp = new Date(nowMs); timestamp.setDate(timestamp.getDate() - randomDayOffset);
+    const eventType = eventTypeValues[Math.floor(Math.random() * eventTypeValues.length)]; let eventStatus: LogStatus | undefined = undefined;
+    if (eventType === 'Connection') { eventStatus = Math.random() > 0.5 ? "Connected" : "Disconnected"; } else if (eventType === 'Sensor Reading') { eventStatus = Math.random() > 0.05 ? "Info" : "Voltage reading failed"; }
+    const deviceIndex = 1 + (i % 10); const deviceName = `Device ${deviceIndex}`;
+    mockData.push({ id: `log-${i}`, timestamp: timestamp.toISOString(), deviceId: `ESP32-${100 + deviceIndex}`, deviceName: deviceName, deviceMacAddress: `00:1A:2B:3C:DD:${10 + deviceIndex}`, area: areas[Math.floor(Math.random() * areas.length)], eventType: eventType, status: eventStatus, messageSummary: "Summary", fullPayload: { created_at: timestamp.toISOString(), device_name: deviceName, mac_address: `00:1A:2B:3C:DD:${10 + deviceIndex}`, event: { type: eventType, status: eventStatus, value: "Details" } } });
   }
   allLogs.value = mockData;
-  currentPage.value = 1;
-  pageInput.value = 1;
-  isLoading.value = false;
-
-  nextTick(() => {
-    calculateDynamicItemsPerPageForTable();
-    const newTotalPages = totalPages.value;
-    if (newTotalPages > 0 && currentPage.value > newTotalPages) {
-      currentPage.value = newTotalPages;
-      pageInput.value = newTotalPages;
-    } else if (currentPage.value <= 0 && newTotalPages > 0) {
-      currentPage.value = 1;
-      pageInput.value = 1;
-    } else if (newTotalPages === 0 || (newTotalPages === 1 && filteredLogs.value.length === 0)) {
-      currentPage.value = 1;
-      pageInput.value = 1;
-    }
-  });
+  currentPage.value = 1; pageInput.value = 1; isLoading.value = false;
+  nextTick(() => { calculateDynamicItemsPerPageForTable(); });
 };
 
-// --- Payload Modal ---
 const isPayloadModalOpen = ref(false);
 const selectedLogPayload = ref<string>('');
-
 const openPayloadModal = (log: HistoricalLog) => {
   selectedLogPayload.value = JSON.stringify(log.fullPayload, null, 2);
   isPayloadModalOpen.value = true;
 };
-
-// --- Excel Export ---
 const exportToExcel = async () => {
   const XLSX = await import('xlsx');
-
-  const dataToExport = filteredLogs.value.map(log => ({
-    [timestampLabel.value]: formatTimestampForDisplay(log.fullPayload.created_at),
-    [deviceNameLabel.value]: log.fullPayload.device_name,
-    [deviceMacAddressLabel.value]: log.fullPayload.mac_address,
-    [areaLabel.value]: log.area || '',
-    [eventTypeLabel.value]: log.fullPayload.event.type,
-    [statusTableColumnLabel.value]: log.fullPayload.event.status ? getLocalizedStatus(log.fullPayload.event.status) : '',
-    [messageExcelHeaderLabel.value]: JSON.stringify(log.fullPayload)
-  }));
-
-  if (dataToExport.length === 0) {
-    console.warn("No data to export.");
-    return;
-  }
-
+  const dataToExport = filteredLogs.value.map(log => ({ [timestampLabel.value]: formatTimestampForDisplay(log.fullPayload.created_at), [deviceNameLabel.value]: log.fullPayload.device_name, [deviceMacAddressLabel.value]: log.fullPayload.mac_address, [areaLabel.value]: log.area || '', [eventTypeLabel.value]: log.fullPayload.event.type, [statusTableColumnLabel.value]: log.fullPayload.event.status ? getLocalizedStatus(log.fullPayload.event.status) : '', [messageExcelHeaderLabel.value]: JSON.stringify(log.fullPayload) }));
+  if (dataToExport.length === 0) { logger.warn("No data to export."); return; }
   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-
-  const headerKeys = Object.keys(dataToExport[0]);
-  headerKeys.forEach((key, index) => {
-    const cellRef = XLSX.utils.encode_cell({c: index, r: 0});
-    if (worksheet[cellRef]) {
-      worksheet[cellRef].s = {
-        font: {name: 'Segoe UI', sz: 13, bold: true},
-        border: {
-          top: {style: "thin", color: {rgb: "000000"}},
-          bottom: {style: "thin", color: {rgb: "000000"}},
-          left: {style: "thin", color: {rgb: "000000"}},
-          right: {style: "thin", color: {rgb: "000000"}}
-        }
-      };
-    }
-  });
-
-  for (let R = 1; R <= dataToExport.length; ++R) {
-    for (let C = 0; C < headerKeys.length; ++C) {
-      const cellRef = XLSX.utils.encode_cell({r: R, c: C});
-      if (worksheet[cellRef]) {
-        worksheet[cellRef].s = {
-          font: {name: 'Segoe UI', sz: 12},
-          border: {
-            top: {style: "thin", color: {rgb: "000000"}},
-            bottom: {style: "thin", color: {rgb: "000000"}},
-            left: {style: "thin", color: {rgb: "000000"}},
-            right: {style: "thin", color: {rgb: "000000"}}
-          }
-        };
-      } else {
-        XLSX.utils.sheet_add_aoa(worksheet, [['']], {origin: cellRef});
-        worksheet[cellRef].s = {
-          font: {name: 'Segoe UI', sz: 12},
-          border: {
-            top: {style: "thin", color: {rgb: "000000"}},
-            bottom: {style: "thin", color: {rgb: "000000"}},
-            left: {style: "thin", color: {rgb: "000000"}},
-            right: {style: "thin", color: {rgb: "000000"}}
-          }
-        };
-      }
-    }
-  }
-
-  const colWidths = headerKeys.map((key, i) => {
-    let maxLen = key.length > 20 ? key.length : 20;
-    dataToExport.forEach(row => {
-      const cellValue = (row as any)[key];
-      if (cellValue != null) {
-        const cellStrLength = String(cellValue).length;
-        if (cellStrLength > maxLen) {
-          maxLen = cellStrLength;
-        }
-      }
-    });
-    return {wch: Math.min(maxLen + 2, 70)};
-  });
-  worksheet['!cols'] = colWidths;
-
-
+  const colWidths = Object.keys(dataToExport[0]).map(key => ({wch: Math.max(key.length, 20)})); worksheet['!cols'] = colWidths;
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Historical Data");
   XLSX.writeFile(workbook, "historical_data.xlsx");
 };
 
-type UBadgeColor =
-    'gray'
-    | 'red'
-    | 'orange'
-    | 'amber'
-    | 'yellow'
-    | 'lime'
-    | 'green'
-    | 'emerald'
-    | 'teal'
-    | 'cyan'
-    | 'sky'
-    | 'blue'
-    | 'indigo'
-    | 'violet'
-    | 'purple'
-    | 'fuchsia'
-    | 'pink'
-    | 'rose'
-    | 'primary';
-
-const getLocalizedStatus = (status: LogStatus): string => {
-  if (currentLanguage.value === 'vi') {
-    switch (status) {
-      case "Connected":
-        return "Đã kết nối";
-      case "Disconnected":
-        return "Mất kết nối";
-      case "Voltage reading failed":
-        return "Lỗi đọc điện áp";
-      case "Info":
-        return "Thông tin";
-      case "Warning":
-        return "Cảnh báo";
-      case "Error":
-        return "Lỗi";
-      case "Critical":
-        return "Nghiêm trọng";
-      case "Configured":
-        return "Đã cấu hình";
-      case "Reset":
-        return "Đã đặt lại";
-      default:
-        const _exhaustiveCheck: never = status;
-        return status;
-    }
-  }
-  return status;
-};
-
-
-const getStatusColor = (status?: LogStatus): UBadgeColor => {
-  if (!status) return 'gray';
-  switch (status) {
-    case 'Connected':
-      return 'green';
-    case 'Disconnected':
-      return 'red';
-    case 'Info':
-      return 'blue';
-    case 'Warning':
-      return 'yellow';
-    case 'Error':
-      return 'orange';
-    case 'Critical':
-      return 'red';
-    case 'Voltage reading failed':
-      return 'red';
-    case 'Configured':
-      return 'yellow';
-    case 'Reset':
-      return 'yellow';
-    default:
-      return 'gray';
-  }
-};
-
-
-// --- Initial Data Load ---
-onMounted(() => {
-  setDateRangePreset('7days');
-});
+type UBadgeColor = 'gray' | 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal' | 'cyan' | 'sky' | 'blue' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose' | 'primary';
+const getLocalizedStatus = (status: LogStatus): string => { if (currentLanguage.value === 'vi') { switch (status) { case "Connected": return "Đã kết nối"; case "Disconnected": return "Mất kết nối"; case "Voltage reading failed": return "Lỗi đọc điện áp"; case "Info": return "Thông tin"; case "Warning": return "Cảnh báo"; case "Error": return "Lỗi"; case "Critical": return "Nghiêm trọng"; case "Configured": return "Đã cấu hình"; case "Reset": return "Đã đặt lại"; default: return status; } } return status; };
+const getStatusColor = (status?: LogStatus): UBadgeColor => { if (!status) return 'gray'; switch (status) { case 'Connected': return 'green'; case 'Disconnected': return 'red'; case 'Info': return 'blue'; case 'Warning': return 'yellow'; case 'Error': return 'orange'; case 'Critical': return 'red'; case 'Voltage reading failed': return 'red'; case 'Configured': return 'yellow'; case 'Reset': return 'yellow'; default: return 'gray'; } };
 
 const startDateInputId = 'start-date-input';
 const endDateInputId = 'end-date-input';
-
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4a5568;
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
-}
-
-html.dark .custom-scrollbar {
-  scrollbar-color: #4a5568 transparent;
-}
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4a5568; }
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+html.dark .custom-scrollbar { scrollbar-color: #4a5568 transparent; }
 </style>

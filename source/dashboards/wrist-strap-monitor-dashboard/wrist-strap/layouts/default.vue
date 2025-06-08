@@ -10,6 +10,9 @@
     </main>
 
     <AppFooter ref="appFooterInstance" />
+
+    <!-- ADD THIS NEW COMPONENT AT THE END -->
+    <LayoutActionStatusModal />
   </div>
 </template>
 
@@ -17,6 +20,8 @@
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import AppFooter from "~/components/layout/AppFooter.vue";
 import AppHeader from "~/components/layout/AppHeader.vue";
+// Import the new modal component
+import LayoutActionStatusModal from '~/components/layout/ActionStatusModal.vue';
 
 const appFooterInstance = ref<{ $el: HTMLElement } | null>(null);
 const footerHeight = ref(0);
