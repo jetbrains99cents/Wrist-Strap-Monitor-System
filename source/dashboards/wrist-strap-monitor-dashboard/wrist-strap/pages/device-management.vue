@@ -50,36 +50,9 @@
 
       <div class="filters-section mb-4 p-4 bg-gray-50 dark:bg-dark-surface rounded-lg shadow shrink-0">
         <div class="flex flex-wrap gap-4">
-          <USelectMenu
-              v-model="selectedFilterArea"
-              :options="areaColumnFilterOptions"
-              size="sm"
-              :style="{ minWidth: '180px' }"
-              :placeholder="filterByAreaPlaceholder"
-              value-attribute="value"
-              option-attribute="label"
-              clearable
-          />
-          <USelectMenu
-              v-model="selectedFilterStatus"
-              :options="statusColumnFilterOptions"
-              size="sm"
-              :style="{ minWidth: '180px' }"
-              :placeholder="filterByStatusPlaceholder"
-              value-attribute="value"
-              option-attribute="label"
-              clearable
-          />
-          <USelectMenu
-              v-model="selectedFilterDate"
-              :options="dateColumnFilterOptions"
-              size="sm"
-              :style="{ minWidth: '180px' }"
-              :placeholder="filterByDatePlaceholder"
-              value-attribute="value"
-              option-attribute="label"
-              clearable
-          />
+          <USelectMenu v-model="selectedFilterArea" :options="areaColumnFilterOptions" size="sm" :style="{ minWidth: '180px' }" :placeholder="filterByAreaPlaceholder" value-attribute="value" option-attribute="label" clearable />
+          <USelectMenu v-model="selectedFilterStatus" :options="statusColumnFilterOptions" size="sm" :style="{ minWidth: '180px' }" :placeholder="filterByStatusPlaceholder" value-attribute="value" option-attribute="label" clearable />
+          <USelectMenu v-model="selectedFilterDate" :options="dateColumnFilterOptions" size="sm" :style="{ minWidth: '180px' }" :placeholder="filterByDatePlaceholder" value-attribute="value" option-attribute="label" clearable />
         </div>
       </div>
 
@@ -103,15 +76,15 @@
             @select="handleRowClick"
             class="h-full"
         >
+          <template #installationDate-data="{ row }"><span>{{ formatTimestamp(row.installationDate) }}</span></template>
           <template #status-data="{ row }">
-            <UBadge :color="getStatusColor(row.status)" variant="subtle" size="md">{{
-                getLocalizedStatus(row.status)
-              }}
-            </UBadge>
+            <UBadge :color="getStatusColor(row.status)" variant="subtle" size="md">{{ getLocalizedStatus(row.status) }}</UBadge>
+          </template>
+          <template #firmware_version-data="{ row }">
+            <span>{{ row.firmware_version || 'N/A' }}</span>
           </template>
         </UTable>
-        <div v-if="!pending && paginatedDevices.length === 0 && filteredDevices.length > 0 && itemsPerPage > 0"
-             class="flex flex-col items-center justify-center flex-grow text-center py-8 text-gray-500 dark:text-dark-text-secondary">
+        <div v-if="!pending && paginatedDevices.length === 0 && filteredDevices.length > 0 && itemsPerPage > 0" class="flex flex-col items-center justify-center flex-grow text-center py-8 text-gray-500 dark:text-dark-text-secondary">
           <UIcon name="i-heroicons-exclamation-circle-20-solid" class="w-12 h-12 mb-2"/>
           <p>{{ noDevicesOnPageMessage }}</p>
         </div>
@@ -120,24 +93,14 @@
       <div v-if="totalPages > 1" class="pagination-controls flex justify-center items-center mt-auto pt-4 shrink-0 gap-2">
         <UPagination v-model="currentPage" :page-count="itemsPerPage" :total="filteredDevices.length" :max="5"/>
         <div class="flex items-center gap-1 text-sm">
-          <UInput
-              v-model.number="pageInput"
-              type="number"
-              size="xs"
-              class="w-16 text-center"
-              :min="1"
-              :max="totalPages"
-              @keyup.enter="goToPage"
-              @blur="goToPage"
-          />
+          <UInput v-model.number="pageInput" type="number" size="xs" class="w-16 text-center" :min="1" :max="totalPages" @keyup.enter="goToPage" @blur="goToPage" />
           <span>/ {{ totalPages }}</span>
         </div>
       </div>
     </section>
 
     <USlideover v-model="isMobileMenuOpen" side="left" :ui="{ width: 'max-w-xs w-full sm:w-72' }">
-      <UCard class="flex flex-col flex-1 h-full"
-             :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', body: { padding: '', base: 'flex-1 overflow-y-auto' } }">
+      <UCard class="flex flex-col flex-1 h-full" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', body: { padding: '', base: 'flex-1 overflow-y-auto' } }">
         <template #header>
           <div class="flex items-center justify-between p-4">
             <h3 class="text-lg font-semibold text-gray-800 dark:text-dark-text-primary">Wrist Strap Menu</h3>
@@ -145,56 +108,69 @@
           </div>
         </template>
         <div class="p-4">
-          <UVerticalNavigation
-              :links="localizedNavigationItems"
-              :ui="{ base: 'group relative flex items-start gap-x-3', padding: 'px-3 py-3', label: 'text-base whitespace-pre-line break-words text-left', icon: { base: 'flex-shrink-0 w-5 h-5 mt-0.5' }}"
-              @click="isMobileMenuOpen = false"
-          />
+          <UVerticalNavigation :links="localizedNavigationItems" :ui="{ base: 'group relative flex items-start gap-x-3', padding: 'px-3 py-3', label: 'text-base whitespace-pre-line break-words text-left', icon: { base: 'flex-shrink-0 w-5 h-5 mt-0.5' }}" @click="isMobileMenuOpen = false" />
         </div>
       </UCard>
     </USlideover>
 
-    <UModal v-model="isModalOpen">
+    <UModal v-model="isFormModalOpen">
       <UForm v-if="formState" :state="formState" @submit="isEditing ? handleUpdateDevice() : handleSaveNewDevice()">
         <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
           <template #header>
             <h3 class="text-lg font-semibold">{{ isEditing ? editDeviceModalTitle : addDeviceModalTitle }}</h3>
           </template>
-
           <div class="p-4 space-y-4">
-            <UFormGroup :label="deviceNameLabel" name="name" required>
-              <UInput v-model="formState.name" />
-            </UFormGroup>
-            <UFormGroup :label="areaLabel" name="installationArea" required>
-              <USelectMenu v-model="formState.installationArea" :options="allAreas" />
-            </UFormGroup>
-            <UFormGroup :label="macAddressLabel" name="deviceMacAddress" required>
-              <UInput v-model="formState.deviceMacAddress" />
-            </UFormGroup>
+            <UFormGroup :label="deviceNameLabel" name="name" required><UInput v-model="formState.name" /></UFormGroup>
+            <UFormGroup :label="areaLabel" name="installationArea" required><USelectMenu v-model="formState.installationArea" :options="allAreas" /></UFormGroup>
+            <UFormGroup :label="macAddressLabel" name="mac_address"><UInput v-model="formState.mac_address" :disabled="isEditing"/></UFormGroup>
+            <UFormGroup :label="firmwareVersionLabel" name="firmware_version"><UInput v-model="formState.firmware_version" /></UFormGroup>
           </div>
-
           <template #footer>
             <div class="flex justify-end gap-3">
-              <UButton :label="cancelLabel" color="gray" @click="isModalOpen = false"/>
-              <UButton :label="saveLabel" type="submit" color="primary" />
+              <UButton :label="cancelLabel" color="gray" @click="isFormModalOpen = false"/>
+              <UButton :label="saveLabel" type="submit" color="primary" :loading="isSaving"/>
             </div>
           </template>
         </UCard>
       </UForm>
     </UModal>
+
+    <UModal v-model="isConfirmDeleteModalOpen">
+      <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+        <template #header>
+          <h3 class="text-lg font-semibold text-red-600 dark:text-red-400">{{ confirmDeleteTitle }}</h3>
+        </template>
+        <div class="p-4">
+          <p>{{ confirmDeleteMessage }}</p>
+        </div>
+        <template #footer>
+          <div class="flex justify-end gap-3">
+            <UButton :label="cancelLabel" color="gray" @click="isConfirmDeleteModalOpen = false" />
+            <UButton :label="deleteLabel" color="red" @click="confirmDeleteDevices" :loading="isSaving" />
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import {ref, computed, watch, onMounted, onBeforeUnmount, nextTick} from 'vue';
-import {useLanguage} from '~/composables/useLanguage';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useLanguage } from '~/composables/useLanguage';
+import { useLogger } from '~/composables/useLogger';
+import { useActionStatusModal } from '~/composables/useActionStatusModal';
 
-type AppBadgeColor = 'green' | 'red' | 'amber' | 'gray' | 'primary' | 'blue' | 'orange' | 'yellow' | 'purple' | 'pink' | 'cyan' | 'teal' | 'indigo' | 'white' | 'black';
+type AppBadgeColor = 'green' | 'red' | 'amber' | 'gray';
+type DeviceStatus = 'Connected' | 'Disconnected' | 'Voltage reading failed' | 'Unknown';
 
-const {currentLanguage} = useLanguage();
+const { currentLanguage } = useLanguage();
+const logger = useLogger();
 const toast = useToast();
-const isMobileMenuOpen = ref(false);
+const { $api } = useNuxtApp();
+const { show: showActionStatusModal } = useActionStatusModal();
 
+// --- General State & Navigation ---
+const isMobileMenuOpen = ref(false);
 const rawNavigationItems = ref([
   {id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/'},
   {id: 'device-list', label_en: 'Device List', label_vi: 'Danh sách thiết bị', icon: 'i-heroicons-queue-list-solid', to: '/device-list'},
@@ -203,14 +179,9 @@ const rawNavigationItems = ref([
   {id: 'data-visualization', label_en: 'Data Visualization', label_vi: 'Trực quan hóa dữ liệu', icon: 'i-heroicons-chart-pie-solid', to: '/data-visualization'},
   {id: 'data-analysis', label_en: 'Data Analysis', label_vi: 'Phân tích dữ liệu', icon: 'i-heroicons-presentation-chart-line-solid', to: '/data-analysis'},
 ]);
-const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({
-  id: item.id,
-  label: currentLanguage.value === 'vi' ? item.label_vi : item.label_en,
-  icon: item.icon,
-  to: item.to
-})));
+const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({ id: item.id, label: currentLanguage.value === 'vi' ? item.label_vi : item.label_en, icon: item.icon, to: item.to })));
 
-// --- Labels & Translations ---
+// --- Localization Computed Properties ---
 const pageTitle = computed(() => currentLanguage.value === 'vi' ? 'Quản lý Thiết bị' : 'Device Management');
 const addDeviceLabel = computed(() => currentLanguage.value === 'vi' ? 'Thêm mới' : 'Add Device');
 const removeDeviceLabel = computed(() => currentLanguage.value === 'vi' ? 'Xóa' : 'Remove');
@@ -221,277 +192,137 @@ const noDevicesOnPageMessage = computed(() => currentLanguage.value === 'vi' ? '
 const filterByAreaPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Lọc theo khu vực' : 'Filter by Area');
 const filterByStatusPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Lọc theo trạng thái' : 'Filter by Status');
 const filterByDatePlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Lọc theo ngày' : 'Filter by Date');
-
 const addDeviceModalTitle = computed(() => currentLanguage.value === 'vi' ? 'Thêm thiết bị mới' : 'Add New Device');
 const editDeviceModalTitle = computed(() => currentLanguage.value === 'vi' ? 'Chỉnh sửa thông tin thiết bị' : 'Edit Device Information');
 const deviceNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên thiết bị' : 'Device Name');
 const areaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt' : 'Installation Area');
 const macAddressLabel = computed(() => currentLanguage.value === 'vi' ? 'Địa chỉ MAC' : 'MAC Address');
+const firmwareVersionLabel = computed(() => currentLanguage.value === 'vi' ? 'Phiên bản Firmware' : 'Firmware Version');
+const installationDateLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày lắp đặt' : 'Installation Date');
+const statusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái' : 'Status');
 const cancelLabel = computed(() => currentLanguage.value === 'vi' ? 'Hủy' : 'Cancel');
 const saveLabel = computed(() => currentLanguage.value === 'vi' ? 'Lưu' : 'Save');
+const deleteLabel = computed(() => currentLanguage.value === 'vi' ? 'Xóa' : 'Delete');
+const confirmDeleteTitle = computed(() => currentLanguage.value === 'vi' ? 'Xác nhận Xóa' : 'Confirm Deletion');
+const confirmDeleteMessage = computed(() => {
+  const count = selectedDevices.value.length;
+  return currentLanguage.value === 'vi'
+      ? `Bạn có chắc chắn muốn xóa ${count} thiết bị đã chọn không? Hành động này không thể hoàn tác.`
+      : `Are you sure you want to delete the ${count} selected device(s)? This action cannot be undone.`;
+});
+const successTitle = computed(() => currentLanguage.value === 'vi' ? 'Thành công' : 'Success');
+const addSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Thiết bị đã được thêm thành công.' : 'Device has been added successfully.');
+const updateSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Thiết bị đã được cập nhật thành công.' : 'Device has been updated successfully.');
+const deleteSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Các thiết bị đã được xóa thành công.' : 'The selected devices have been deleted successfully.');
 
-// --- Data & State ---
-type DeviceStatus = 'Online' | 'Offline' | 'Voltage reading failed';
-interface Device {
-  id: number;
-  name: string;
-  installationArea: string;
-  installationDate: string;
-  status: DeviceStatus;
-  deviceMacAddress: string;
-}
-
-const mockDevices = ref<Device[]>([]);
+// --- Device Data & Table State ---
+interface Device { id: string; name: string; installationArea: string; installationDate: number; status: DeviceStatus | null; mac_address: string; firmware_version?: string | null; }
+const allDevices = ref<Device[]>([]);
 const allAreas = ["POL", "FLW", "CG", "OQC Lighting", "D Inspection", "Assembly X", "Testing Y", "Warehouse Z"];
-const allStatuses: DeviceStatus[] = ['Online', 'Offline', 'Voltage reading failed'];
+const allStatuses: DeviceStatus[] = ['Connected', 'Disconnected', 'Voltage reading failed'];
 const pending = ref(false);
 
-for (let i = 1; i <= 100; i++) {
-  const randomStatus = allStatuses[Math.floor(Math.random() * allStatuses.length)];
-  mockDevices.value.push({
-    id: i,
-    name: `Device ${i}`,
-    installationArea: allAreas[Math.floor(Math.random() * allAreas.length)],
-    installationDate: `${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')}/${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}/202${Math.floor(Math.random() * 3) + 3}`,
-    status: randomStatus,
-    deviceMacAddress: `12:34:56:78:9A:${String(10 + i).padStart(2, '0')}`
-  });
-}
+// --- MODIFIED: The entire column definition is now inside a computed property ---
+const localizedColumns = computed(() => [
+  {key: 'name', label: deviceNameLabel.value, sortable: true},
+  {key: 'mac_address', label: macAddressLabel.value, sortable: false},
+  {key: 'installationArea', label: areaLabel.value, sortable: true},
+  {key: 'firmware_version', label: firmwareVersionLabel.value, sortable: true},
+  {key: 'installationDate', label: installationDateLabel.value, sortable: true},
+  {key: 'status', label: statusLabel.value, sortable: true},
+]);
 
-const rawColumns = [
-  {key: 'name', label_en: 'Device Name', label_vi: 'Tên thiết bị', sortable: true},
-  {key: 'installationArea', label_en: 'Installation Area', label_vi: 'Khu vực lắp đặt', sortable: true},
-  {key: 'installationDate', label_en: 'Installation Date', label_vi: 'Ngày lắp đặt', sortable: true},
-  {key: 'status', label_en: 'Status', label_vi: 'Trạng thái', sortable: true},
-  {key: 'deviceMacAddress', label_en: 'Device Mac Address', label_vi: 'Địa chỉ MAC', sortable: false},
-];
-const localizedColumns = computed(() => rawColumns.map(col => ({
-  key: col.key,
-  label: (currentLanguage.value === 'vi' ? col.label_vi : col.label_en),
-  sortable: col.sortable,
-})));
-
-// --- Filtering & Sorting ---
+// --- Filtering, Sorting & Pagination ---
 const searchTerm = ref('');
 const selectedFilterArea = ref<string | undefined>(undefined);
 const selectedFilterStatus = ref<DeviceStatus | undefined>(undefined);
-const selectedFilterDate = ref<string | undefined>(undefined);
+const selectedFilterDate = ref<number | undefined>(undefined);
 const sort = ref<{ column: string; direction: 'asc' | 'desc' }>({column: 'name', direction: 'asc'});
-
 const filteredDevices = computed(() => {
-  let results = [...mockDevices.value];
-  if (searchTerm.value) {
-    const term = searchTerm.value.toLowerCase();
-    results = results.filter(device => (device.name.toLowerCase().includes(term)) || (device.deviceMacAddress.toLowerCase().includes(term)));
-  }
+  let results = [...allDevices.value];
+  if (searchTerm.value) { const term = searchTerm.value.toLowerCase(); results = results.filter(device => (device.name.toLowerCase().includes(term)) || (device.mac_address.toLowerCase().includes(term))); }
   if (selectedFilterArea.value) results = results.filter(device => device.installationArea === selectedFilterArea.value);
   if (selectedFilterStatus.value) results = results.filter(device => device.status === selectedFilterStatus.value);
-  if (selectedFilterDate.value) results = results.filter(device => device.installationDate === selectedFilterDate.value);
-
-  results.sort((a, b) => {
-    let valA = a[sort.value.column as keyof Device];
-    let valB = b[sort.value.column as keyof Device];
-    if (sort.value.column === 'installationDate') {
-      const [dayA, monthA, yearA] = (valA as string).split('/').map(Number);
-      const [dayB, monthB, yearB] = (valB as string).split('/').map(Number);
-      const dateA = new Date(yearA, monthA - 1, dayA).getTime();
-      const dateB = new Date(yearB, monthB - 1, dayB).getTime();
-      if (dateA < dateB) return sort.value.direction === 'asc' ? -1 : 1;
-      if (dateA > dateB) return sort.value.direction === 'asc' ? 1 : -1;
-      return 0;
-    }
-    if (typeof valA === 'string' && typeof valB === 'string') {
-      const comparison = valA.localeCompare(valB, undefined, { sensitivity: 'base' });
-      return sort.value.direction === 'asc' ? comparison : -comparison;
-    }
-    return 0;
-  });
+  if (selectedFilterDate.value) results = results.filter(device => new Date(device.installationDate).toDateString() === new Date(selectedFilterDate.value!).toDateString());
+  results.sort((a, b) => { let valA = a[sort.value.column as keyof Device]; let valB = b[sort.value.column as keyof Device]; if (sort.value.column === 'installationDate') { return sort.value.direction === 'asc' ? (valA as number) - (valB as number) : (valB as number) - (valA as number); } if (typeof valA === 'string' && typeof valB === 'string') { return sort.value.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA); } return 0; });
   return results;
 });
-
-// --- Dynamic Pagination ---
 const deviceTableContainerRef = ref<HTMLElement | null>(null);
 const itemsPerPage = ref(10);
 const currentPage = ref(1);
 const pageInput = ref(currentPage.value);
-const tableHeaderActualHeight = ref(42);
-const tableRowActualHeight = ref(45);
-
-const calculateDynamicItemsPerPageForTable = () => {
-  if (!deviceTableContainerRef.value || !deviceTableContainerRef.value.offsetParent) return;
-
-  const containerHeight = deviceTableContainerRef.value.offsetHeight;
-  const headerH = tableHeaderActualHeight.value || 42;
-  const rowH = tableRowActualHeight.value || 45;
-
-  if (containerHeight > headerH && rowH > 0) {
-    const availableHeightForRows = containerHeight - headerH;
-    const numRowsThatFit = Math.floor(availableHeightForRows / rowH);
-    itemsPerPage.value = numRowsThatFit > 0 ? numRowsThatFit : 1;
-  }
-};
-
+const calculateDynamicItemsPerPageForTable = () => { if (!deviceTableContainerRef.value) return; const containerHeight = deviceTableContainerRef.value.offsetHeight; const headerH = 42; const rowH = 45; if (containerHeight > headerH && rowH > 0) { itemsPerPage.value = Math.max(1, Math.floor((containerHeight - headerH) / rowH)); } };
 let tableResizeObserver: ResizeObserver | null = null;
-onMounted(() => {
-  nextTick(() => {
-    if (deviceTableContainerRef.value) {
-      const headerEl = deviceTableContainerRef.value.querySelector('thead');
-      if (headerEl) tableHeaderActualHeight.value = headerEl.offsetHeight;
-
-      const firstRowEl = deviceTableContainerRef.value.querySelector('tbody tr');
-      if (firstRowEl) tableRowActualHeight.value = (firstRowEl as HTMLElement).offsetHeight;
-
-      calculateDynamicItemsPerPageForTable();
-      tableResizeObserver = new ResizeObserver(calculateDynamicItemsPerPageForTable);
-      tableResizeObserver.observe(deviceTableContainerRef.value);
-    }
-  });
-});
-
-onBeforeUnmount(() => {
-  if (tableResizeObserver && deviceTableContainerRef.value) tableResizeObserver.unobserve(deviceTableContainerRef.value);
-  if (tableResizeObserver) tableResizeObserver.disconnect();
-});
-
-watch(() => filteredDevices.value.length, () => {
-  nextTick(() => {
-    calculateDynamicItemsPerPageForTable();
-    if (currentPage.value > totalPages.value) currentPage.value = totalPages.value || 1;
-  });
-});
-
-const totalPages = computed(() => {
-  if (filteredDevices.value.length === 0) return 1;
-  return Math.ceil(filteredDevices.value.length / itemsPerPage.value);
-});
-
-const paginatedDevices = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return filteredDevices.value.slice(start, end);
-});
-
+onMounted(() => { fetchDevices(); nextTick(() => { if (deviceTableContainerRef.value) { calculateDynamicItemsPerPageForTable(); tableResizeObserver = new ResizeObserver(calculateDynamicItemsPerPageForTable); tableResizeObserver.observe(deviceTableContainerRef.value); } }); });
+onBeforeUnmount(() => { if (tableResizeObserver) tableResizeObserver.disconnect(); });
+watch(() => filteredDevices.value.length, () => { nextTick(() => { calculateDynamicItemsPerPageForTable(); if (currentPage.value > totalPages.value) currentPage.value = totalPages.value || 1; }); });
+const totalPages = computed(() => Math.ceil(filteredDevices.value.length / itemsPerPage.value) || 1);
+const paginatedDevices = computed(() => { const start = (currentPage.value - 1) * itemsPerPage.value; const end = start + itemsPerPage.value; return filteredDevices.value.slice(start, end); });
 watch(currentPage, (newPage) => { pageInput.value = newPage; });
-const goToPage = () => {
-  let page = Number(pageInput.value);
-  if (isNaN(page) || page < 1) page = 1;
-  if (page > totalPages.value) page = totalPages.value;
-  currentPage.value = page;
-  pageInput.value = page;
-};
-
+const goToPage = () => { let page = Number(pageInput.value); if (isNaN(page) || page < 1) page = 1; if (page > totalPages.value) page = totalPages.value; currentPage.value = page; };
 watch([searchTerm, selectedFilterArea, selectedFilterStatus, selectedFilterDate], () => { currentPage.value = 1; });
 
-// --- Filter Options ---
-const getLocalizedStatus = (status: DeviceStatus): string => {
-  if (currentLanguage.value === 'vi') {
-    switch (status) {
-      case 'Online': return 'Trực tuyến';
-      case 'Offline': return 'Ngoại tuyến';
-      case 'Voltage reading failed': return 'Lỗi đọc điện áp';
-      default: return status;
-    }
-  }
-  return status;
-};
+// --- Table Data Formatting ---
+const formatTimestamp = (timestamp: number) => new Date(timestamp).toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US');
+const getLocalizedStatus = (status: DeviceStatus | null): string => { if (!status) return 'N/A'; if (currentLanguage.value === 'vi') { switch (status) { case 'Connected': return 'Đã kết nối'; case 'Disconnected': return 'Mất kết nối'; case 'Voltage reading failed': return 'Lỗi đọc điện áp'; case 'Unknown': return 'Không rõ'; } } return status; };
 const areaColumnFilterOptions = computed(() => [{ label: filterByAreaPlaceholder.value, value: undefined }, ...allAreas.map(a => ({ label: a, value: a }))]);
-const statusColumnFilterOptions = computed(() => [{ label: filterByStatusPlaceholder.value, value: undefined }, ...allStatuses.map(s => ({ label: getLocalizedStatus(s), value: s }))]);
-const dateColumnFilterOptions = computed(() => {
-  const uniqueDates = [...new Set(mockDevices.value.map(d => d.installationDate))].sort((a, b) => {
-    const [dayA, monthA, yearA] = a.split('/').map(Number);
-    const [dayB, monthB, yearB] = b.split('/').map(Number);
-    return new Date(yearA, monthA - 1, dayA).getTime() - new Date(yearB, monthB - 1, dayB).getTime();
-  });
-  return [{ label: filterByDatePlaceholder.value, value: undefined }, ...uniqueDates.map(d => ({ label: d, value: d }))];
-});
-const getStatusColor = (status: DeviceStatus): AppBadgeColor => {
-  switch (status) {
-    case 'Online': return 'green';
-    case 'Offline': return 'red';
-    case 'Voltage reading failed': return 'amber';
-    default: return 'gray';
-  }
-};
+const statusColumnFilterOptions = computed(() => [{ label: filterByStatusPlaceholder.value, value: undefined }, ...allStatuses.map(s => ({ label: getLocalizedStatus(s as DeviceStatus), value: s }))]);
+const dateColumnFilterOptions = computed(() => { const uniqueDates = [...new Set(allDevices.value.map(d => new Date(d.installationDate).toDateString()))]; return [{ label: filterByDatePlaceholder.value, value: undefined }, ...uniqueDates.map(d => ({ label: new Date(d).toLocaleDateString(), value: new Date(d).getTime() }))]; });
+const getStatusColor = (status: DeviceStatus | null): AppBadgeColor => { if (!status) return 'gray'; switch (status) { case 'Connected': return 'green'; case 'Disconnected': return 'red'; case 'Voltage reading failed': return 'amber'; default: return 'gray'; } };
 
-// --- CRUD & Modal Logic ---
+// --- Modal & Action State ---
 const selectedDevices = ref<Device[]>([]);
-const isModalOpen = ref(false);
+const isFormModalOpen = ref(false);
+const isConfirmDeleteModalOpen = ref(false);
 const isEditing = ref(false);
-const editingDevice = ref<Device | null>(null);
-const newDeviceForm = ref({ name: '', installationArea: '', deviceMacAddress: '', status: 'Offline' as DeviceStatus });
+const isSaving = ref(false);
+const formState = ref<any>({});
 
-const formState = computed(() => isEditing.value ? editingDevice.value : newDeviceForm.value);
+// --- Modal Logic ---
+const openAddModal = () => { isEditing.value = false; formState.value = { name: '', installationArea: allAreas[0], mac_address: '', firmware_version: '' }; isFormModalOpen.value = true; };
+const handleRowClick = (row: Device) => { logger.log('[Device Management] Row clicked/selected. Device data:', JSON.parse(JSON.stringify(row))); isEditing.value = true; formState.value = JSON.parse(JSON.stringify(row)); isFormModalOpen.value = true; };
 
-const openAddModal = () => {
-  isEditing.value = false;
-  newDeviceForm.value = { name: '', installationArea: allAreas[0], deviceMacAddress: '', status: 'Offline' };
-  isModalOpen.value = true;
-};
+// --- CRUD ---
+const handleSaveNewDevice = async () => { logger.log('[Device Management] Action: Add Device'); isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, mac_address: formState.value.mac_address || null, firmware_version: formState.value.firmware_version || null, device_type: 'WristStrapMonitorV1', }; logger.log('[Device Management] Add payload:', payload); try { const newDeviceResponse = await $api('/api/v1/devices/', { method: 'POST', body: payload }); const newDevice: Device = { id: newDeviceResponse._id, name: newDeviceResponse.name, installationArea: newDeviceResponse.installation_area, installationDate: newDeviceResponse.installation_date, status: (newDeviceResponse.last_event?.status || 'Unknown') as DeviceStatus, mac_address: newDeviceResponse.mac_address, firmware_version: newDeviceResponse.firmware_version, }; allDevices.value.push(newDevice); logger.log('[Device Management] Device added successfully. Response:', newDeviceResponse); isFormModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: addSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to add device:', error); toast.add({ title: 'Error', description: 'Could not add the new device.', color: 'red' }); } finally { isSaving.value = false; } };
+const handleUpdateDevice = async () => { if (!formState.value.id) return; logger.log(`[Device Management] Action: Edit Device. ID: ${formState.value.id}`); isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, firmware_version: formState.value.firmware_version, }; logger.log('[Device Management] Update payload:', payload); try { const updatedDevice = await $api(`/api/v1/devices/${formState.value.id}`, { method: 'PUT', body: payload }); const deviceIndex = allDevices.value.findIndex(d => d.id === formState.value.id); if (deviceIndex !== -1) { allDevices.value[deviceIndex].name = updatedDevice.name; allDevices.value[deviceIndex].installationArea = updatedDevice.installation_area; allDevices.value[deviceIndex].firmware_version = updatedDevice.firmware_version; } logger.log(`[Device Management] Device ${formState.value.id} updated successfully. Response:`, updatedDevice); isFormModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: updateSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to update device:', error); toast.add({ title: 'Error', description: 'Could not update the device.', color: 'red' }); } finally { isSaving.value = false; } };
+const handleRemoveDevice = () => { if (selectedDevices.value.length > 0) { logger.log(`[Device Management] Action: Remove Device(s). Opening confirmation for IDs:`, selectedDevices.value.map(d => d.id)); isConfirmDeleteModalOpen.value = true; } };
+const confirmDeleteDevices = async () => { isSaving.value = true; const idsToDelete = selectedDevices.value.map(d => d.id); logger.log(`[Device Management] Deletion confirmed. Removing IDs:`, idsToDelete); try { await Promise.all( idsToDelete.map(id => $api(`/api/v1/devices/${id}`, { method: 'DELETE' })) ); allDevices.value = allDevices.value.filter(device => !idsToDelete.includes(device.id)); selectedDevices.value = []; logger.log('[Device Management] Devices deleted successfully from backend and frontend state.'); isConfirmDeleteModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: deleteSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to delete devices:', error); toast.add({ title: 'Error', description: 'Could not delete one or more devices.', color: 'red' }); } finally { isSaving.value = false; } };
+const handleExportExcel = async () => { logger.log('[Device Management] Action: Export to Excel'); const XLSX = await import('xlsx'); const dataToExport = filteredDevices.value.map(device => ({ [deviceNameLabel.value]: device.name, [macAddressLabel.value]: device.mac_address, [areaLabel.value]: device.installationArea, [firmwareVersionLabel.value]: device.firmware_version || 'N/A', [installationDateLabel.value]: formatTimestamp(device.installationDate), [statusLabel.value]: getLocalizedStatus(device.status), })); if (dataToExport.length === 0) { logger.warn("[Device Management] No data available to export."); toast.add({ title: 'No Data', description: 'There is no data to export.', color: 'orange' }); return; } const worksheet = XLSX.utils.json_to_sheet(dataToExport); const colWidths = Object.keys(dataToExport[0]).map(key => ({ wch: Math.max(key.length, 25) })); worksheet['!cols'] = colWidths; const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, "Device List"); const today = new Date(); const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; const fileName = `Device_List_${dateStr}.xlsx`; XLSX.writeFile(workbook, fileName); logger.log(`[Device Management] Successfully exported data to ${fileName}`); };
 
-const handleRowClick = (row: Device) => {
-  isEditing.value = true;
-  editingDevice.value = { ...row };
-  isModalOpen.value = true;
-};
-
-const handleSaveNewDevice = () => {
-  const newId = Math.max(0, ...mockDevices.value.map(d => d.id)) + 1;
-  const today = new Date();
-  const newDevice: Device = {
-    ...newDeviceForm.value,
-    id: newId,
-    installationDate: `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`,
-  };
-  mockDevices.value.unshift(newDevice);
-  isModalOpen.value = false;
-  toast.add({ title: 'Device Added', color: 'green' });
-};
-
-const handleUpdateDevice = () => {
-  if (!editingDevice.value) return;
-  const index = mockDevices.value.findIndex(d => d.id === editingDevice.value!.id);
-  if (index !== -1) {
-    mockDevices.value[index] = { ...editingDevice.value };
+async function fetchDevices() {
+  pending.value = true;
+  logger.log('[Device Management] Fetching devices from API...');
+  try {
+    const response: any[] = await $api('/api/v1/devices/');
+    logger.log('[Device Management] Raw fetched data:', JSON.parse(JSON.stringify(response)));
+    allDevices.value = response.map((device: any) => ({
+      id: device._id,
+      name: device.name,
+      installationArea: device.installation_area,
+      installationDate: device.installation_date,
+      status: (device.last_event?.status || 'Unknown') as DeviceStatus,
+      mac_address: device.mac_address,
+      firmware_version: device.firmware_version,
+    }));
+    logger.log('[Device Management] Mapped frontend device objects:', JSON.parse(JSON.stringify(allDevices.value)));
+  } catch (error) {
+    logger.error('[Device Management] Failed to fetch devices:', error);
+    toast.add({ title: 'Error', description: 'Could not fetch devices.', color: 'red' });
+  } finally {
+    pending.value = false;
   }
-  isModalOpen.value = false;
-  editingDevice.value = null;
-  toast.add({ title: 'Device Updated', color: 'green' });
-};
+}
 
-const handleRemoveDevice = () => {
-  if (selectedDevices.value.length === 0) {
-    toast.add({ title: 'No device selected', description: 'Please select a device from the table to remove.', color: 'amber' });
-    return;
-  }
-  const deviceToRemove = selectedDevices.value[0];
-  mockDevices.value = mockDevices.value.filter(d => d.id !== deviceToRemove.id);
-  selectedDevices.value = [];
-  toast.add({ title: 'Device Removed', color: 'red' });
-};
-
-// --- Excel Export ---
-const handleExportExcel = async () => {
-  const XLSX = await import('xlsx');
-  const dataToExport = filteredDevices.value.map(device => ({
-    [localizedColumns.value[0].label]: device.name,
-    [localizedColumns.value[1].label]: device.installationArea,
-    [localizedColumns.value[2].label]: device.installationDate,
-    [localizedColumns.value[3].label]: getLocalizedStatus(device.status),
-    [localizedColumns.value[4].label]: device.deviceMacAddress,
-  }));
-
-  if (dataToExport.length === 0) {
-    toast.add({ title: 'No Data to Export', color: 'amber' });
-    return;
-  }
-  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-  const colWidths = Object.keys(dataToExport[0]).map(key => ({ wch: Math.max(key.length, 20) }));
-  worksheet['!cols'] = colWidths;
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Device List");
-  XLSX.writeFile(workbook, `Device_List_${new Date().toISOString().split('T')[0]}.xlsx`);
-};
-
+// --- Page Head ---
 useHead({title: pageTitle.value});
 watch(pageTitle, (newTitle) => { useHead({title: newTitle}); });
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4a5568; }
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+html.dark .custom-scrollbar { scrollbar-color: #4a5568 transparent; }
+</style>

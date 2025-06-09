@@ -1,0 +1,290 @@
+[
+  {
+    "timestamp": { "$numberLong": "1749447600000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d1",
+    "device_name": "Device 1",
+    "mac_address": "D1:E2:F3:A4:B5:01",
+    "installation_area": "POL",
+    "event": { "type": "Connection", "status": "Connected", "value": "Signal strength: -55dBm" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447540000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d2",
+    "device_name": "Device 2",
+    "mac_address": "D1:E2:F3:A4:B5:02",
+    "installation_area": "FLW",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "Heartbeat missed" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447480000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d3",
+    "device_name": "Device 3",
+    "mac_address": "D1:E2:F3:A4:B5:03",
+    "installation_area": "CG",
+    "event": { "type": "Sensor Reading", "status": "Voltage reading failed", "value": "2.19V" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447420000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d4",
+    "device_name": "Device 4",
+    "mac_address": "D1:E2:F3:A4:B5:04",
+    "installation_area": "OQC Lighting",
+    "event": { "type": "System", "status": "Info", "value": "Device rebooted via command." }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447360000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d5",
+    "device_name": "Device 5",
+    "mac_address": "D1:E2:F3:A4:B5:05",
+    "installation_area": "Assembly X",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test passed" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447300000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d6",
+    "device_name": "Device 6",
+    "mac_address": "D1:E2:F3:A4:B5:06",
+    "installation_area": "Testing Y",
+    "event": { "type": "Alert", "status": "Warning", "value": "Device temperature elevated: 58C" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447240000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d7",
+    "device_name": "Device 7",
+    "mac_address": "D1:E2:F3:A4:B5:07",
+    "installation_area": "POL",
+    "event": { "type": "User action", "status": "Configured", "value": "Settings updated by admin" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447180000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d8",
+    "device_name": "Device 8",
+    "mac_address": "D1:E2:F3:A4:B5:08",
+    "installation_area": "Warehouse Z",
+    "event": { "type": "System", "status": "Reset", "value": "Device reset to factory defaults" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447120000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d9",
+    "device_name": "Device 9",
+    "mac_address": "D1:E2:F3:A4:B5:09",
+    "installation_area": "D Inspection",
+    "event": { "type": "Connection", "status": "Connected", "value": "Re-established connection" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447060000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e0",
+    "device_name": "Device 10",
+    "mac_address": "D1:E2:F3:A4:B5:10",
+    "installation_area": "FLW",
+    "event": { "type": "Alert", "status": "Critical", "value": "Device unresponsive. Immediate attention required." }
+  },
+  {
+    "timestamp": { "$numberLong": "1749447000000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d1",
+    "device_name": "Device 1",
+    "mac_address": "D1:E2:F3:A4:B5:01",
+    "installation_area": "POL",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446940000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d2",
+    "device_name": "Device 2",
+    "mac_address": "D1:E2:F3:A4:B5:02",
+    "installation_area": "FLW",
+    "event": { "type": "Connection", "status": "Connected", "value": "Signal strong" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446880000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d3",
+    "device_name": "Device 3",
+    "mac_address": "D1:E2:F3:A4:B5:03",
+    "installation_area": "CG",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test passed" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446820000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d4",
+    "device_name": "Device 4",
+    "mac_address": "D1:E2:F3:A4:B5:04",
+    "installation_area": "OQC Lighting",
+    "event": { "type": "Connection", "status": "Connected", "value": "Nominal" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446760000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d5",
+    "device_name": "Device 5",
+    "mac_address": "D1:E2:F3:A4:B5:05",
+    "installation_area": "Assembly X",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "No route to host" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446700000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9d6",
+    "device_name": "Device 6",
+    "mac_address": "D1:E2:F3:A4:B5:06",
+    "installation_area": "Testing Y",
+    "event": { "type": "Alert", "status": "Error", "value": "Failed to apply firmware update" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446640000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e1",
+    "device_name": "Device 11",
+    "mac_address": "D1:E2:F3:A4:B5:11",
+    "installation_area": "POL",
+    "event": { "type": "Connection", "status": "Connected", "value": "Online" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446580000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e2",
+    "device_name": "Device 12",
+    "mac_address": "D1:E2:F3:A4:B5:12",
+    "installation_area": "CG",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "Timeout" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446520000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e3",
+    "device_name": "Device 13",
+    "mac_address": "D1:E2:F3:A4:B5:13",
+    "installation_area": "FLW",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446460000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e4",
+    "device_name": "Device 14",
+    "mac_address": "D1:E2:F3:A4:B5:14",
+    "installation_area": "Assembly X",
+    "event": { "type": "System", "status": "Info", "value": "Scheduled reboot initiated." }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446400000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e5",
+    "device_name": "Device 15",
+    "mac_address": "D1:E2:F3:A4:B5:15",
+    "installation_area": "Testing Y",
+    "event": { "type": "Sensor Reading", "status": "Voltage reading failed", "value": "2.05V" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446340000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e6",
+    "device_name": "Device 16",
+    "mac_address": "D1:E2:F3:A4:B5:16",
+    "installation_area": "POL",
+    "event": { "type": "Connection", "status": "Connected", "value": "Signal: -60dBm" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446280000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e7",
+    "device_name": "Device 17",
+    "mac_address": "D1:E2:F3:A4:B5:17",
+    "installation_area": "OQC Lighting",
+    "event": { "type": "User action", "status": "Configured", "value": "Thresholds updated" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446220000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e8",
+    "device_name": "Device 18",
+    "mac_address": "D1:E2:F3:A4:B5:18",
+    "installation_area": "Warehouse Z",
+    "event": { "type": "Alert", "status": "Warning", "value": "High latency detected: 150ms" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446160000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9e9",
+    "device_name": "Device 19",
+    "mac_address": "D1:E2:F3:A4:B5:19",
+    "installation_area": "Logistics",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "Beacon not found" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446100000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f0",
+    "device_name": "Device 20",
+    "mac_address": "D1:E2:F3:A4:B5:20",
+    "installation_area": "Packaging",
+    "event": { "type": "System", "status": "Reset", "value": "Device reset by user" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749446040000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f1",
+    "device_name": "Device 21",
+    "mac_address": "D1:E2:F3:A4:B5:21",
+    "installation_area": "POL",
+    "event": { "type": "Connection", "status": "Connected", "value": "Online" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445980000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f2",
+    "device_name": "Device 22",
+    "mac_address": "D1:E2:F3:A4:B5:22",
+    "installation_area": "Assembly X",
+    "event": { "type": "Alert", "status": "Critical", "value": "Memory leak detected, restart required" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445920000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f3",
+    "device_name": "Device 23",
+    "mac_address": "D1:E2:F3:A4:B5:23",
+    "installation_area": "CG",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445860000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f4",
+    "device_name": "Device 24",
+    "mac_address": "D1:E2:F3:A4:B5:24",
+    "installation_area": "FLW",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "Network unreachable" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445800000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f5",
+    "device_name": "Device 25",
+    "mac_address": "D1:E2:F3:A4:B5:25",
+    "installation_area": "Testing Y",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445740000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f6",
+    "device_name": "Device 26",
+    "mac_address": "D1:E2:F3:A4:B5:26",
+    "installation_area": "Warehouse Z",
+    "event": { "type": "Connection", "status": "Connected", "value": "OK" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445680000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f7",
+    "device_name": "Device 27",
+    "mac_address": "D1:E2:F3:A4:B5:27",
+    "installation_area": "OQC Lighting",
+    "event": { "type": "Alert", "status": "Error", "value": "Failed to authenticate with server" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445620000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f8",
+    "device_name": "Device 28",
+    "mac_address": "D1:E2:F3:A4:B5:28",
+    "installation_area": "POL",
+    "event": { "type": "User action", "status": "Configured", "value": "Device renamed" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445560000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9f9",
+    "device_name": "Device 29",
+    "mac_address": "D1:E2:F3:A4:B5:29",
+    "installation_area": "Logistics",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "DNS resolution failed" }
+  },
+  {
+    "timestamp": { "$numberLong": "1749445500000" },
+    "device_id": "6846a1b2c3d4e5f6a7b8c9fa",
+    "device_name": "Device 30",
+    "mac_address": "D1:E2:F3:A4:B5:30",
+    "installation_area": "Packaging",
+    "event": { "type": "System", "status": "Info", "value": "Firmware v2.1.0 installed" }
+  }
+]

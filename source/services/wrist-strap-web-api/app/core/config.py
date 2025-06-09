@@ -1,3 +1,4 @@
+# File: app/core/config.py
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -6,7 +7,8 @@ class Settings(BaseSettings):
 
     # Database settings
     mongo_details: str
-    database_name: str
+    database_name: str # This is for the global user DB
+    device_database_name: str # NEW: For the service-specific DB
     mongo_user: str
     mongo_password: str
 

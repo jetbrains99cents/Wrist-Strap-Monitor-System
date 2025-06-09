@@ -38,9 +38,7 @@
               :placeholder="filterByNamePlaceholder"
               class="flex-grow sm:flex-grow-0 sm:w-auto min-w-[150px]"
               icon="i-heroicons-magnifying-glass-20-solid"
-              :trailing-icon="filterName ? 'i-heroicons-x-mark-20-solid' : undefined"
-              @trailing-icon-click="clearFilterName"
-              :ui="{ trailingIcon: { pointerEvents: filterName ? 'auto' : 'none' } }"
+              clearable
           />
           <USelectMenu
               v-model="selectedStatusValue"
@@ -60,18 +58,20 @@
               class="flex-grow sm:flex-grow-0 sm:w-auto min-w-[200px]"
               clearable
           />
-          <UButton :label="applyFiltersLabel" icon="i-heroicons-funnel"/>
         </div>
       </div>
 
       <div ref="deviceGridAreaRef" class="device-grid-area flex-grow overflow-y-auto mb-6 custom-scrollbar">
-        <div v-if="paginatedDevices.length > 0"
-             class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+        <div v-if="isLoading" class="flex items-center justify-center h-full">
+          <UIcon name="i-heroicons-arrow-path-20-solid" class="animate-spin w-10 h-10" />
+        </div>
+        <div v-else-if="paginatedDevices.length > 0"
+             class="flex flex-wrap gap-4 justify-start">
           <DeviceCard
               v-for="device in paginatedDevices"
               :key="device.id"
               :device="device"
-              class="device-card-item"
+              class="device-card-item w-[200px]"
           />
         </div>
         <div v-else
@@ -81,7 +81,7 @@
         </div>
       </div>
 
-      <div v-if="totalPages > 1" class="pagination-controls flex justify-center mt-auto pt-4 shrink-0">
+      <div v-if="totalPages > 1 && !isLoading" class="pagination-controls flex justify-center mt-auto pt-4 shrink-0">
         <UPagination
             v-model="currentPage"
             :page-count="itemsPerPage"
@@ -112,9 +112,13 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useLanguage } from '~/composables/useLanguage';
-// import DeviceCard from '~/components/device/DeviceCard.vue'; // Explicit import if not auto-imported
+import { useLogger } from '~/composables/useLogger';
+import DeviceCard from '~/components/device/DeviceCard.vue';
 
 const { currentLanguage } = useLanguage();
+const logger = useLogger();
+const { $api } = useNuxtApp();
+const toast = useToast();
 const isMobileMenuOpen = ref(false);
 
 // --- Sidebar Navigation Items ---
@@ -138,7 +142,6 @@ const pageTitle = computed(() => currentLanguage.value === 'vi' ? 'Danh sách Th
 const filterByNamePlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Lọc theo tên...' : 'Filter by name...');
 const filterByStatusPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Tất cả trạng thái' : 'All Statuses');
 const filterByAreaPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Tất cả khu vực' : 'All Areas');
-const applyFiltersLabel = computed(() => currentLanguage.value === 'vi' ? 'Lọc' : 'Filter');
 const noDevicesMessage = computed(() => currentLanguage.value === 'vi' ? 'Không tìm thấy thiết bị nào.' : 'No devices match your filters.');
 
 useHead({ title: pageTitle.value });
@@ -146,112 +149,141 @@ watch(pageTitle, (newTitle) => { useHead({ title: `${newTitle} - Wrist Strap Das
 
 // --- Device List Data and Logic ---
 interface Device {
-  id: string | number;
+  id: string;
   name: string;
   area: string;
-  status: 'connected' | 'voltage_read_failed' | 'disconnected';
+  status: string;
+  macAddress: string;
+  firmwareVersion: string | null;
+  createdAt: number;
+  installationDate: number;
+  last_event: object | null;
 }
-const areasData: string[] = ["CG Appearance Inspection", "For Line Work", "OQC Lighting", "D Inspection", "POL", "FLW", "Assembly Line A", "Testing Bay", "Packaging", "Warehouse", "Logistics Hub", "Receiving Dock"];
-const statusesList: Device['status'][] = ['connected', 'voltage_read_failed', 'disconnected'];
-const mockDevices = ref<Device[]>([]);
 
-for (let i = 1; i <= 100; i++) { // 100 devices
-  const randomArea = areasData[Math.floor(Math.random() * areasData.length)];
-  mockDevices.value.push({
-    id: `device-${i}`,
-    name: `Device ${i}`, // MODIFIED: Simplified device name
-    area: randomArea,
-    status: statusesList[Math.floor(Math.random() * statusesList.length)],
-  });
-}
+const allDevices = ref<Device[]>([]);
+const isLoading = ref(false);
+const areasData = ref<string[]>([]);
+const knownStatuses: string[] = ['Connected', 'Disconnected', 'Voltage reading failed'];
+
+// --- API Fetch ---
+const fetchLiveDevices = async () => {
+  isLoading.value = true;
+  logger.log('[DeviceList] Fetching devices from API...');
+  try {
+    const response: any[] = await $api('/api/v1/devices/');
+    logger.log('[DeviceList] Raw data received from API:', JSON.parse(JSON.stringify(response)));
+
+    allDevices.value = response.map((d: any) => ({
+      id: d._id,
+      name: d.name,
+      area: d.installation_area,
+      status: d.last_event?.status || 'Unknown',
+      macAddress: d.mac_address,
+      firmwareVersion: d.firmware_version,
+      createdAt: d.createdAt,
+      installationDate: d.installation_date,
+      last_event: d.last_event || null
+    }));
+    logger.log('[DeviceList] Mapped frontend device objects:', JSON.parse(JSON.stringify(allDevices.value)));
+
+    const uniqueAreas = [...new Set(allDevices.value.map(d => d.area))].filter(Boolean);
+    areasData.value = uniqueAreas.sort();
+
+  } catch (error) {
+    logger.error('[DeviceList] Failed to fetch devices:', error);
+    toast.add({ title: 'Error', description: 'Could not fetch device list.', color: 'red' });
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 // --- Filter State ---
 const filterName = ref('');
-const selectedStatusValue = ref<Device['status'] | undefined>(undefined);
+const selectedStatusValue = ref<string | undefined>(undefined);
 const selectedAreaValue = ref<string | undefined>(undefined);
-const clearFilterName = () => { filterName.value = ''; };
 
 // --- Dynamic Filter Options ---
-const localizedStatusOptions = computed(() => [ { label: filterByStatusPlaceholder.value, value: undefined as Device['status'] | undefined }, { label: currentLanguage.value === 'vi' ? 'Đã kết nối' : 'Connected', value: 'connected' as Device['status'] }, { label: currentLanguage.value === 'vi' ? 'Lỗi đọc điện áp' : 'Voltage Read Failed', value: 'voltage_read_failed' as Device['status'] }, { label: currentLanguage.value === 'vi' ? 'Mất kết nối' : 'Disconnected', value: 'disconnected' as Device['status'] } ]);
-const localizedAreaOptions = computed(() => [ { label: filterByAreaPlaceholder.value, value: undefined as string | undefined }, ...areasData.map(area => ({ label: area, value: area })) ]);
-
-// --- Computed Filtered Devices ---
-const filteredDevices = computed(() => mockDevices.value.filter(device => {
-  const nameMatch = filterName.value ? device.name.toLowerCase().includes(filterName.value.toLowerCase()) : true;
-  const statusMatch = selectedStatusValue.value !== undefined ? device.status === selectedStatusValue.value : true;
-  const areaMatch = selectedAreaValue.value !== undefined ? device.area === selectedAreaValue.value : true;
-  return nameMatch && statusMatch && areaMatch;
-}));
-
-// --- DYNAMIC PAGINATION LOGIC ---
-const deviceGridAreaRef = ref<HTMLElement | null>(null);
-const itemsPerPage = ref(12); // Initial default, will be updated by calculateDynamicItemsPerPage
-const currentPage = ref(1);
-
-const CARD_ESTIMATED_HEIGHT = ref(100); // Adjust based on your DeviceCard's typical rendered height + grid gap
-const CARD_ESTIMATED_MIN_WIDTH = ref(200); // Corresponds to minmax(200px,...)
-const GRID_GAP = ref(16); // Corresponds to gap-4 (1rem)
-
-const calculateDynamicItemsPerPage = () => {
-  if (!deviceGridAreaRef.value || filteredDevices.value.length === 0) {
-    // itemsPerPage.value = 12; // Retain previous or a sensible minimum if no items/grid
-    return;
+const getLocalizedStatus = (status: string): string => {
+  if (currentLanguage.value === 'vi') {
+    switch (status) {
+      case 'Connected': return 'Đã kết nối';
+      case 'Disconnected': return 'Mất kết nối';
+      case 'Voltage reading failed': return 'Lỗi đọc điện áp';
+      case 'Unknown': return 'Không rõ';
+      default: return status;
+    }
   }
-
-  const gridAreaHeight = deviceGridAreaRef.value.offsetHeight;
-  const gridAreaWidth = deviceGridAreaRef.value.offsetWidth;
-
-  let actualCardHeight = CARD_ESTIMATED_HEIGHT.value;
-  let actualCardWidth = CARD_ESTIMATED_MIN_WIDTH.value;
-
-  const firstCardEl = deviceGridAreaRef.value.querySelector('.device-card-item');
-  if (firstCardEl) {
-    const cardRect = firstCardEl.getBoundingClientRect();
-    if (cardRect.height > GRID_GAP.value) actualCardHeight = cardRect.height + GRID_GAP.value; // card height + vertical gap
-    if (cardRect.width > 0) actualCardWidth = cardRect.width;
-  }
-
-  if (gridAreaHeight <= 0 || actualCardHeight <= GRID_GAP.value || gridAreaWidth <= 0 || actualCardWidth <=0) {
-    itemsPerPage.value = Math.max(1, filteredDevices.value.length > 0 ? 1 : 12);
-    return;
-  }
-
-  const numRowsThatFit = Math.max(1, Math.floor(gridAreaHeight / actualCardHeight));
-  const numColsThatFit = Math.max(1, Math.floor((gridAreaWidth + GRID_GAP.value) / (actualCardWidth + GRID_GAP.value)));
-
-  const newItemsPerPage = numRowsThatFit * numColsThatFit;
-
-  if (newItemsPerPage > 0 && itemsPerPage.value !== newItemsPerPage) {
-    itemsPerPage.value = newItemsPerPage;
-  } else if (newItemsPerPage === 0 && filteredDevices.value.length > 0) {
-    itemsPerPage.value = 1;
-  }
-  // If no items, itemsPerPage can remain its last calculated value or a default.
-  // It will be used by totalPages which would become 1 if filteredDevices is empty.
+  return status;
 };
 
-let resizeObserver: ResizeObserver | null = null;
+const localizedStatusOptions = computed(() => [
+  { label: filterByStatusPlaceholder.value, value: undefined },
+  ...knownStatuses.map(status => ({ label: getLocalizedStatus(status), value: status }))
+]);
 
-onMounted(() => {
-  nextTick(() => {
-    if (deviceGridAreaRef.value) {
-      calculateDynamicItemsPerPage();
-      resizeObserver = new ResizeObserver(calculateDynamicItemsPerPage);
-      resizeObserver.observe(deviceGridAreaRef.value);
-    }
+const localizedAreaOptions = computed(() => [
+  { label: filterByAreaPlaceholder.value, value: undefined },
+  ...areasData.value.map(area => ({ label: area, value: area }))
+]);
+
+// --- Computed Filtered Devices ---
+const filteredDevices = computed(() => {
+  if (isLoading.value) return [];
+  return allDevices.value.filter(device => {
+    const nameMatch = filterName.value ? device.name.toLowerCase().includes(filterName.value.toLowerCase()) : true;
+    const statusMatch = selectedStatusValue.value !== undefined ? device.status === selectedStatusValue.value : true;
+    const areaMatch = selectedAreaValue.value !== undefined ? device.area === selectedAreaValue.value : true;
+    return nameMatch && statusMatch && areaMatch;
   });
 });
 
-onBeforeUnmount(() => {
-  if (resizeObserver && deviceGridAreaRef.value) {
-    resizeObserver.unobserve(deviceGridAreaRef.value);
-  }
-  if (resizeObserver) {
-    resizeObserver.disconnect();
-    resizeObserver = null;
-  }
-});
+// --- Dynamic Pagination Logic ---
+const deviceGridAreaRef = ref<HTMLElement | null>(null);
+const itemsPerPage = ref(12);
+const currentPage = ref(1);
+const CARD_ESTIMATED_HEIGHT = ref(100);
+const CARD_ESTIMATED_MIN_WIDTH = ref(200);
+const GRID_GAP = ref(16);
 
+const calculateDynamicItemsPerPage = () => {
+  if (!deviceGridAreaRef.value || filteredDevices.value.length === 0) return;
+  const gridAreaHeight = deviceGridAreaRef.value.offsetHeight;
+  const gridAreaWidth = deviceGridAreaRef.value.offsetWidth;
+  let actualCardHeight = CARD_ESTIMATED_HEIGHT.value;
+  let actualCardWidth = CARD_ESTIMATED_MIN_WIDTH.value;
+  const firstCardEl = deviceGridAreaRef.value.querySelector('.device-card-item');
+  if (firstCardEl) {
+    const cardRect = firstCardEl.getBoundingClientRect();
+    if (cardRect.height > GRID_GAP.value) actualCardHeight = cardRect.height + GRID_GAP.value;
+    if (cardRect.width > 0) actualCardWidth = cardRect.width;
+  }
+  if (gridAreaHeight <= 0 || actualCardHeight <= GRID_GAP.value || gridAreaWidth <= 0 || actualCardWidth <= 0) {
+    itemsPerPage.value = Math.max(1, filteredDevices.value.length > 0 ? 1 : 12);
+    return;
+  }
+  const numRowsThatFit = Math.max(1, Math.floor(gridAreaHeight / actualCardHeight));
+  const numColsThatFit = Math.max(1, Math.floor((gridAreaWidth + GRID_GAP.value) / (actualCardWidth + GRID_GAP.value)));
+  const newItemsPerPage = numRowsThatFit * numColsThatFit;
+  if (newItemsPerPage > 0 && itemsPerPage.value !== newItemsPerPage) itemsPerPage.value = newItemsPerPage;
+  else if (newItemsPerPage === 0 && filteredDevices.value.length > 0) itemsPerPage.value = 1;
+};
+
+let resizeObserver: ResizeObserver | null = null;
+onMounted(() => {
+  fetchLiveDevices().then(() => {
+    nextTick(() => {
+      if (deviceGridAreaRef.value) {
+        calculateDynamicItemsPerPage();
+        resizeObserver = new ResizeObserver(calculateDynamicItemsPerPage);
+        resizeObserver.observe(deviceGridAreaRef.value);
+      }
+    });
+  });
+});
+onBeforeUnmount(() => {
+  if (resizeObserver && deviceGridAreaRef.value) resizeObserver.unobserve(deviceGridAreaRef.value);
+  if (resizeObserver) resizeObserver.disconnect();
+});
 watch(
     () => filteredDevices.value.length,
     () => {
@@ -259,64 +291,32 @@ watch(
         calculateDynamicItemsPerPage();
         if (totalPages.value > 0 && currentPage.value > totalPages.value) {
           currentPage.value = totalPages.value;
-        } else if (currentPage.value <= 0 && totalPages.value > 0) { // Ensure current page is at least 1
-          currentPage.value = 1;
-        } else if (filteredDevices.value.length === 0) { // If no devices, reset to page 1
+        } else if (totalPages.value > 0 && currentPage.value === 0) {
           currentPage.value = 1;
         }
       });
-    }
+    }, { immediate: true }
 );
-
 const totalPages = computed(() => {
   if (!filteredDevices.value.length || itemsPerPage.value <= 0) return 1;
   return Math.ceil(filteredDevices.value.length / itemsPerPage.value);
 });
-
 const paginatedDevices = computed(() => {
-  if (itemsPerPage.value <= 0) return filteredDevices.value.slice(0,1);
+  if (itemsPerPage.value <= 0) return [];
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
   return filteredDevices.value.slice(start, end);
 });
-
 watch([filterName, selectedStatusValue, selectedAreaValue], () => {
   currentPage.value = 1;
 });
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-html.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #4a5568;
-}
-
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 transparent;
-}
-
-html.dark .custom-scrollbar {
-  scrollbar-color: #4a5568 transparent;
-}
-
-/* Ensure the device grid area has some presence for the "No devices" message */
-.device-grid-area:empty::before,
-.device-grid-area > div:empty::before { /* Target the inner grid div too if it's empty */
-  content: '';
-  display: block;
-  min-height: 200px; /* Adjust as needed */
-}
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4a5568; }
+.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+html.dark .custom-scrollbar { scrollbar-color: #4a5568 transparent; }
 </style>
