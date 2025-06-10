@@ -1,6 +1,6 @@
 [
   {
-    "timestamp": { "$numberLong": "1749447600000" },
+    "timestamp": { "$numberLong": "1749667200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d1",
     "device_name": "Device 1",
     "mac_address": "D1:E2:F3:A4:B5:01",
@@ -8,7 +8,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "Signal strength: -55dBm" }
   },
   {
-    "timestamp": { "$numberLong": "1749447540000" },
+    "timestamp": { "$numberLong": "1749666600000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d2",
     "device_name": "Device 2",
     "mac_address": "D1:E2:F3:A4:B5:02",
@@ -16,7 +16,7 @@
     "event": { "type": "Connection", "status": "Disconnected", "value": "Heartbeat missed" }
   },
   {
-    "timestamp": { "$numberLong": "1749447480000" },
+    "timestamp": { "$numberLong": "1749666000000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d3",
     "device_name": "Device 3",
     "mac_address": "D1:E2:F3:A4:B5:03",
@@ -24,7 +24,7 @@
     "event": { "type": "Sensor Reading", "status": "Voltage reading failed", "value": "2.19V" }
   },
   {
-    "timestamp": { "$numberLong": "1749447420000" },
+    "timestamp": { "$numberLong": "1749665400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d4",
     "device_name": "Device 4",
     "mac_address": "D1:E2:F3:A4:B5:04",
@@ -32,7 +32,7 @@
     "event": { "type": "System", "status": "Info", "value": "Device rebooted via command." }
   },
   {
-    "timestamp": { "$numberLong": "1749447360000" },
+    "timestamp": { "$numberLong": "1749664800000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d5",
     "device_name": "Device 5",
     "mac_address": "D1:E2:F3:A4:B5:05",
@@ -40,7 +40,7 @@
     "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test passed" }
   },
   {
-    "timestamp": { "$numberLong": "1749447300000" },
+    "timestamp": { "$numberLong": "1749664200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d6",
     "device_name": "Device 6",
     "mac_address": "D1:E2:F3:A4:B5:06",
@@ -48,7 +48,7 @@
     "event": { "type": "Alert", "status": "Warning", "value": "Device temperature elevated: 58C" }
   },
   {
-    "timestamp": { "$numberLong": "1749447240000" },
+    "timestamp": { "$numberLong": "1749663600000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d7",
     "device_name": "Device 7",
     "mac_address": "D1:E2:F3:A4:B5:07",
@@ -56,7 +56,7 @@
     "event": { "type": "User action", "status": "Configured", "value": "Settings updated by admin" }
   },
   {
-    "timestamp": { "$numberLong": "1749447180000" },
+    "timestamp": { "$numberLong": "1749663000000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d8",
     "device_name": "Device 8",
     "mac_address": "D1:E2:F3:A4:B5:08",
@@ -64,7 +64,7 @@
     "event": { "type": "System", "status": "Reset", "value": "Device reset to factory defaults" }
   },
   {
-    "timestamp": { "$numberLong": "1749447120000" },
+    "timestamp": { "$numberLong": "1749662400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d9",
     "device_name": "Device 9",
     "mac_address": "D1:E2:F3:A4:B5:09",
@@ -72,7 +72,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "Re-established connection" }
   },
   {
-    "timestamp": { "$numberLong": "1749447060000" },
+    "timestamp": { "$numberLong": "1749661800000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e0",
     "device_name": "Device 10",
     "mac_address": "D1:E2:F3:A4:B5:10",
@@ -80,7 +80,7 @@
     "event": { "type": "Alert", "status": "Critical", "value": "Device unresponsive. Immediate attention required." }
   },
   {
-    "timestamp": { "$numberLong": "1749447000000" },
+    "timestamp": { "$numberLong": "1749575400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d1",
     "device_name": "Device 1",
     "mac_address": "D1:E2:F3:A4:B5:01",
@@ -88,7 +88,7 @@
     "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
   },
   {
-    "timestamp": { "$numberLong": "1749446940000" },
+    "timestamp": { "$numberLong": "1749489000000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d2",
     "device_name": "Device 2",
     "mac_address": "D1:E2:F3:A4:B5:02",
@@ -96,7 +96,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "Signal strong" }
   },
   {
-    "timestamp": { "$numberLong": "1749446880000" },
+    "timestamp": { "$numberLong": "1749316200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d3",
     "device_name": "Device 3",
     "mac_address": "D1:E2:F3:A4:B5:03",
@@ -104,7 +104,7 @@
     "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test passed" }
   },
   {
-    "timestamp": { "$numberLong": "1749446820000" },
+    "timestamp": { "$numberLong": "1748884200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d4",
     "device_name": "Device 4",
     "mac_address": "D1:E2:F3:A4:B5:04",
@@ -112,7 +112,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "Nominal" }
   },
   {
-    "timestamp": { "$numberLong": "1749446760000" },
+    "timestamp": { "$numberLong": "1748279400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d5",
     "device_name": "Device 5",
     "mac_address": "D1:E2:F3:A4:B5:05",
@@ -120,7 +120,7 @@
     "event": { "type": "Connection", "status": "Disconnected", "value": "No route to host" }
   },
   {
-    "timestamp": { "$numberLong": "1749446700000" },
+    "timestamp": { "$numberLong": "1747492200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9d6",
     "device_name": "Device 6",
     "mac_address": "D1:E2:F3:A4:B5:06",
@@ -128,7 +128,7 @@
     "event": { "type": "Alert", "status": "Error", "value": "Failed to apply firmware update" }
   },
   {
-    "timestamp": { "$numberLong": "1749446640000" },
+    "timestamp": { "$numberLong": "1746705000000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e1",
     "device_name": "Device 11",
     "mac_address": "D1:E2:F3:A4:B5:11",
@@ -136,7 +136,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "Online" }
   },
   {
-    "timestamp": { "$numberLong": "1749446580000" },
+    "timestamp": { "$numberLong": "1745917800000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e2",
     "device_name": "Device 12",
     "mac_address": "D1:E2:F3:A4:B5:12",
@@ -144,7 +144,7 @@
     "event": { "type": "Connection", "status": "Disconnected", "value": "Timeout" }
   },
   {
-    "timestamp": { "$numberLong": "1749446520000" },
+    "timestamp": { "$numberLong": "1745130600000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e3",
     "device_name": "Device 13",
     "mac_address": "D1:E2:F3:A4:B5:13",
@@ -152,7 +152,7 @@
     "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
   },
   {
-    "timestamp": { "$numberLong": "1749446460000" },
+    "timestamp": { "$numberLong": "1744343400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e4",
     "device_name": "Device 14",
     "mac_address": "D1:E2:F3:A4:B5:14",
@@ -160,7 +160,7 @@
     "event": { "type": "System", "status": "Info", "value": "Scheduled reboot initiated." }
   },
   {
-    "timestamp": { "$numberLong": "1749446400000" },
+    "timestamp": { "$numberLong": "1743556200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e5",
     "device_name": "Device 15",
     "mac_address": "D1:E2:F3:A4:B5:15",
@@ -168,7 +168,7 @@
     "event": { "type": "Sensor Reading", "status": "Voltage reading failed", "value": "2.05V" }
   },
   {
-    "timestamp": { "$numberLong": "1749446340000" },
+    "timestamp": { "$numberLong": "1742769000000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e6",
     "device_name": "Device 16",
     "mac_address": "D1:E2:F3:A4:B5:16",
@@ -176,7 +176,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "Signal: -60dBm" }
   },
   {
-    "timestamp": { "$numberLong": "1749446280000" },
+    "timestamp": { "$numberLong": "1741981800000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e7",
     "device_name": "Device 17",
     "mac_address": "D1:E2:F3:A4:B5:17",
@@ -184,7 +184,7 @@
     "event": { "type": "User action", "status": "Configured", "value": "Thresholds updated" }
   },
   {
-    "timestamp": { "$numberLong": "1749446220000" },
+    "timestamp": { "$numberLong": "1741194600000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e8",
     "device_name": "Device 18",
     "mac_address": "D1:E2:F3:A4:B5:18",
@@ -192,7 +192,7 @@
     "event": { "type": "Alert", "status": "Warning", "value": "High latency detected: 150ms" }
   },
   {
-    "timestamp": { "$numberLong": "1749446160000" },
+    "timestamp": { "$numberLong": "1740407400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9e9",
     "device_name": "Device 19",
     "mac_address": "D1:E2:F3:A4:B5:19",
@@ -200,7 +200,7 @@
     "event": { "type": "Connection", "status": "Disconnected", "value": "Beacon not found" }
   },
   {
-    "timestamp": { "$numberLong": "1749446100000" },
+    "timestamp": { "$numberLong": "1739620200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f0",
     "device_name": "Device 20",
     "mac_address": "D1:E2:F3:A4:B5:20",
@@ -208,7 +208,7 @@
     "event": { "type": "System", "status": "Reset", "value": "Device reset by user" }
   },
   {
-    "timestamp": { "$numberLong": "1749446040000" },
+    "timestamp": { "$numberLong": "1738833000000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f1",
     "device_name": "Device 21",
     "mac_address": "D1:E2:F3:A4:B5:21",
@@ -216,7 +216,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "Online" }
   },
   {
-    "timestamp": { "$numberLong": "1749445980000" },
+    "timestamp": { "$numberLong": "1738045800000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f2",
     "device_name": "Device 22",
     "mac_address": "D1:E2:F3:A4:B5:22",
@@ -224,7 +224,7 @@
     "event": { "type": "Alert", "status": "Critical", "value": "Memory leak detected, restart required" }
   },
   {
-    "timestamp": { "$numberLong": "1749445920000" },
+    "timestamp": { "$numberLong": "1737258600000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f3",
     "device_name": "Device 23",
     "mac_address": "D1:E2:F3:A4:B5:23",
@@ -232,7 +232,7 @@
     "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
   },
   {
-    "timestamp": { "$numberLong": "1749445860000" },
+    "timestamp": { "$numberLong": "1736471400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f4",
     "device_name": "Device 24",
     "mac_address": "D1:E2:F3:A4:B5:24",
@@ -240,7 +240,7 @@
     "event": { "type": "Connection", "status": "Disconnected", "value": "Network unreachable" }
   },
   {
-    "timestamp": { "$numberLong": "1749445800000" },
+    "timestamp": { "$numberLong": "1735684200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f5",
     "device_name": "Device 25",
     "mac_address": "D1:E2:F3:A4:B5:25",
@@ -248,7 +248,7 @@
     "event": { "type": "Sensor Reading", "status": "Info", "value": "Strap test OK" }
   },
   {
-    "timestamp": { "$numberLong": "1749445740000" },
+    "timestamp": { "$numberLong": "1734897000000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f6",
     "device_name": "Device 26",
     "mac_address": "D1:E2:F3:A4:B5:26",
@@ -256,7 +256,7 @@
     "event": { "type": "Connection", "status": "Connected", "value": "OK" }
   },
   {
-    "timestamp": { "$numberLong": "1749445680000" },
+    "timestamp": { "$numberLong": "1734109800000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f7",
     "device_name": "Device 27",
     "mac_address": "D1:E2:F3:A4:B5:27",
@@ -264,7 +264,7 @@
     "event": { "type": "Alert", "status": "Error", "value": "Failed to authenticate with server" }
   },
   {
-    "timestamp": { "$numberLong": "1749445620000" },
+    "timestamp": { "$numberLong": "1733322600000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f8",
     "device_name": "Device 28",
     "mac_address": "D1:E2:F3:A4:B5:28",
@@ -272,7 +272,7 @@
     "event": { "type": "User action", "status": "Configured", "value": "Device renamed" }
   },
   {
-    "timestamp": { "$numberLong": "1749445560000" },
+    "timestamp": { "$numberLong": "1732535400000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9f9",
     "device_name": "Device 29",
     "mac_address": "D1:E2:F3:A4:B5:29",
@@ -280,11 +280,131 @@
     "event": { "type": "Connection", "status": "Disconnected", "value": "DNS resolution failed" }
   },
   {
-    "timestamp": { "$numberLong": "1749445500000" },
+    "timestamp": { "$numberLong": "1731748200000" },
     "device_id": "6846a1b2c3d4e5f6a7b8c9fa",
     "device_name": "Device 30",
     "mac_address": "D1:E2:F3:A4:B5:30",
     "installation_area": "Packaging",
     "event": { "type": "System", "status": "Info", "value": "Firmware v2.1.0 installed" }
+  },
+  {
+    "timestamp": { "$numberLong": "1721088000000" },
+    "device_id": "DEV-A01",
+    "device_name": "Sensor Alpha",
+    "mac_address": "AA:BB:CC:DD:EE:A1",
+    "installation_area": "Factory Floor A",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Temperature: 25.5C" }
+  },
+  {
+    "timestamp": { "$numberLong": "1719532800000" },
+    "device_id": "DEV-B02",
+    "device_name": "Gateway Beta",
+    "mac_address": "BB:CC:DD:EE:FF:B2",
+    "installation_area": "Control Room",
+    "event": { "type": "System", "status": "Info", "value": "Firmware updated to 1.5" }
+  },
+  {
+    "timestamp": { "$numberLong": "1717372800000" },
+    "device_id": "DEV-C03",
+    "device_name": "Monitor Gamma",
+    "mac_address": "CC:DD:EE:FF:AA:C3",
+    "installation_area": "Assembly Line 3",
+    "event": { "type": "Alert", "status": "Critical", "value": "Power supply failure" }
+  },
+  {
+    "timestamp": { "$numberLong": "1714780800000" },
+    "device_id": "DEV-D04",
+    "device_name": "Probe Delta",
+    "mac_address": "DD:EE:FF:AA:BB:D4",
+    "installation_area": "Quality Control",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "Network error" }
+  },
+  {
+    "timestamp": { "$numberLong": "1712102400000" },
+    "device_id": "DEV-E05",
+    "device_name": "Unit Epsilon",
+    "mac_address": "EE:FF:AA:BB:CC:E5",
+    "installation_area": "Warehouse Main",
+    "event": { "type": "User action", "status": "Configured", "value": "Maintenance mode activated" }
+  },
+  {
+    "timestamp": { "$numberLong": "1709424000000" },
+    "device_id": "DEV-F06",
+    "device_name": "Detector Zeta",
+    "mac_address": "FF:AA:BB:CC:DD:F6",
+    "installation_area": "Testing Bay 2",
+    "event": { "type": "Sensor Reading", "status": "Warning", "value": "Abnormal vibration levels" }
+  },
+  {
+    "timestamp": { "$numberLong": "1706745600000" },
+    "device_id": "DEV-G07",
+    "device_name": "Control Eta",
+    "mac_address": "AA:CC:BB:DD:EE:G7",
+    "installation_area": "Control Room",
+    "event": { "type": "System", "status": "Error", "value": "Database connection lost" }
+  },
+  {
+    "timestamp": { "$numberLong": "1704067200000" },
+    "device_id": "DEV-H08",
+    "device_name": "Hub Theta",
+    "mac_address": "BB:DD:CC:EE:FF:H8",
+    "installation_area": "Central Hub",
+    "event": { "type": "Connection", "status": "Connected", "value": "Link established" }
+  },
+  {
+    "timestamp": { "$numberLong": "1701388800000" },
+    "device_id": "DEV-I09",
+    "device_name": "Gauge Iota",
+    "mac_address": "CC:EE:DD:FF:AA:I9",
+    "installation_area": "Calibration Lab",
+    "event": { "type": "Sensor Reading", "status": "Info", "value": "Pressure: 100 kPa" }
+  },
+  {
+    "timestamp": { "$numberLong": "1698710400000" },
+    "device_id": "DEV-J10",
+    "device_name": "Relay Kappa",
+    "mac_address": "DD:FF:EE:AA:BB:J0",
+    "installation_area": "Distribution Point",
+    "event": { "type": "Alert", "status": "Warning", "value": "Overcurrent detected" }
+  },
+  {
+    "timestamp": { "$numberLong": "1696032000000" },
+    "device_id": "DEV-K11",
+    "device_name": "Actuator Lambda",
+    "mac_address": "EE:AA:FF:BB:CC:K1",
+    "installation_area": "Robotics Bay",
+    "event": { "type": "Connection", "status": "Connected", "value": "Ready for operation" }
+  },
+  {
+    "timestamp": { "$numberLong": "1693353600000" },
+    "device_id": "DEV-L12",
+    "device_name": "Display Mu",
+    "mac_address": "FF:BB:AA:CC:DD:L2",
+    "installation_area": "Human Interface",
+    "event": { "type": "System", "status": "Info", "value": "Screen brightness adjusted" }
+  },
+  {
+    "timestamp": { "$numberLong": "1690675200000" },
+    "device_id": "DEV-M13",
+    "device_name": "Transmitter Nu",
+    "mac_address": "AA:CC:BB:EE:FF:M3",
+    "installation_area": "Remote Station 1",
+    "event": { "type": "Sensor Reading", "status": "Voltage reading failed", "value": "0V" }
+  },
+  {
+    "timestamp": { "$numberLong": "1687996800000" },
+    "device_id": "DEV-N14",
+    "device_name": "Receiver Xi",
+    "mac_address": "BB:EE:CC:FF:AA:N4",
+    "installation_area": "Control Center",
+    "event": { "type": "Connection", "status": "Disconnected", "value": "Power lost" }
+  },
+  {
+    "timestamp": { "$numberLong": "1685318400000" },
+    "device_id": "DEV-O15",
+    "device_name": "Optimizer Omicron",
+    "mac_address": "CC:FF:EE:AA:BB:O5",
+    "installation_area": "Optimization Unit",
+    "event": { "type": "User action", "status": "Reset", "value": "Calibration reset by user" }
   }
 ]

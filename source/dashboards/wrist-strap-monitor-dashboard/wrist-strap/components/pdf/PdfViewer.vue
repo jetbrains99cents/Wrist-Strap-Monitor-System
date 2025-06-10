@@ -26,11 +26,11 @@
 import {ref, onMounted, onUnmounted, watch, nextTick, computed} from 'vue';
 import * as pdfjsLib from 'pdfjs-dist/build/pdf.mjs';
 import PdfjsWorkerPath from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { useLogger } from '~/composables/useLogger'; // <-- 1. Import the logger
+import { useLogger } from '~/composables/useLogger';
 
 type InteractionMode = 'pan' | 'select';
 
-const logger = useLogger(); // <-- 2. Initialize the logger
+const logger = useLogger();
 
 const props = defineProps({
   src: {type: String, required: true},
@@ -46,6 +46,7 @@ const emit = defineEmits<{
   (e: 'loaded'): void;
   (e: 'panstart'): void;
   (e: 'panend'): void;
+  (e: 'scale-updated', scale: number): void; // <-- ADDED
 }>();
 
 const pdfViewportRef = ref<HTMLElement | null>(null);
@@ -168,7 +169,7 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
     logger.log(`[PdfViewer/renderPage] Updating internal reactive dimensions.`);
     actualCanvasWidth_internal.value = canvasEl.width;
     actualCanvasHeight_internal.value = canvasEl.height;
-    currentPdfJsRenderScale.value = pdfScaleToRender;
+    currentPdfJsRenderScale.value = pdfScaleToRender; // Ensure this holds the actual scale rendered
 
     const renderContext = {canvasContext: context, viewport: viewport};
     logger.log("[PdfViewer/renderPage] Starting PDF.js page.render task.");
@@ -176,6 +177,10 @@ async function renderPage(pageNum: number, pdfScaleToRenderInput: number) {
     await renderTask.promise;
     renderTask = null;
     logger.log("[PdfViewer/renderPage] PDF.js page.render task completed.");
+
+    emit('scale-updated', currentPdfJsRenderScale.value); // <-- ADDED: Emit the updated scale
+    logger.log(`[PdfViewer/renderPage] Emitted 'scale-updated' with scale: ${currentPdfJsRenderScale.value}`);
+
 
     await nextTick();
 
@@ -279,6 +284,8 @@ async function loadPdf() {
           pdfPageOriginalHeight_internal.value = originalHeight;
           logger.log(`[PdfViewer/loadPdf] Stored original PDF WxH: ${pdfPageOriginalWidth_internal.value}x${pdfPageOriginalHeight_internal.value}`);
           await renderPage(currentPage.value, currentPdfJsRenderScale.value);
+          emit('scale-updated', currentPdfJsRenderScale.value); // <-- ADDED: Emit initial scale on load
+          logger.log(`[PdfViewer/loadPdf] Emitted 'scale-updated' (initial) with scale: ${currentPdfJsRenderScale.value}`);
         }
       } else {
         errorMsg.value = "[PdfViewer/loadPdf] PDF has no pages.";
@@ -389,7 +396,7 @@ const handleMouseLeave = (event: MouseEvent) => {
 
 const handleWheelZoom = (event: WheelEvent) => {
   event.preventDefault();
-  let newScaleDelta = props.pdfZoomStep * (event.ctrlKey ? 1.5 : 1);
+  let newScaleDelta = props.pdfZoomStep * (event.ctrlKey ? 0.5 : 1); // Use 0.5 for finer control with Ctrl
   let currentScale = (Number.isFinite(currentPdfJsRenderScale.value) && currentPdfJsRenderScale.value > 0) ? currentPdfJsRenderScale.value : ensureValidScale(NaN, "wheelZoom currentScale");
   if (event.deltaY < 0) {
     changeZoom(currentScale + newScaleDelta);
@@ -412,6 +419,8 @@ const triggerFullReset = () => {
   if (pdfDoc) {
     currentPage.value = 1;
     changeZoom(props.initialPdfRenderScale);
+    panX.value = 0; // Also reset pan on full reset
+    panY.value = 0;
   } else {
     currentPdfJsRenderScale.value = ensureValidScale(props.initialPdfRenderScale, "fullReset non-doc");
     panX.value = 0;
@@ -430,6 +439,7 @@ const applyManualScale = (newScale: number) => {
 const triggerGoToPage = (pageNumber: number) => {
   if (pageNumber >= 1 && pageNumber <= numPages.value && pageNumber !== currentPage.value && pdfDoc) {
     currentPage.value = pageNumber;
+    renderPage(currentPage.value, currentPdfJsRenderScale.value);
   }
 };
 

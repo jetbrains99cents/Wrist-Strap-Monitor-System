@@ -86,7 +86,7 @@
               @loaded="handlePdfLoaded"
               @panstart="isPdfCurrentlyPanning = true"
               @panend="isPdfCurrentlyPanning = false"
-          />
+              @scale-updated="handlePdfScaleUpdated" />
           <GridOverlay
               v-if="computedGridOverlayProps.visible"
               :rows="computedGridOverlayProps.rows"
@@ -165,30 +165,27 @@
                       :ui="{ label: 'text-xs font-medium text-gray-500 dark:text-gray-400', border: { base: 'border-gray-200 dark:border-gray-700'}}"/>
             <div class="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-1.5 text-sm">
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalDeviceNameLabel }}:</span>
-              <span class="dark:text-white font-semibold">{{ modalCellData.device.device_name }}</span>
+              <span class="dark:text-white font-semibold">{{ modalCellData.device.name }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalDeviceAreaLabel }}:</span>
               <span class="dark:text-white">{{ modalCellData.device.installation_area }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{
                   modalDeviceLastEventStatusLabel
                 }}:</span> <span class="dark:text-white">{{
-                getLocalizedStatus(modalCellData.device.last_event.status)
+                getLocalizedStatus(modalCellData.device.last_event?.status)
               }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalLastEventTypeLabel }}:</span>
-              <span class="dark:text-white">{{ modalCellData.device.last_event.type }}</span>
+              <span class="dark:text-white">{{ modalCellData.device.last_event?.type || 'N/A' }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{
                   modalFirmwareVersionLabel
                 }}:</span> <span class="dark:text-white">{{ modalCellData.device.firmware_version || 'N/A' }}</span>
-              <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalWifiSsidLabel }}:</span>
-              <span class="dark:text-white">{{ modalCellData.device.wifi_ssid || 'N/A' }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{
                   modalScaleAtCreationLabel
-                }}:</span> <span class="dark:text-white">{{
-                modalCellData.device.scale_at_creation_time.toFixed(1)
-              }}x</span>
+                }}:</span> <span class="dark:text-white">{{ modalCellData.device.scale_at_creation_time ? modalCellData.device.scale_at_creation_time.toFixed(1) + 'x' : 'N/A'
+              }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalCreatedAtLabel }}:</span>
-              <span class="dark:text-white">{{ formatDateForDisplay(modalCellData.device.created_at) }}</span>
+              <span class="dark:text-white">{{ formatDateForDisplay(modalCellData.device.createdAt) }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalInstalledAtLabel }}:</span>
-              <span class="dark:text-white">{{ formatDateForDisplay(modalCellData.device.installed_at) }}</span>
+              <span class="dark:text-white">{{ formatDateForDisplay(modalCellData.device.installation_date) }}</span>
             </div>
           </template>
           <p v-else class="text-sm text-gray-500 dark:text-gray-400">{{ noDeviceAssignedToCellLabel }}</p>
@@ -244,10 +241,18 @@
               <USelectMenu
                   v-model="newDeviceForm.installation_area"
                   :options="areaOptionsForModal"
+                  value-attribute="value"
+                  option-attribute="label"
                   :placeholder="selectAreaPlaceholderLabel"
                   searchable
                   size="md"
               />
+            </UFormGroup>
+            <UFormGroup :label="newDeviceMacAddressLabel" name="newDeviceMacAddress" :ui="{label: { base: 'text-sm' }}">
+              <UInput v-model="newDeviceForm.mac_address" :placeholder="newDeviceMacAddressPlaceholderLabel" size="md"/>
+            </UFormGroup>
+            <UFormGroup :label="newDeviceFirmwareVersionLabel" name="newDeviceFirmwareVersion" :ui="{label: { base: 'text-sm' }}">
+              <UInput v-model="newDeviceForm.firmware_version" :placeholder="newDeviceFirmwareVersionPlaceholderLabel" size="md"/>
             </UFormGroup>
           </div>
 
@@ -257,9 +262,25 @@
         </div>
 
         <template #footer>
-          <div class="flex justify-between w-full">
+          <div class="flex justify-between items-center w-full">
             <UButton :label="closeButtonLabel" color="gray" variant="outline" @click="closeAndResetModal"/>
-            <UButton :label="saveAssignmentButtonLabel" color="primary" @click="handleSaveCellAssignment"/>
+
+            <div class="flex items-center gap-x-2">
+              <UButton
+                  v-if="modalCellData && modalCellData.device"
+                  :label="removeAssignmentButtonLabel"
+                  color="red"
+                  variant="solid"
+                  @click="handleRemoveAssignment"
+                  :loading="isSaving"
+              />
+              <UButton
+                  :label="saveAssignmentButtonLabel"
+                  color="primary"
+                  @click="handleSaveCellAssignment"
+                  :loading="isSaving"
+              />
+            </div>
           </div>
         </template>
       </UCard>
@@ -274,38 +295,65 @@ import {useLanguage} from '~/composables/useLanguage';
 import {useLogger} from '~/composables/useLogger';
 import PdfViewer from '~/components/pdf/PdfViewer.vue';
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
-import {definePageMeta} from "#imports";
+import {definePageMeta, useNuxtApp, useRuntimeConfig, useToast} from "#imports";
 
 definePageMeta({
   middleware: 'auth'
 });
 
+// SECTION: Type Definitions (Aligned with API Spec)
 type InteractionMode = 'pan' | 'select';
 type LogStatus = "Connected" | "Disconnected" | "Voltage reading failed" | "Info" | "Warning" | "Error" | "Critical" | "Configured" | "Reset";
 type EventCategory = "Connection" | "Sensor Reading" | "Alert" | "User action" | "System";
-interface EventDetails { type: EventCategory; status?: LogStatus; value: string | Record<string, any>; }
-interface DeviceData { id: string; device_name: string; coordinates: { row: number; col: number }; installation_area: string; mac_address?: string; wifi_ssid?: string; firmware_version?: string; last_event: EventDetails; scale_at_creation_time: number; created_at: string; installed_at: string; }
+
+interface EventDetails {
+  type: EventCategory;
+  status?: LogStatus | null;
+  timestamp: string;
+  value: string | Record<string, any>;
+}
+
+interface DeviceData {
+  id: string;
+  name: string;
+  coordinates: { row: number; col: number } | null;
+  installation_area: string;
+  mac_address?: string;
+  device_type: string;
+  firmware_version?: string;
+  last_event: EventDetails | null;
+  scale_at_creation_time: number | null;
+  createdAt: string;
+  installation_date: string;
+  updatedAt: string;
+}
+
 interface GridCellStatus { status: LogStatus; deviceId: string; deviceName: string; installationArea?: string; lastEventType?: EventCategory; createdAtFormatted?: string; installedAtFormatted?: string; }
 interface SelectableDevice { id: string; name: string; }
 interface ModalDisplayData { row: number; col: number; device?: DeviceData; }
 interface PdfViewerExposed { zoomIn: () => void; zoomOut: () => void; resetZoomAndPan: () => void; setPdfScale: (scale: number) => void; goToPage: (page: number) => void; reloadPdf: () => void; currentScale: { value: number }; currentPageNum: { value: number }; totalPages: { value: number }; isRendering: { value: boolean }; isLoading: { value: boolean }; minScale: number; maxScale: number; getCanvasActualWidth: () => number; getCanvasActualHeight: () => number; getCanvasPanX: () => number; getCanvasPanY: () => number; getPdfPageOriginalWidth: () => number; getPdfPageOriginalHeight: () => number; initialPdfRenderScale?: number; }
+// !SECTION
 
+// SECTION: Composables and Basic Refs
 const logger = useLogger();
 const {currentLanguage} = useLanguage();
+const runtimeConfig = useRuntimeConfig();
+const toast = useToast();
+const { $api } = useNuxtApp(); // Use the pre-configured API client
 
 const isMobileMenuOpen = ref(false);
+const isSaving = ref(false);
+// !SECTION
+
+// SECTION: PDF Viewer State
 const pdfViewerComponentRef = ref<PdfViewerExposed | null>(null);
 const isPdfCurrentlyPanning = ref(false);
 const zoomInputPercentage = ref(100);
-const currentPageInput = ref(1);
-const totalPagesForPdf = ref(0);
 const isPanMode = ref(true);
 const interactionMode = computed<InteractionMode>(() => isPanMode.value ? 'pan' : 'select');
-const sharedTooltipText = ref('');
-const sharedTooltipVisible = ref(false);
-const sharedTooltipStyle = ref<Record<string, string | number>>({});
-let tooltipHideTimeout: ReturnType<typeof setTimeout> | null = null;
+// !SECTION
 
+// SECTION: i18n Computed Labels
 const openMenuAriaLabel = computed(() => currentLanguage.value === 'vi' ? 'Mở menu điều hướng' : 'Open navigation menu');
 const mobileMenuTitleLabel = computed(() => currentLanguage.value === 'vi' ? 'Menu bản đồ' : 'Map menu');
 const viewModeBaseLabel = computed(() => currentLanguage.value === 'vi' ? 'Chế độ xem' : 'View mode');
@@ -330,12 +378,16 @@ const newDeviceNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên
 const newDeviceNamePlaceholderLabel = computed(() => currentLanguage.value === 'vi' ? 'Ví dụ: Device 123' : 'Example: Device 123');
 const newDeviceAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt' : 'Installation area');
 const selectAreaPlaceholderLabel = computed(() => currentLanguage.value === 'vi' ? 'Chọn khu vực...' : 'Select area...');
+const newDeviceMacAddressLabel = computed(() => currentLanguage.value === 'vi' ? 'Địa chỉ MAC' : 'MAC Address');
+const newDeviceMacAddressPlaceholderLabel = computed(() => currentLanguage.value === 'vi' ? 'Ví dụ: AA:BB:CC:DD:EE:FF' : 'Example: AA:BB:CC:DD:EE:FF');
+const newDeviceFirmwareVersionLabel = computed(() => currentLanguage.value === 'vi' ? 'Phiên bản Firmware' : 'Firmware Version');
+const newDeviceFirmwareVersionPlaceholderLabel = computed(() => currentLanguage.value === 'vi' ? 'Ví dụ: 1.0.0' : 'Example: 1.0.0');
 const noCellDataAvailableLabel = computed(() => currentLanguage.value === 'vi' ? 'Không có dữ liệu ô.' : 'No cell data available.');
 const closeButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Đóng' : 'Close');
 const saveAssignmentButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Lưu gán' : 'Save assignment');
+const removeAssignmentButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Xóa Gán' : 'Remove Assignment');
 const modalDeviceLastEventStatusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái sự kiện cuối' : 'Last event status');
 const modalFirmwareVersionLabel = computed(() => currentLanguage.value === 'vi' ? 'Phiên bản Firmware' : 'Firmware version');
-const modalWifiSsidLabel = computed(() => currentLanguage.value === 'vi' ? 'Wi-Fi SSID' : 'Wi-Fi SSID');
 const modalScaleAtCreationLabel = computed(() => currentLanguage.value === 'vi' ? 'Tỉ lệ khi tạo' : 'Scale at creation');
 const modalCreatedAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày tạo' : 'Created at');
 const modalInstalledAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày lắp đặt' : 'Installed at');
@@ -351,86 +403,54 @@ const tooltipLastEventTypeLabel = computed(() => currentLanguage.value === 'vi' 
 const tooltipCreatedAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày tạo' : 'Created At');
 const tooltipInstalledAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày lắp đặt' : 'Installed At');
 const tooltipCellLabel = computed(() => currentLanguage.value === 'vi' ? 'Ô' : 'Cell');
+// !SECTION
 
+// SECTION: PDF Control Handlers
 const minZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.minScale * 100) : 20);
-const maxZoomPercentage = computed(() => pdfViewerComponentRef.value ? Math.round(pdfViewerComponentRef.value.maxScale * 1000) : 1000);
 
 const applyManualZoomToViewer = () => {
   const viewer = pdfViewerComponentRef.value;
-  if (viewer) {
-    const currentZoomInputVal = zoomInputPercentage.value;
-    if (!isNaN(currentZoomInputVal)) {
-      const newScale = Math.max(viewer.minScale, Math.min(currentZoomInputVal / 100, viewer.maxScale));
-      if (Number.isFinite(newScale) && newScale > 0) {
-        viewer.setPdfScale(newScale);
-        zoomInputPercentage.value = Math.round(newScale * 100);
-      } else {
-        const currentViewerScale = viewer.currentScale?.value;
-        if (currentViewerScale && Number.isFinite(currentViewerScale) && currentViewerScale > 0) {
-          zoomInputPercentage.value = Math.round(currentViewerScale * 100);
-        } else {
-          zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100);
-        }
-      }
-    } else {
-      const currentViewerScale = viewer.currentScale?.value;
-      if (currentViewerScale && Number.isFinite(currentViewerScale) && currentViewerScale > 0) {
-        zoomInputPercentage.value = Math.round(currentViewerScale * 100);
-      } else {
-        zoomInputPercentage.value = Math.round((viewer.initialPdfRenderScale || 1.0) * 100);
-      }
-    }
+  if (!viewer) return;
+  const currentZoomInputVal = zoomInputPercentage.value;
+  if (isNaN(currentZoomInputVal)) return;
+  const newScale = Math.max(viewer.minScale, Math.min(currentZoomInputVal / 100, viewer.maxScale));
+  if (Number.isFinite(newScale) && newScale > 0) {
+    viewer.setPdfScale(newScale);
   }
 };
 
 const setQuickZoom = (percentage: number) => {
   if (pdfViewerComponentRef.value) {
     const scale = percentage / 100;
-    zoomInputPercentage.value = percentage;
     pdfViewerComponentRef.value.setPdfScale(scale);
   }
 };
 
 const handleResetView = () => {
-  if (pdfViewerComponentRef.value) {
-    pdfViewerComponentRef.value.resetZoomAndPan();
-    setQuickZoom(100);
-  }
+  pdfViewerComponentRef.value?.resetZoomAndPan();
 };
 
-const handlePdfRendered = () => {
-  logger.log('[index.vue] PDF Page Rendered');
-};
-
+const handlePdfRendered = () => logger.log('[index.vue] PDF Page Rendered');
 const handlePdfLoaded = async () => {
   logger.log('[index.vue] PDF Loaded event received.');
   await nextTick();
   if (pdfViewerComponentRef.value) {
-    const currentScaleVal = pdfViewerComponentRef.value.currentScale.value;
-    if (Number.isFinite(currentScaleVal) && currentScaleVal > 0) {
-      zoomInputPercentage.value = Math.round(currentScaleVal * 100);
-    } else {
-      zoomInputPercentage.value = Math.round((pdfViewerComponentRef.value.initialPdfRenderScale || 1.0) * 100);
-    }
-    totalPagesForPdf.value = pdfViewerComponentRef.value.totalPages.value;
-    currentPageInput.value = pdfViewerComponentRef.value.currentPageNum.value;
+    handlePdfScaleUpdated(pdfViewerComponentRef.value.currentScale.value);
   }
 };
 
-watch(() => pdfViewerComponentRef.value?.currentScale?.value, (newScale) => {
+const handlePdfScaleUpdated = (newScale: number) => {
+  logger.log(`[index.vue] Received 'scale-updated' event with scale: ${newScale}`);
   if (typeof newScale === 'number' && Number.isFinite(newScale) && newScale > 0) {
-    if (Math.round(newScale * 100) !== zoomInputPercentage.value) {
-      zoomInputPercentage.value = Math.round(newScale * 100);
+    const newPercentage = Math.round(newScale * 100);
+    if (newPercentage !== zoomInputPercentage.value) {
+      zoomInputPercentage.value = newPercentage;
     }
   }
-});
-watch(() => pdfViewerComponentRef.value?.currentPageNum?.value, (newPage) => {
-  if (typeof newPage === 'number') currentPageInput.value = newPage;
-});
-watch(() => pdfViewerComponentRef.value?.totalPages?.value, (newTotal) => {
-  if (typeof newTotal === 'number') totalPagesForPdf.value = newTotal;
-});
+};
+// !SECTION
 
+// SECTION: Navigation Items
 const rawNavigationItems = ref([
   {id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/'},
   {id: 'device-list', label_en: 'Device List', label_vi: 'Danh sách thiết bị', icon: 'i-heroicons-queue-list-solid', to: '/device-list'},
@@ -445,7 +465,9 @@ const localizedNavigationItems = computed(() => rawNavigationItems.value.map(ite
   icon: item.icon,
   to: item.to,
 })));
+// !SECTION
 
+// SECTION: Grid and Modal State
 const pdfViewAndGridAreaRef = ref<HTMLElement | null>(null);
 const BASE_CELL_SIZE_PX = 50;
 const selectedGridCell = ref<{ row: number; col: number } | null>(null);
@@ -453,13 +475,24 @@ const isGridCellModalOpen = ref(false);
 const modalCellData = ref<ModalDisplayData | null>(null);
 const isCreatingNewDeviceInModal = ref(false);
 const modalSelectedDeviceId = ref<string | undefined>(undefined);
-const newDeviceForm = ref({name: '', installation_area: undefined as string | undefined,});
-const availableDevices = ref<SelectableDevice[]>([]);
-const availableInstallationAreas = ref<string[]>(["POL", "FLW", "CG A", "CG B", "QA Main", "Storage X", "Production Line 1", "Production Line 2", "Maintenance Bay", "Office Area"]);
-const areaOptionsForModal = computed(() => availableInstallationAreas.value.map(area => ({label: area, value: area})));
-const availableDeviceOptionsForModal = computed(() => availableDevices.value.map(d => ({id: d.id, name: d.name})));
-const deviceDataStream = ref<DeviceData[]>([]);
 
+const newDeviceForm = ref({
+  name: '',
+  installation_area: undefined as string | undefined,
+  mac_address: '',
+  firmware_version: ''
+});
+
+const deviceDataStream = ref<DeviceData[]>([]);
+const availableDevices = computed<SelectableDevice[]>(() =>
+    deviceDataStream.value.map(d => ({id: d.id, name: d.name})).sort((a, b) => a.name.localeCompare(b.name))
+);
+const availableInstallationAreas = ref<string[]>(runtimeConfig.public.installationAreas);
+const areaOptionsForModal = computed(() => availableInstallationAreas.value.map(area => ({label: area, value: area})));
+const availableDeviceOptionsForModal = computed(() => availableDevices.value);
+// !SECTION
+
+// SECTION: Utility and Formatting Functions
 const formatDateForDisplay = (isoString: string): string => {
   if (!isoString) return 'N/A';
   try {
@@ -478,146 +511,7 @@ const formatDateForTooltip = (isoString: string): string => {
   }
 };
 
-const generateDeviceData = (count = 40): DeviceData[] => {
-  const data: DeviceData[] = [];
-  const statuses: LogStatus[] = ["Connected", "Error", "Disconnected", "Warning", "Info", "Voltage reading failed", "Configured", "Reset"];
-  const eventTypes: EventCategory[] = ["Connection", "Sensor Reading", "Alert", "User action", "System"];
-  const maxRows = 20;
-  const maxCols = 30;
-  const usedCells = new Set<string>();
-  const now = new Date();
-
-  for (let i = 1; i <= count; i++) {
-    let row, col;
-    do {
-      row = Math.floor(Math.random() * maxRows);
-      col = Math.floor(Math.random() * maxCols);
-    } while (usedCells.has(`${row}-${col}`));
-    usedCells.add(`${row}-${col}`);
-
-    const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-    let eventStatus: LogStatus | undefined = statuses[Math.floor(Math.random() * statuses.length)];
-    const deviceName = `Device ${i}`;
-    const installedDate = new Date(now.getTime() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000);
-    const deviceId = `dev-instance-${Date.now().toString(36).slice(-4)}-${i}`;
-
-    const deviceEntry: DeviceData = {
-      id: deviceId,
-      device_name: deviceName,
-      coordinates: {row, col},
-      installation_area: availableInstallationAreas.value[Math.floor(Math.random() * availableInstallationAreas.value.length)],
-      mac_address: `00:1A:BB:CC:DD:${String(i).padStart(2, '0')}`,
-      wifi_ssid: `FACTORY_WIFI_${String.fromCharCode(65 + (i % 3))}`,
-      firmware_version: `1.${i % 5}.${i % 9}`,
-      last_event: { type: eventType, status: eventStatus, value: "Event value" },
-      scale_at_creation_time: parseFloat((Math.random() * 4 + 1).toFixed(1)),
-      created_at: new Date(installedDate.getTime() - Math.floor(Math.random() * 5) * 24 * 60 * 60 * 1000).toISOString(),
-      installed_at: installedDate.toISOString(),
-    };
-    data.push(deviceEntry);
-  }
-  return data;
-};
-
-const handleKeydown = (event: KeyboardEvent) => {
-  if (event.key === 'Shift') {
-    const target = event.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return;
-    if (event.repeat) return;
-    event.preventDefault();
-    isPanMode.value = !isPanMode.value;
-  }
-};
-
-onMounted(() => {
-  deviceDataStream.value = generateDeviceData();
-  availableDevices.value = [
-    {id: 'unique-master-dev-001', name: 'ESP32 Sensor Alpha'},
-    {id: 'unique-master-dev-002', name: 'ESP32 Sensor Beta'},
-    ...deviceDataStream.value.slice(0, 5).map(d => ({id: d.id, name: d.device_name})),
-  ];
-  const uniqueDeviceIds = new Set<string>();
-  availableDevices.value = availableDevices.value.filter(device => {
-    if (uniqueDeviceIds.has(device.id)) return false;
-    uniqueDeviceIds.add(device.id);
-    return true;
-  });
-  window.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
-});
-
-const computedGridOverlayProps = computed(() => {
-  const viewer = pdfViewerComponentRef.value;
-  if (!viewer) {
-    return { visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: 50, cellHeight: 50 };
-  }
-  const panXVal = viewer.getCanvasPanX();
-  const panYVal = viewer.getCanvasPanY();
-  const actualWidthVal = viewer.getCanvasActualWidth();
-  const actualHeightVal = viewer.getCanvasActualHeight();
-
-  if (!Number.isFinite(actualWidthVal) || actualWidthVal <= 0 || !Number.isFinite(actualHeightVal) || actualHeightVal <= 0) {
-    return { visible: false, x: panXVal, y: panYVal, width: 0, height: 0, rows: 0, cols: 0, cellWidth: 50, cellHeight: 50 };
-  }
-
-  const cols = Math.max(0, Math.floor(actualWidthVal / BASE_CELL_SIZE_PX));
-  const rows = Math.max(0, Math.floor(actualHeightVal / BASE_CELL_SIZE_PX));
-
-  return { visible: true, x: panXVal, y: panYVal, width: actualWidthVal, height: actualHeightVal, rows, cols, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX };
-});
-
-const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
-  const statuses: Record<string, GridCellStatus> = {};
-  const gridProps = computedGridOverlayProps.value;
-  if (!gridProps.visible) return {};
-
-  for (const device of deviceDataStream.value) {
-    const { row, col } = device.coordinates;
-    if (row >= 0 && col >= 0 && row < gridProps.rows && col < gridProps.cols) {
-      const key = `${row}-${col}`;
-      statuses[key] = {
-        status: device.last_event.status || 'Warning',
-        deviceId: device.id,
-        deviceName: device.device_name,
-        installationArea: device.installation_area,
-        lastEventType: device.last_event.type,
-        createdAtFormatted: formatDateForTooltip(device.created_at),
-        installedAtFormatted: formatDateForTooltip(device.installed_at),
-      };
-    }
-  }
-  return statuses;
-});
-
-const resetModalState = () => {
-  isCreatingNewDeviceInModal.value = false;
-  modalSelectedDeviceId.value = undefined;
-  newDeviceForm.value = {name: '', installation_area: undefined};
-};
-
-const closeAndResetModal = () => {
-  isGridCellModalOpen.value = false;
-  resetModalState();
-};
-
-const handleGridCellClick = (cell: { row: number; col: number; }) => {
-  if (interactionMode.value !== 'select' || isPdfCurrentlyPanning.value) return;
-  resetModalState();
-  const existingDeviceOnCell = deviceDataStream.value.find(d => d.coordinates.row === cell.row && d.coordinates.col === cell.col);
-  modalCellData.value = {row: cell.row, col: cell.col, device: existingDeviceOnCell};
-  if (existingDeviceOnCell) {
-    const selectableMatch = availableDevices.value.find(ad => ad.id === existingDeviceOnCell.id);
-    if (selectableMatch) {
-      modalSelectedDeviceId.value = selectableMatch.id;
-    }
-  }
-  isGridCellModalOpen.value = true;
-};
-
-const getLocalizedStatus = (status?: LogStatus): string => {
+const getLocalizedStatus = (status?: LogStatus | null): string => {
   if (!status) return 'N/A';
   if (currentLanguage.value === 'vi') {
     const statusMap: Record<LogStatus, string> = { "Connected": "Đã kết nối", "Disconnected": "Mất kết nối", "Voltage reading failed": "Lỗi đọc điện áp", "Info": "Thông tin", "Warning": "Cảnh báo", "Error": "Lỗi", "Critical": "Nghiêm trọng", "Configured": "Đã cấu hình", "Reset": "Đã đặt lại" };
@@ -625,6 +519,103 @@ const getLocalizedStatus = (status?: LogStatus): string => {
   }
   return status;
 };
+// !SECTION
+
+
+// SECTION: API Interaction
+const fetchAndSetDevices = async () => {
+  try {
+    logger.log('[API] Fetching devices...');
+    const response = await $api<any[]>('/api/v1/devices');
+    deviceDataStream.value = response.map((device: any): DeviceData => ({
+      id: device._id,
+      name: device.name,
+      coordinates: device.coordinates,
+      installation_area: device.installation_area,
+      mac_address: device.mac_address,
+      device_type: device.device_type,
+      firmware_version: device.firmware_version,
+      last_event: device.last_event,
+      scale_at_creation_time: device.scale_at_creation_time,
+      createdAt: device.createdAt,
+      installation_date: device.installation_date,
+      updatedAt: device.updatedAt,
+    }));
+    logger.log(`[API] Successfully fetched and mapped ${deviceDataStream.value.length} devices.`);
+  } catch (error: any) {
+    logger.error('[API] Failed to fetch devices:', error);
+    toast.add({ title: 'API Error', description: 'Could not fetch device data from the server.', color: 'red', icon: 'i-heroicons-x-circle' });
+  }
+};
+// !SECTION
+
+
+// SECTION: Lifecycle Hooks and Event Listeners
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Shift' && !event.repeat) {
+    const target = event.target as HTMLElement;
+    if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA' && !target.isContentEditable) {
+      event.preventDefault();
+      isPanMode.value = !isPanMode.value;
+    }
+  }
+};
+
+onMounted(async () => {
+  await fetchAndSetDevices();
+  window.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
+});
+// !SECTION
+
+
+// SECTION: Grid Overlay and Tooltip Logic
+const computedGridOverlayProps = computed(() => {
+  const viewer = pdfViewerComponentRef.value;
+  if (!viewer) return { visible: false, x: 0, y: 0, width: 0, height: 0, rows: 0, cols: 0, cellWidth: 50, cellHeight: 50 };
+  const panXVal = viewer.getCanvasPanX();
+  const panYVal = viewer.getCanvasPanY();
+  const actualWidthVal = viewer.getCanvasActualWidth();
+  const actualHeightVal = viewer.getCanvasActualHeight();
+  if (!Number.isFinite(actualWidthVal) || actualWidthVal <= 0 || !Number.isFinite(actualHeightVal) || actualHeightVal <= 0) {
+    return { visible: false, x: panXVal, y: panYVal, width: 0, height: 0, rows: 0, cols: 0, cellWidth: 50, cellHeight: 50 };
+  }
+  const cols = Math.max(0, Math.floor(actualWidthVal / BASE_CELL_SIZE_PX));
+  const rows = Math.max(0, Math.floor(actualHeightVal / BASE_CELL_SIZE_PX));
+  return { visible: true, x: panXVal, y: panYVal, width: actualWidthVal, height: actualHeightVal, rows, cols, cellWidth: BASE_CELL_SIZE_PX, cellHeight: BASE_CELL_SIZE_PX };
+});
+
+const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
+  const statuses: Record<string, GridCellStatus> = {};
+  const gridProps = computedGridOverlayProps.value;
+  if (!gridProps.visible) return {};
+  for (const device of deviceDataStream.value) {
+    if (device.coordinates) {
+      const { row, col } = device.coordinates;
+      if (row >= 0 && col >= 0 && row < gridProps.rows && col < gridProps.cols) {
+        const key = `${row}-${col}`;
+        statuses[key] = {
+          status: device.last_event?.status || 'Warning',
+          deviceId: device.id,
+          deviceName: device.name,
+          installationArea: device.installation_area,
+          lastEventType: device.last_event?.type,
+          createdAtFormatted: formatDateForTooltip(device.createdAt),
+          installedAtFormatted: formatDateForTooltip(device.installation_date),
+        };
+      }
+    }
+  }
+  return statuses;
+});
+
+const sharedTooltipText = ref('');
+const sharedTooltipVisible = ref(false);
+const sharedTooltipStyle = ref<Record<string, string | number>>({});
+let tooltipHideTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const handleCellMouseEnter = (payload: { row: number; col: number; event: MouseEvent }) => {
   if (tooltipHideTimeout) clearTimeout(tooltipHideTimeout);
@@ -646,59 +637,144 @@ const handleCellMouseLeave = () => {
     sharedTooltipVisible.value = false;
   }, 100);
 };
+// !SECTION
 
-const handleSaveCellAssignment = () => {
-  if (!modalCellData.value) return;
 
-  const {row, col} = modalCellData.value;
-  let newGridDeviceData: DeviceData;
-  const nowISO = new Date().toISOString();
-  const currentScale = pdfViewerComponentRef.value?.currentScale.value || 1.0;
-
-  if (isCreatingNewDeviceInModal.value) {
-    if (!newDeviceForm.value.name.trim() || !newDeviceForm.value.installation_area) {
-      alert(currentLanguage.value === 'vi' ? 'Tên và khu vực không được để trống.' : 'Name and area cannot be empty.');
-      return;
-    }
-    const newDeviceUniqueId = `dev-${Date.now().toString(36)}`;
-    newGridDeviceData = {
-      id: newDeviceUniqueId,
-      device_name: newDeviceForm.value.name.trim(),
-      coordinates: {row, col},
-      installation_area: newDeviceForm.value.installation_area,
-      last_event: {type: 'System', status: 'Configured', value: 'Device created.'},
-      scale_at_creation_time: currentScale,
-      created_at: nowISO,
-      installed_at: nowISO,
-    };
-    availableDevices.value.push({id: newGridDeviceData.id, name: newGridDeviceData.device_name});
-  } else {
-    if (!modalSelectedDeviceId.value) {
-      alert(currentLanguage.value === 'vi' ? 'Vui lòng chọn một thiết bị.' : 'Please select a device.');
-      return;
-    }
-    const selectedDeviceMaster = availableDevices.value.find(d => d.id === modalSelectedDeviceId.value);
-    if (!selectedDeviceMaster) return;
-
-    const existingDeviceOnAnyCell = deviceDataStream.value.find(d => d.id === selectedDeviceMaster.id);
-    newGridDeviceData = {
-      ...existingDeviceOnAnyCell!,
-      id: selectedDeviceMaster.id,
-      device_name: selectedDeviceMaster.name,
-      coordinates: {row, col},
-      installation_area: existingDeviceOnAnyCell?.installation_area || "Default Area",
-      last_event: existingDeviceOnAnyCell?.last_event || {type: 'System', status: 'Info', value: `Moved to cell R${row},C${col}`},
-      scale_at_creation_time: existingDeviceOnAnyCell?.scale_at_creation_time || currentScale,
-      created_at: existingDeviceOnAnyCell?.created_at || nowISO,
-      installed_at: nowISO,
-    };
-  }
-
-  deviceDataStream.value = deviceDataStream.value.filter(d => d.id !== newGridDeviceData.id && (d.coordinates.row !== row || d.coordinates.col !== col));
-  deviceDataStream.value.push(newGridDeviceData);
-
-  closeAndResetModal();
+// SECTION: Modal and Cell Assignment Logic
+const resetModalState = () => {
+  isCreatingNewDeviceInModal.value = false;
+  modalSelectedDeviceId.value = undefined;
+  newDeviceForm.value = {name: '', installation_area: undefined, mac_address: '', firmware_version: ''};
 };
+
+const closeAndResetModal = () => {
+  isGridCellModalOpen.value = false;
+  resetModalState();
+};
+
+const handleGridCellClick = (cell: { row: number; col: number; }) => {
+  if (interactionMode.value !== 'select' || isPdfCurrentlyPanning.value) return;
+  resetModalState();
+  const existingDeviceOnCell = deviceDataStream.value.find(d => d.coordinates?.row === cell.row && d.coordinates?.col === cell.col);
+  modalCellData.value = {row: cell.row, col: cell.col, device: existingDeviceOnCell};
+  if (existingDeviceOnCell) {
+    modalSelectedDeviceId.value = existingDeviceOnCell.id;
+  }
+  isGridCellModalOpen.value = true;
+};
+
+const handleRemoveAssignment = async () => {
+  const deviceToRemove = modalCellData.value?.device;
+  if (!deviceToRemove) {
+    toast.add({ title: 'Error', description: 'No device is assigned to this cell.', color: 'orange' });
+    return;
+  }
+  logger.log(`[API] Removing assignment for device ID: ${deviceToRemove.id}`);
+  isSaving.value = true;
+  try {
+    await $api(`/api/v1/devices/${deviceToRemove.id}`, {
+      method: 'PUT',
+      body: {
+        coordinates: null,
+        scale_at_creation_time: null
+      }
+    });
+    toast.add({ title: 'Success', description: `Assignment removed for ${deviceToRemove.name}.`, color: 'green' });
+    await fetchAndSetDevices();
+    closeAndResetModal();
+  } catch (error: any) {
+    logger.error(`[API] Failed to remove assignment for device ${deviceToRemove.id}:`, error);
+    toast.add({ title: 'API Error', description: `Could not remove assignment.`, color: 'red' });
+  } finally {
+    isSaving.value = false;
+  }
+};
+
+
+const handleSaveCellAssignment = async () => {
+  logger.log('[Save Assignment] Function initiated.');
+
+  if (!modalCellData.value) {
+    logger.error('[Save Assignment] Exit: modalCellData is null.');
+    return;
+  }
+  isSaving.value = true;
+
+  const { row, col } = modalCellData.value;
+  const scaleToSave = parseFloat((zoomInputPercentage.value / 100).toFixed(1));
+
+  try {
+    if (isCreatingNewDeviceInModal.value) {
+      if (!newDeviceForm.value.name.trim() || !newDeviceForm.value.installation_area) {
+        toast.add({ title: 'Validation Error', description: 'Device Name and Installation Area are required.', color: 'orange' });
+        logger.warn('[Save Assignment] Exit: New device form is invalid (missing name or area).');
+        isSaving.value = false;
+        return;
+      }
+
+      const payload = {
+        name: newDeviceForm.value.name.trim(),
+        // *** Reverted to use the default placeholder for MAC address ***
+        mac_address: newDeviceForm.value.mac_address.trim() || '00:00:00:00:00:00',
+        device_type: "WristStrapMonitorV1",
+        installation_area: newDeviceForm.value.installation_area,
+        coordinates: { row, col },
+        scale_at_creation_time: scaleToSave,
+        firmware_version: newDeviceForm.value.firmware_version || "",
+        installation_date: new Date().toISOString()
+      };
+
+      logger.log('[API] Creating new device with payload:', payload);
+      await $api('/api/v1/devices', { method: 'POST', body: payload });
+      toast.add({ title: 'Success', description: `Device ${payload.name} created and assigned.`, color: 'green' });
+
+    } else {
+      // Logic to assign an existing device
+      const newlySelectedDeviceId = modalSelectedDeviceId.value;
+      const deviceCurrentlyOnCell = modalCellData.value.device;
+
+      if (!newlySelectedDeviceId) {
+        toast.add({ title: 'Error', description: 'No device selected to assign.', color: 'orange' });
+        logger.warn('[Save Assignment] Exit: No new device was selected from the dropdown.');
+        isSaving.value = false;
+        return;
+      }
+      if (newlySelectedDeviceId === deviceCurrentlyOnCell?.id) {
+        toast.add({ title: 'Info', description: 'No changes detected.', color: 'blue' });
+        logger.log('[Save Assignment] Exit: The selected device is already assigned to this cell. No change needed.');
+        isSaving.value = false;
+        return;
+      }
+
+      if (deviceCurrentlyOnCell) {
+        logger.log(`[API] Un-assigning old device: ${deviceCurrentlyOnCell.id}`);
+        await $api(`/api/v1/devices/${deviceCurrentlyOnCell.id}`, {
+          method: 'PUT',
+          body: { coordinates: null, scale_at_creation_time: null }
+        });
+      }
+
+      logger.log(`[API] Assigning new device: ${newlySelectedDeviceId} to cell R${row},C${col}`);
+      await $api(`/api/v1/devices/${newlySelectedDeviceId}`, {
+        method: 'PUT',
+        body: { coordinates: { row, col }, scale_at_creation_time: scaleToSave }
+      });
+      const deviceName = availableDevices.value.find(d => d.id === newlySelectedDeviceId)?.name || 'device';
+      toast.add({ title: 'Success', description: `${deviceName} has been assigned to the cell.`, color: 'green' });
+    }
+
+    await fetchAndSetDevices();
+    closeAndResetModal();
+
+  } catch (error: any) {
+    logger.error('[API] Failed to save cell assignment:', error);
+    const errorMsg = error.data?.detail || 'An unknown error occurred.';
+    toast.add({ title: 'API Error', description: `Could not save assignment: ${errorMsg}`, color: 'red' });
+  } finally {
+    isSaving.value = false;
+  }
+};
+// !SECTION
 </script>
 
 <style scoped>

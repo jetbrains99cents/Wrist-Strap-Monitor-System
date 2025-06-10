@@ -1,0 +1,510 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Wrist Strap Monitor System",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Devices"
+    }
+  ],
+  "paths": {
+    "/api/v1/devices": {
+      "get": {
+        "summary": "Get list of all devices' information",
+        "deprecated": false,
+        "description": "Retrieves a list of all wrist strap devices, including their current status and coordinates if assigned.",
+        "tags": [
+          "Devices"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeviceInDB"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "Unauthorized - Missing or invalid token.",
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Create a new device",
+        "deprecated": false,
+        "description": "Creates a new device. Admin access required. If coordinates are provided, scale_at_creation_time must also be provided.",
+        "tags": [
+          "Devices"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceCreate"
+              },
+              "examples": {
+                "create_with_coordinates": {
+                  "value": {
+                    "name": "New Device 1",
+                    "mac_address": "AA:BB:CC:DD:EE:F1",
+                    "device_type": "WristStrapMonitorV1",
+                    "installation_area": "Production Line 1",
+                    "coordinates": {
+                      "row": 5,
+                      "col": 5
+                    },
+                    "scale_at_creation_time": 1.5,
+                    "firmware_version": "1.0.0",
+                    "installation_date": "2025-06-10T10:00:00Z"
+                  },
+                  "summary": "Create a new device with coordinates"
+                },
+                "create_without_coordinates": {
+                  "value": {
+                    "name": "Unassigned Device",
+                    "mac_address": "AA:BB:CC:DD:EE:F2",
+                    "device_type": "WristStrapMonitorV1",
+                    "installation_area": "Warehouse",
+                    "firmware_version": "1.0.0",
+                    "installation_date": "2025-06-10T10:00:00Z"
+                  },
+                  "summary": "Create a new device without coordinates"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Device created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceInDB"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "Bad Request - Invalid data or missing required fields (e.g., scale without coordinates)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {}
+          },
+          "403": {
+            "description": "Forbidden - Admin access required",
+            "headers": {}
+          },
+          "422": {
+            "description": "Validation Error",
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v1/devices/{device_id}": {
+      "get": {
+        "summary": "Get information of a single device",
+        "deprecated": false,
+        "description": "Retrieves detailed information for a specific device by its ID.",
+        "tags": [
+          "Devices"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "description": "The unique identifier of the device.",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceInDB"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {}
+          },
+          "404": {
+            "description": "Device not found",
+            "headers": {}
+          }
+        },
+        "security": []
+      },
+      "put": {
+        "summary": "Update a device",
+        "deprecated": false,
+        "description": "Updates an existing device's information. Admin access required. If coordinates are provided, scale_at_creation_time must also be provided.",
+        "tags": [
+          "Devices"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "description": "The unique identifier of the device.",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceUpdate"
+              },
+              "examples": {
+                "update_coords_and_scale": {
+                  "value": {
+                    "coordinates": {
+                      "row": 6,
+                      "col": 6
+                    },
+                    "scale_at_creation_time": 2
+                  },
+                  "summary": "Update device coordinates and scale"
+                },
+                "update_name_and_firmware": {
+                  "value": {
+                    "name": "Updated Device Name",
+                    "firmware_version": "1.1.0"
+                  },
+                  "summary": "Update device name and firmware"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Device updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeviceInDB"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "Bad Request - Invalid data or missing required fields",
+            "headers": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {}
+          },
+          "403": {
+            "description": "Forbidden - Admin access required",
+            "headers": {}
+          },
+          "404": {
+            "description": "Device not found",
+            "headers": {}
+          },
+          "422": {
+            "description": "Validation Error",
+            "headers": {}
+          }
+        },
+        "security": []
+      },
+      "delete": {
+        "summary": "Delete a device",
+        "deprecated": false,
+        "description": "Deletes a device by its ID. Admin access required.",
+        "tags": [
+          "Devices"
+        ],
+        "parameters": [
+          {
+            "name": "device_id",
+            "in": "path",
+            "description": "The unique identifier of the device.",
+            "required": true,
+            "example": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Device deleted successfully (No Content)",
+            "headers": {}
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {}
+          },
+          "403": {
+            "description": "Forbidden - Admin access required",
+            "headers": {}
+          },
+          "404": {
+            "description": "Device not found",
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Coordinates": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "integer",
+            "description": "Row coordinate on the map grid."
+          },
+          "col": {
+            "type": "integer",
+            "description": "Column coordinate on the map grid."
+          }
+        },
+        "required": [
+          "row",
+          "col"
+        ]
+      },
+      "LastEventDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Type of the last event (e.g., 'Connection', 'Sensor Reading')."
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Status of the last event (e.g., 'Connected', 'Warning')."
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last event (ISO 8601)."
+          },
+          "value": {
+            "type": "object",
+            "description": "Details of the last event, can be any JSON.",
+            "properties": {}
+          }
+        },
+        "required": [
+          "type",
+          "timestamp",
+          "value"
+        ]
+      },
+      "DeviceCreate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the device."
+          },
+          "mac_address": {
+            "type": "string",
+            "pattern": "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$",
+            "description": "Unique MAC address."
+          },
+          "device_type": {
+            "type": "string",
+            "description": "Type of the device (e.g., 'WristStrapMonitorV1')."
+          },
+          "installation_area": {
+            "type": "string",
+            "description": "Area where the device is installed."
+          },
+          "coordinates": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/7293350"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "$ref": "#/components/schemas/Coordinates"
+          },
+          "scale_at_creation_time": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "float",
+            "description": "PDF scale at which coordinates were assigned."
+          },
+          "firmware_version": {
+            "type": "string",
+            "description": "Firmware version of the device."
+          },
+          "installation_date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date of device installation (ISO 8601 string)."
+          }
+        },
+        "required": [
+          "name",
+          "mac_address",
+          "device_type",
+          "installation_area",
+          "firmware_version",
+          "installation_date"
+        ]
+      },
+      "DeviceInDB": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/DeviceCreate"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "MongoDB document ID."
+              },
+              "last_event": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/LastEventDetails"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updatedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        ]
+      },
+      "DeviceUpdate": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "installation_area": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "coordinates": {
+            "oneOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/definitions/7293350"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "$ref": "#/components/schemas/Coordinates"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "scale_at_creation_time": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "float"
+          },
+          "firmware_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [],
+  "security": []
+}

@@ -39,7 +39,17 @@ export default defineNuxtConfig({
             apiBase: 'https://172.16.9.183:3002',
             // --- ADD THIS NEW LINE ---
             // This will be true when you run `npm run dev` and false for `npm run build`
-            loggingEnabled: process.env.NODE_ENV === 'development'
+            loggingEnabled: process.env.NODE_ENV === 'development',
+            installationAreas: [
+                "POL",
+                "FLW",
+                "CG",
+                "OQC Lighting",
+                "D Inspection",
+                "Warehouse Z",
+                "Logistics",
+                "Packaging",
+            ]
         }
     },
     // --- END ADDED SECTION ---

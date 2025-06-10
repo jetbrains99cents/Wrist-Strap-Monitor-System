@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-1 min-h-0 overflow-hidden">
-    <!-- Desktop Sidebar -->
     <aside
         class="hidden md:flex md:flex-col bg-gray-100 dark:bg-dark-surface border-r border-gray-200 dark:border-dark-border p-4 w-60 lg:w-64 overflow-y-auto shrink-0"
         aria-label="Desktop Dashboard Navigation"
@@ -16,7 +15,6 @@
       />
     </aside>
 
-    <!-- Main Content Area -->
     <section class="flex-1 flex flex-col overflow-hidden p-4 sm:p-6 md:p-8">
       <div class="md:hidden mb-4 shrink-0">
         <UButton
@@ -28,13 +26,12 @@
         />
       </div>
 
-      <!-- Filter Bar -->
       <UCard class="filter-bar shrink-0 mb-6" :ui="{ body: { padding: 'p-4' } }">
         <div class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
             <div>
               <label :for="startDateInputId" class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">{{
-                startDateLabel
+                  startDateLabel
                 }}</label>
               <UInput :id="startDateInputId" type="datetime-local" v-model="filters.startDate" size="md"/>
             </div>
@@ -89,7 +86,6 @@
         </div>
       </UCard>
 
-      <!-- Data Table Area -->
       <div ref="dataTableContainerRef" class="data-table-area flex-grow min-h-0 flex flex-col">
         <UTable
             :columns="tableColumns"
@@ -128,7 +124,6 @@
         </UTable>
       </div>
 
-      <!-- Pagination Controls & Actions -->
       <div class="pagination-actions-bar flex justify-between items-center mt-4 shrink-0">
         <div class="flex items-center gap-2">
           <UPagination
@@ -162,7 +157,6 @@
       </div>
     </section>
 
-    <!-- Mobile Sidebar -->
     <USlideover v-model="isMobileMenuOpen" side="left" :ui="{ width: 'max-w-xs w-full sm:w-72' }">
       <UCard class="flex flex-col flex-1 h-full"
              :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', body: { padding: '', base: 'flex-1 overflow-y-auto' } }">
@@ -182,7 +176,6 @@
       </UCard>
     </USlideover>
 
-    <!-- Payload Modal -->
     <UModal v-model="isPayloadModalOpen">
       <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
         <template #header>
@@ -209,11 +202,16 @@
 import {ref, computed, watch, onMounted, onBeforeUnmount, nextTick} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
 import {useLogger} from '~/composables/useLogger';
+import { useNuxtApp } from '#app';
+// REMOVED: Problematic import for useToast
+// import { useToast } from '#app/composables/toast'; // This line was causing the error
 
 type Sort = { column: string; direction: 'asc' | 'desc'; };
 
 const logger = useLogger();
 const {currentLanguage} = useLanguage();
+const toast = useToast(); // useToast is auto-imported by Nuxt UI, no explicit import needed
+const { $api } = useNuxtApp();
 const isMobileMenuOpen = ref(false);
 
 // --- Types ---
@@ -230,26 +228,25 @@ type LogStatus =
 
 type EventCategory = "Connection" | "Sensor Reading" | "Alert" | "User action" | "System";
 
+// MODIFIED: HistoricalLog interface to match backend HistoricalLogResponse
 interface HistoricalLog {
   id: string;
-  timestamp: string;
+  timestamp: string; // ISO 8601 string
   deviceId: string;
   deviceName: string;
   deviceMacAddress: string;
-  area?: string;
+  area: string; // Changed to non-optional as per backend/DB schema
   eventType: EventCategory;
   status?: LogStatus;
   messageSummary: string;
-  fullPayload: {
+  fullPayload: { // Simplified to match backend's dict (no specific wifi_ssid/firmware_version)
     created_at: string;
     device_name: string;
     mac_address: string;
-    wifi_ssid?: string;
-    firmware_version?: string;
     event: {
       type: EventCategory;
       status?: LogStatus;
-      value: string | Record<string, any>;
+      value: any; // Use any for dynamic content
     };
   };
 }
@@ -382,6 +379,7 @@ const statusOptions = computed<FilterOption[]>(() => [
 let debounceTimer: ReturnType<typeof setTimeout>;
 const DEBOUNCE_DELAY = 500;
 
+// MODIFIED: Watch filters to trigger API fetch (existing logic with currentPage reset)
 watch(filters, () => {
   clearTimeout(debounceTimer);
   currentPage.value = 1;
@@ -393,30 +391,49 @@ watch(filters, () => {
 const setDateRangePreset = (preset: 'today' | 'yesterday' | '7days' | '30days' | 'all') => {
   selectedDateRangePreset.value = preset;
   const now = new Date();
-  let start = new Date();
-  let end = new Date(now);
+  let start = new Date(now); // Initialize with now
+  let end = new Date(now);   // Initialize with now
 
+  // Default to today's start/end for all presets, then adjust
   start.setHours(0, 0, 0, 0);
   end.setHours(23, 59, 59, 999);
 
-  if (preset === 'today') {
-  } else if (preset === 'yesterday') {
-    start.setDate(now.getDate() - 1);
-    end.setDate(now.getDate() - 1);
-  } else if (preset === '7days') {
-    start.setDate(now.getDate() - 6);
-  } else if (preset === '30days') {
-    start.setDate(now.getDate() - 29);
-  } else if (preset === 'all') {
-    start.setFullYear(now.getFullYear() - 1);
-  }
+  // FIXED: Corrected the template literal string interpolation for startDate and endDate
+  // This was causing the "Invalid date for API call" warnings.
+  if (preset === 'all') {
+    filters.value.startDate = ''; // Explicitly clear for 'All time'
+    filters.value.endDate = '';   // Explicitly clear for 'All time'
+  } else {
+    // Generate YYYY-MM-DDTHH:mm format required by datetime-local input
+    const formatDateTimeLocal = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
 
-  filters.value.startDate = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}T${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`;
-  filters.value.endDate = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}T${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`;
+    if (preset === 'today') {
+      // start and end are already set to today's start/end by default
+    } else if (preset === 'yesterday') {
+      start.setDate(now.getDate() - 1);
+      end.setDate(now.getDate() - 1);
+    } else if (preset === '7days') {
+      start.setDate(now.getDate() - 6);
+    } else if (preset === '30days') {
+      start.setDate(now.getDate() - 29);
+    }
+    // Set the filters with the formatted local datetime string
+    filters.value.startDate = formatDateTimeLocal(start);
+    filters.value.endDate = formatDateTimeLocal(end);
+  }
 };
+
 
 const isLoading = ref(false);
 const allLogs = ref<HistoricalLog[]>([]);
+const totalItems = ref(0); // Initialize to 0, will be updated by fetchHistoricalData
 const currentPage = ref(1);
 const itemsPerPage = ref(15);
 const sort = ref<Sort>({column: 'timestamp', direction: 'desc'});
@@ -454,7 +471,8 @@ const calculateDynamicItemsPerPageForTable = () => {
 
 let tableResizeObserver: ResizeObserver | null = null;
 onMounted(() => {
-  setDateRangePreset('7days');
+  // Call setDateRangePreset to trigger initial fetch
+  setDateRangePreset('7days'); // This will trigger fetchHistoricalData via watch(filters)
   nextTick(() => {
     if (dataTableContainerRef.value) {
       calculateDynamicItemsPerPageForTable();
@@ -488,7 +506,9 @@ const formatTimestampForDisplay = (isoString: string): string => {
   if (!isoString) return '';
   try {
     const date = new Date(isoString);
+    // Use 'en-GB' for consistent DD/MM/YYYY and include seconds
     const options: Intl.DateTimeFormatOptions = { timeZone: 'Asia/Ho_Chi_Minh', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+    // Format to "DD/MM/YYYY-HH:MM:SS"
     const parts = new Intl.DateTimeFormat('en-GB', options).formatToParts(date);
     const getPart = (type: Intl.DateTimeFormatPartTypes) => (parts.find(p => p.type === type)?.value || '');
     const day = getPart('day');
@@ -504,74 +524,106 @@ const formatTimestampForDisplay = (isoString: string): string => {
   }
 };
 
+// MODIFIED: Simplified filteredLogs to return allLogs.value (filtering is backend-side)
 const filteredLogs = computed(() => {
-  let logs = [...allLogs.value];
-  if (filters.value.searchTerm) {
-    const term = filters.value.searchTerm.toLowerCase();
-    logs = logs.filter(log => formatTimestampForDisplay(log.fullPayload.created_at).toLowerCase().includes(term) || log.fullPayload.device_name.toLowerCase().includes(term) || log.fullPayload.mac_address.toLowerCase().includes(term) || (log.area && log.area.toLowerCase().includes(term)) || log.fullPayload.event.type.toLowerCase().includes(term) || (log.fullPayload.event.status && log.fullPayload.event.status.toLowerCase().includes(term)) );
-  }
-  if (filters.value.eventType) {
-    logs = logs.filter(log => log.fullPayload.event.type === filters.value.eventType);
-  }
-  if (filters.value.status) {
-    logs = logs.filter(log => log.fullPayload.event.status === filters.value.status);
-  }
-  if (filters.value.startDate && selectedDateRangePreset.value !== 'all') {
-    logs = logs.filter(log => new Date(log.fullPayload.created_at) >= new Date(filters.value.startDate!));
-  }
-  if (filters.value.endDate && selectedDateRangePreset.value !== 'all') {
-    logs = logs.filter(log => new Date(log.fullPayload.created_at) <= new Date(filters.value.endDate!));
-  }
-  if (sort.value.column) {
-    const {column, direction} = sort.value;
-    logs.sort((a, b) => {
-      let valA: any, valB: any;
-      if (column === 'timestamp') { valA = new Date(a.fullPayload.created_at).getTime(); valB = new Date(b.fullPayload.created_at).getTime(); }
-      else if (column === 'deviceName') { valA = a.fullPayload.device_name; valB = b.fullPayload.device_name; }
-      else if (column === 'deviceMacAddress') { valA = a.fullPayload.mac_address; valB = b.fullPayload.mac_address; }
-      else if (column === 'area') { valA = a.area || ''; valB = b.area || ''; }
-      else if (column === 'eventType') { valA = a.fullPayload.event.type; valB = b.fullPayload.event.type; }
-      else if (column === 'status') { valA = a.fullPayload.event.status || ''; valB = b.fullPayload.event.status || ''; }
-      else { valA = (a as any)[column]; valB = (b as any)[column]; }
-      if (valA < valB) return direction === 'asc' ? -1 : 1;
-      if (valA > valB) return direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }
-  return logs;
+  return allLogs.value;
 });
 
-const totalItems = computed(() => filteredLogs.value.length);
+
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
 const paginatedLogs = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return filteredLogs.value.slice(start, end);
+  // With backend pagination, paginatedLogs can just be allLogs.value
+  // as allLogs.value already contains the current page's data.
+  return allLogs.value;
 });
 
-watch(currentPage, (newPage) => { pageInput.value = newPage; });
-const goToPage = () => { let page = Number(pageInput.value); if (isNaN(page) || page < 1) page = 1; else if (page > totalPages.value) page = totalPages.value; currentPage.value = page; pageInput.value = page; };
+// MODIFIED: Watchers for pagination and sorting
+watch(currentPage, (newPage, oldPage) => {
+  // Only fetch if page actually changes (not just pageInput sync)
+  if (newPage !== oldPage) {
+    pageInput.value = newPage;
+    fetchHistoricalData();
+  }
+});
+
+watch(sort, () => {
+  currentPage.value = 1; // Reset to page 1 when sort changes
+  pageInput.value = 1;
+  fetchHistoricalData();
+}, { deep: true });
+
+watch(itemsPerPage, (newItemsPerPage, oldItemsPerPage) => {
+  if (newItemsPerPage !== oldItemsPerPage) {
+    currentPage.value = 1; // Reset to page 1 when items per page changes
+    pageInput.value = 1;
+    fetchHistoricalData();
+  }
+});
+
+const goToPage = () => {
+  let page = Number(pageInput.value);
+  if (isNaN(page) || page < 1) page = 1;
+  else if (page > totalPages.value) page = totalPages.value;
+  currentPage.value = page; // This will trigger watch(currentPage) and thus fetchHistoricalData
+};
 const goToPageOnBlur = () => { goToPage(); };
 
+// MODIFIED: fetchHistoricalData to use API call
 const fetchHistoricalData = async () => {
   isLoading.value = true;
   logger.log("Fetching data with filters:", JSON.parse(JSON.stringify(filters.value)));
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const mockData: HistoricalLog[] = [];
-  const eventTypeValues: EventCategory[] = ["Connection", "Sensor Reading", "Alert", "User action", "System"];
-  const statusValues: LogStatus[] = ["Connected", "Disconnected", "Voltage reading failed", "Info", "Warning", "Error", "Critical", "Configured", "Reset"];
-  const areas: string[] = ["POL", "FLW", "CG A", "CG B", "Testing Alpha", "Warehouse Main"];
-  const numEntries = 200; const nowMs = Date.now();
-  for (let i = 0; i < numEntries; i++) {
-    const randomDayOffset = Math.floor(Math.random() * 30); const timestamp = new Date(nowMs); timestamp.setDate(timestamp.getDate() - randomDayOffset);
-    const eventType = eventTypeValues[Math.floor(Math.random() * eventTypeValues.length)]; let eventStatus: LogStatus | undefined = undefined;
-    if (eventType === 'Connection') { eventStatus = Math.random() > 0.5 ? "Connected" : "Disconnected"; } else if (eventType === 'Sensor Reading') { eventStatus = Math.random() > 0.05 ? "Info" : "Voltage reading failed"; }
-    const deviceIndex = 1 + (i % 10); const deviceName = `Device ${deviceIndex}`;
-    mockData.push({ id: `log-${i}`, timestamp: timestamp.toISOString(), deviceId: `ESP32-${100 + deviceIndex}`, deviceName: deviceName, deviceMacAddress: `00:1A:2B:3C:DD:${10 + deviceIndex}`, area: areas[Math.floor(Math.random() * areas.length)], eventType: eventType, status: eventStatus, messageSummary: "Summary", fullPayload: { created_at: timestamp.toISOString(), device_name: deviceName, mac_address: `00:1A:2B:3C:DD:${10 + deviceIndex}`, event: { type: eventType, status: eventStatus, value: "Details" } } });
+
+  try {
+    const apiParams: Record<string, any> = {
+      page: currentPage.value,
+      page_size: itemsPerPage.value, // Backend expects page_size
+      sort_by: sort.value.column,
+      sort_direction: sort.value.direction,
+    };
+
+    // Only add date filters to API params if they are not empty strings
+    if (filters.value.startDate) {
+      const startDate = new Date(filters.value.startDate);
+      if (!isNaN(startDate.getTime())) {
+        apiParams.start_date = startDate.toISOString();
+      } else {
+        logger.warn("Invalid start date for API call (not convertible to Date object):", filters.value.startDate);
+      }
+    }
+    if (filters.value.endDate) {
+      const endDate = new Date(filters.value.endDate);
+      if (!isNaN(endDate.getTime())) {
+        apiParams.end_date = endDate.toISOString();
+      } else {
+        logger.warn("Invalid end date for API call (not convertible to Date object):", filters.value.endDate);
+      }
+    }
+
+    if (filters.value.searchTerm) {
+      apiParams.search_term = filters.value.searchTerm;
+    }
+    if (filters.value.eventType) {
+      apiParams.event_type = filters.value.eventType;
+    }
+    if (filters.value.status) {
+      apiParams.status = filters.value.status;
+    }
+
+
+    const response = await $api('/api/v1/logs/', { params: apiParams });
+
+    allLogs.value = response.items;
+    totalItems.value = response.total_count; // Update totalItems from backend
+
+  } catch (error) {
+    logger.error("Failed to fetch historical data:", error);
+    toast.add({ title: 'Error', description: 'Could not load historical logs. Please try again.', color: 'red' });
+    allLogs.value = []; // Clear data on error
+    totalItems.value = 0; // Reset total on error
+  } finally {
+    isLoading.value = false;
+    nextTick(() => { calculateDynamicItemsPerPageForTable(); });
   }
-  allLogs.value = mockData;
-  currentPage.value = 1; pageInput.value = 1; isLoading.value = false;
-  nextTick(() => { calculateDynamicItemsPerPageForTable(); });
 };
 
 const isPayloadModalOpen = ref(false);
@@ -582,13 +634,58 @@ const openPayloadModal = (log: HistoricalLog) => {
 };
 const exportToExcel = async () => {
   const XLSX = await import('xlsx');
-  const dataToExport = filteredLogs.value.map(log => ({ [timestampLabel.value]: formatTimestampForDisplay(log.fullPayload.created_at), [deviceNameLabel.value]: log.fullPayload.device_name, [deviceMacAddressLabel.value]: log.fullPayload.mac_address, [areaLabel.value]: log.area || '', [eventTypeLabel.value]: log.fullPayload.event.type, [statusTableColumnLabel.value]: log.fullPayload.event.status ? getLocalizedStatus(log.fullPayload.event.status) : '', [messageExcelHeaderLabel.value]: JSON.stringify(log.fullPayload) }));
-  if (dataToExport.length === 0) { logger.warn("No data to export."); return; }
-  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-  const colWidths = Object.keys(dataToExport[0]).map(key => ({wch: Math.max(key.length, 20)})); worksheet['!cols'] = colWidths;
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Historical Data");
-  XLSX.writeFile(workbook, "historical_data.xlsx");
+  // MODIFIED: Call new export endpoint for all filtered data
+  try {
+    const exportApiParams: Record<string, any> = {
+      sort_by: sort.value.column,
+      sort_direction: sort.value.direction,
+    };
+    if (filters.value.searchTerm) exportApiParams.search_term = filters.value.searchTerm;
+    if (filters.value.eventType) exportApiParams.event_type = filters.value.eventType;
+    if (filters.value.status) exportApiParams.status = filters.value.status;
+    if (filters.value.startDate) {
+      const startDate = new Date(filters.value.startDate);
+      if (!isNaN(startDate.getTime())) exportApiParams.start_date = startDate.toISOString();
+    }
+    if (filters.value.endDate) {
+      const endDate = new Date(filters.value.endDate);
+      if (!isNaN(endDate.getTime())) exportApiParams.end_date = endDate.toISOString();
+    }
+
+    const allFilteredLogsForExport = await $api('/api/v1/logs/export/', { params: exportApiParams });
+
+    const dataToExport = allFilteredLogsForExport.map((log: HistoricalLog) => ({
+      [timestampLabel.value]: formatTimestampForDisplay(log.timestamp),
+      [deviceNameLabel.value]: log.deviceName,
+      [deviceMacAddressLabel.value]: log.deviceMacAddress,
+      [areaLabel.value]: log.area || '',
+      [eventTypeLabel.value]: log.eventType,
+      [statusTableColumnLabel.value]: log.status ? getLocalizedStatus(log.status) : '',
+      [messageExcelHeaderLabel.value]: JSON.stringify(log.fullPayload)
+    }));
+
+    if (dataToExport.length === 0) {
+      logger.warn("No data to export based on current filters.");
+      toast.add({ title: 'No Data', description: 'There is no data matching your filters to export.', color: 'orange' });
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const colWidths = Object.keys(dataToExport[0]).map(key => ({wch: Math.max(key.length, 25)}));
+    worksheet['!cols'] = colWidths;
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Historical Data");
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    const fileName = `historical_data_export_${dateStr}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    logger.log(`Successfully exported data to ${fileName}`);
+    toast.add({ title: 'Export Successful', description: `Exported ${dataToExport.length} logs to Excel.`, color: 'green' });
+
+  } catch (error) {
+    logger.error("Error exporting data:", error);
+    toast.add({ title: 'Export Failed', description: 'Could not export data to Excel.', color: 'red' });
+  }
 };
 
 type UBadgeColor = 'gray' | 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal' | 'cyan' | 'sky' | 'blue' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose' | 'primary';

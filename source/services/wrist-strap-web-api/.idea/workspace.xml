@@ -5,25 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d4c20be-1ab7-41e6-a74c-6889261a0341" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/app/api/v1/endpoints/admin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/endpoints/devices.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/endpoints/logs.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/api/v1/endpoints/settings.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/crud/device.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/crud/log.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/schemas/device.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/schemas/log.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/schemas/pyobjectid.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/schemas/setting.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/crud/setting.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/tools.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../sample historical logs json string.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../../sample historical logs json string.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/components/device/DeviceCard.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/components/device/DeviceCard.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-list.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-management.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-management.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/data-analysis.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/data-analysis.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/logs.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/logs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/log.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/log.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/db/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/db/session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/device.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/device.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/log.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/log.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/setting.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/setting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -142,7 +144,7 @@
       <updated>1749281993202</updated>
       <workItem from="1749281994210" duration="24697000" />
       <workItem from="1749432182283" duration="9239000" />
-      <workItem from="1749448700902" duration="10201000" />
+      <workItem from="1749448700902" duration="34358000" />
     </task>
     <servers />
   </component>
@@ -151,6 +153,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api.coverage" NAME="wrist-strap-web-api Coverage Results" MODIFIED="1749351168385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api_secure.coverage" NAME="wrist-strap-web-api-secure Coverage Results" MODIFIED="1749461928000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api_secure.coverage" NAME="wrist-strap-web-api-secure Coverage Results" MODIFIED="1749533434665" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>
