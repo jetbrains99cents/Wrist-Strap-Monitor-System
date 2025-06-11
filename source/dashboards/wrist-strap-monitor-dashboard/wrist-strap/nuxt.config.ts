@@ -49,7 +49,31 @@ export default defineNuxtConfig({
                 "Warehouse Z",
                 "Logistics",
                 "Packaging",
-            ]
+            ],
+            // --- ADD THIS NEW OBJECT ---
+            statusColors: {
+                // Green for OK states
+                "Connected": "green",
+
+                // Blue for Neutral/Info states
+                "Info": "blue",
+                "Configured": "blue",
+                "Reset": "blue",
+                "System": "blue",
+                "User action": "blue",
+
+                // Amber for Warnings
+                "Warning": "amber",
+                "Voltage reading failed": "amber",
+
+                // Red for Failures
+                "Disconnected": "red",
+                "Error": "red",
+                "Critical": "red",
+
+                // Slate (dark gray/black) for Unknown
+                "Unknown": "slate"
+            }
         }
     },
     // --- END ADDED SECTION ---

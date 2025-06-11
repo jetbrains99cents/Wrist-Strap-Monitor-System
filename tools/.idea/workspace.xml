@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ea037d49-a3dc-4281-be40-5758b867dee6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/analytics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/crud/analytics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/schemas/voltage_reading.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/generate_historical_logs_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/generate_voltage_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/tools.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/tools.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/historical_logs_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/historical_logs_data.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2yLM1outEzxuu1t3erbv8em09fb" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.generate_voltage_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.159" />
+        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ea037d49-a3dc-4281-be40-5758b867dee6" name="Changes" comment="" />
+      <created>1749609187505</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1749609187505</updated>
+      <workItem from="1749609188543" duration="4839000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/tools$main.coverage" NAME="main Coverage Results" MODIFIED="1749609276840" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/tools$generate_voltage_data.coverage" NAME="generate_voltage_data Coverage Results" MODIFIED="1749611894886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+  </component>
+</project>

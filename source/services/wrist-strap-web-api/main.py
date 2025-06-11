@@ -11,7 +11,7 @@ app = FastAPI(
 # Configure CORS
 origins = [
     "https://172.16.9.183:3001",  # Your Nuxt dashboard HTTPS dev server
-    "https://172.21.16.1:3001",  # Your Nuxt dashboard HTTPS dev server
+    "https://172.21.16.1SS:3001",  # Your Nuxt dashboard HTTPS dev server
     "https://localhost:3001",    # Localhost version of dashboard
     "http://localhost:3001",     # Fallback for HTTP dashboard dev if used
     "https://172.16.9.183:3000",  # Your Nuxt landing page HTTPS dev server

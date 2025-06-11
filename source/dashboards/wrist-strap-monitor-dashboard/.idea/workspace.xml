@@ -8,6 +8,7 @@
       <change afterPath="$PROJECT_DIR$/wrist-strap/components/layout/ActionStatusModal.vue" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useActionStatusModal.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useLogger.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useStatusColor.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/layouts/empty.vue" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/middleware/auth.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/pages/login.vue" afterDir="false" />
@@ -15,23 +16,21 @@
       <change afterPath="$PROJECT_DIR$/wrist-strap/prod-server.mjs" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/types/nuxt.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/setting.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../tools/.idea/tools.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../../tools/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../sample historical logs json string.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../../sample historical logs json string.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/analytics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/analytics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/voltage_reading.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/generate_historical_logs_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/generate_voltage_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/logs.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/logs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/log.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/log.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/db/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/db/session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/device.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/device.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/log.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/log.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/setting.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/setting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/.idea/tools.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/tools.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/historical_logs_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/historical_logs_data.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/main.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/pyproject.toml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,7 +123,8 @@
       <workItem from="1749435091043" duration="7957000" />
       <workItem from="1749445526867" duration="2457000" />
       <workItem from="1749448005046" duration="337000" />
-      <workItem from="1749448536401" duration="39858000" />
+      <workItem from="1749448536401" duration="41832000" />
+      <workItem from="1749610769018" duration="9490000" />
     </task>
     <servers />
   </component>
