@@ -10,7 +10,7 @@
     >
       <h3
           class="m-0 relative text-sm" >
-        v1.0 - Updated at 27/12/2025
+        v1.0 - Updated at 12/6/2025
       </h3>
     </div>
 

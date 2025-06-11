@@ -1,16 +1,19 @@
+# File: app/api/v1/endpoints/settings.py
+
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.setting import SystemSettingsResponse, SystemSettingsCreateUpdate
 from app.crud import setting as setting_crud
-from app.security import get_current_user, get_current_admin_user  # Assuming settings are protected
-from app.schemas.user import User  # For current_user type hint
+from app.security import get_current_user, get_current_admin_user
+from app.schemas.user import User
 from fastapi.concurrency import run_in_threadpool
 from app.db.session import get_db
 import pymongo.database
-from http import HTTPStatus  # For robust HTTP status codes
-from pydantic import ValidationError  # To catch Pydantic validation errors
+from http import HTTPStatus
+from pydantic import ValidationError
 
-print("--- Loading settings.py endpoints ---")
-
+# Get a logger instance for this file
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -19,62 +22,62 @@ router = APIRouter()
     response_model=SystemSettingsResponse,
     summary="Get System Settings",
     description="Retrieves the global system settings for working time and production plan alerts.",
-    dependencies=[Depends(get_current_user)],  # Use get_current_user for viewing settings
     status_code=status.HTTP_200_OK
 )
 async def read_settings(
         db: pymongo.database.Database = Depends(get_db),
         current_user: User = Depends(get_current_user)
 ):
+    """
+    Retrieves the global system settings.
+    """
+    user_email = current_user.get("email")
+    logger.info(f"User '{user_email}' is requesting system settings.")
     try:
         settings_data = await run_in_threadpool(setting_crud.get_settings, db)
         if settings_data is None:
-            # If no settings document exists, return a default response or 404
-            # Returning a default is often user-friendlier for initial load
-            # Let's return an empty/default structure if not found
-            # Ensure this matches a valid SystemSettingsResponse object
+            logger.info("No system settings document found in the database. Returning a default structure.")
             return SystemSettingsResponse(
-                _id=setting_crud.SETTINGS_DOC_ID,  # Use the defined fixed ID
+                _id=setting_crud.SETTINGS_DOC_ID,
                 workingTime=[],
                 productionPlan=[],
                 createdAt=None,
-                updatedAt=None  # Pydantic will handle default values if provided
+                updatedAt=None
             )
-            # Alternatively, raise HTTPException(status.HTTP_404_NOT_FOUND, detail="System settings not found")
-
-        # Pydantic model will handle conversion from 24hr to 12hr AM/PM and aliasing
         return SystemSettingsResponse(**settings_data)
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error reading settings: {e}")
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=f"Internal Server Error: {e}")
+        logger.error(f"An unexpected error occurred while user '{user_email}' was reading settings: {e}", exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="An internal server error occurred while reading settings.")
 
 
 @router.put(
     "/",
     response_model=SystemSettingsResponse,
     summary="Update System Settings",
-    description="Updates the global system settings for working time and production plan alerts.",
-    dependencies=[Depends(get_current_admin_user)],  # Typically only admins can update settings
+    description="Updates the global system settings. Requires admin privileges.",
     status_code=status.HTTP_200_OK
 )
 async def update_system_settings(
-        settings_in: SystemSettingsCreateUpdate,  # Input model handles frontend to backend conversion
+        settings_in: SystemSettingsCreateUpdate,
         db: pymongo.database.Database = Depends(get_db),
-        current_user: User = Depends(get_current_admin_user)  # Ensure user is admin
+        current_user: User = Depends(get_current_admin_user)
 ):
+    """
+    Updates the global system settings. Admin only.
+    """
+    admin_email = current_user.get("email")
+    logger.info(f"Admin '{admin_email}' is attempting to update system settings.")
     try:
-        # settings_in Pydantic model's validator automatically converts frontend 12hr to 24hr internal format
         updated_data = await run_in_threadpool(setting_crud.update_settings, db, settings_in)
-
-        # Pydantic model will then convert from 24hr back to 12hr AM/PM for the response
+        logger.info(f"System settings successfully updated by admin '{admin_email}'.")
         return SystemSettingsResponse(**updated_data)
     except ValidationError as e:
-        # Catch Pydantic validation errors specifically to return 422
+        logger.warning(f"Validation error during settings update by admin '{admin_email}': {e.errors()}")
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=e.errors())
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Error updating settings: {e}")
-        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=f"Internal Server Error: {e}")
+        logger.error(f"An unexpected error occurred while admin '{admin_email}' was updating settings: {e}", exc_info=True)
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail="An internal server error occurred while updating settings.")

@@ -1,5 +1,6 @@
 # File: app/api/v1/endpoints/analytics.py
 
+import logging
 from fastapi import APIRouter, Depends, Query, HTTPException, status
 from typing import Optional
 import pymongo.database
@@ -9,8 +10,8 @@ from app.security import get_current_user
 from app.schemas.user import User
 from app.crud import analytics as analytics_crud
 
-print("--- Loading analytics.py endpoints ---")
-
+# Get a logger instance for this file
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -34,6 +35,10 @@ def get_analytics(
     - **dateRange**: The time period for the data.
     - **area**: Optional filter for a specific installation area.
     """
+    user_email = current_user.get("email")
+    log_details = f"metric: {metric}, dateRange: {dateRange}, area: {area or 'all'}"
+    logger.info(f"User '{user_email}' requesting analytics data with filters: {log_details}")
+
     try:
         data = analytics_crud.get_analytics_data(
             db=db,
@@ -41,11 +46,14 @@ def get_analytics(
             date_range=dateRange,
             area=area
         )
+        logger.info(f"Successfully processed analytics request for user '{user_email}' with filters: {log_details}")
         return data
     except Exception as e:
-        # In a real app, you would have more specific error logging here
-        print(f"Error getting analytics for metric '{metric}': {e}")
+        logger.error(
+            f"Error processing analytics for user '{user_email}' with filters: {log_details}. Error: {e}",
+            exc_info=True  # This will include the full traceback in the log
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An error occurred while processing analytics data."
+            detail="An error occurred while processing analytics data."
         )

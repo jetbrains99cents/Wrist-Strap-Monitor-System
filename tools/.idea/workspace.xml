@@ -5,22 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ea037d49-a3dc-4281-be40-5758b867dee6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/analytics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/crud/analytics.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/schemas/voltage_reading.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/generate_historical_logs_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/generate_voltage_data.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/core/logging_config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/plugins/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/wrist-strap/plugins/api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/analytics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/devices.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/devices.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/logs.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/api/v1/endpoints/logs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/core/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/crud/setting.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/crud/setting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/crud/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/crud/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/db/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/db/session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/security.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/tools.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/tools.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/historical_logs_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/historical_logs_data.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/uv.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/uv.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +81,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1749609187505</updated>
-      <workItem from="1749609188543" duration="4839000" />
+      <workItem from="1749609188543" duration="7382000" />
     </task>
     <servers />
   </component>

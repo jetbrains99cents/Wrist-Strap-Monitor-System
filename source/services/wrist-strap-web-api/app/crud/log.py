@@ -1,13 +1,21 @@
-from app.db.session import historical_logs
+# File: app/crud/log.py
+
+import logging
 from app.schemas.log import LogCreate
 from datetime import datetime, timezone
 from typing import Optional, List, Dict, Any, Tuple
 import pymongo.database
 
+# Get a logger instance for this file
+logger = logging.getLogger(__name__)
+
 
 def create_log(db: pymongo.database.Database, log_in: LogCreate):
+    """Creates a new historical log document."""
     historical_logs_collection = db.get_collection("historical_logs")
     new_log_doc = log_in.model_dump()
+    # No need to log here as this will be called very frequently and create too much noise.
+    # Logging for new events is better handled at a higher level if needed.
     result = historical_logs_collection.insert_one(new_log_doc)
     created_log = historical_logs_collection.find_one({"_id": result.inserted_id})
     return created_log
@@ -25,6 +33,7 @@ def get_multi_logs(
         sort_by: str = "timestamp",
         sort_direction: str = "desc"
 ) -> Tuple[List[Dict[str, Any]], int]:
+    """Retrieves multiple historical logs with filtering, sorting, and pagination."""
     historical_logs_collection = db.get_collection("historical_logs")
     query: Dict[str, Any] = {}
 
@@ -47,6 +56,7 @@ def get_multi_logs(
             {"event.status": {"$regex": search_term, "$options": "i"}},
         ]
 
+    logger.info(f"Querying historical_logs with filter: {query}, skip: {skip}, limit: {limit}")
     total_count = historical_logs_collection.count_documents(query)
 
     sort_order = 1 if sort_direction == "asc" else -1
@@ -66,11 +76,10 @@ def get_multi_logs(
         .limit(limit)
 
     logs_list = list(logs_cursor)
-
+    logger.info(f"Found {total_count} total logs, returning {len(logs_list)} logs.")
     return logs_list, total_count
 
 
-# NEW: Function to get all filtered logs without pagination
 def get_all_filtered_logs(
         db: pymongo.database.Database,
         start_date: Optional[datetime] = None,
@@ -80,7 +89,8 @@ def get_all_filtered_logs(
         search_term: Optional[str] = None,
         sort_by: str = "timestamp",
         sort_direction: str = "desc"
-) -> List[Dict[str, Any]]:  # Returns just the list of logs
+) -> List[Dict[str, Any]]:
+    """Retrieves all historical logs that match filters, without pagination (for export)."""
     historical_logs_collection = db.get_collection("historical_logs")
     query: Dict[str, Any] = {}
 
@@ -103,6 +113,7 @@ def get_all_filtered_logs(
             {"event.status": {"$regex": search_term, "$options": "i"}},
         ]
 
+    logger.info(f"Exporting historical_logs with filter: {query}")
     sort_order = 1 if sort_direction == "asc" else -1
     mongo_sort_field_map = {
         "timestamp": "timestamp",
@@ -114,7 +125,8 @@ def get_all_filtered_logs(
     }
     mongo_sort_by_field = mongo_sort_field_map.get(sort_by, "timestamp")
 
-    # Fetch all matching logs, applying filters and sort, but no skip/limit
     logs_cursor = historical_logs_collection.find(query).sort(mongo_sort_by_field, sort_order)
 
-    return list(logs_cursor)  # Return as list
+    logs_list = list(logs_cursor)
+    logger.info(f"Returning {len(logs_list)} logs for export.")
+    return logs_list

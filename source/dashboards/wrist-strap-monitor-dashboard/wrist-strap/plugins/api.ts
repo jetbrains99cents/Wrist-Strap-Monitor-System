@@ -2,27 +2,28 @@
 
 import { ofetch } from 'ofetch';
 import { useUserStore } from '~/stores/userStore';
-import { useLogger } from '~/composables/useLogger'; // <-- Import your logger
-import { useActionStatusModal } from '~/composables/useActionStatusModal'; // Keep your modal composable
+import { useLogger } from '~/composables/useLogger';
+import { useActionStatusModal } from '~/composables/useActionStatusModal';
+import { useLanguage } from '~/composables/useLanguage'; // --- ADDED: Import language composable ---
 
 export default defineNuxtPlugin((_nuxtApp) => {
     const userStore = useUserStore();
     const config = useRuntimeConfig();
-    const logger = useLogger(); // <-- Initialize your logger
+    const logger = useLogger();
     const { show: showActionModal } = useActionStatusModal();
+    const { currentLanguage } = useLanguage(); // --- ADDED: Get reactive language state ---
 
     const apiFetch = ofetch.create({
         baseURL: config.public.apiBase,
 
         // This interceptor runs before every request
         onRequest({ request, options }) {
-            // --- ADDED: Detailed request logging ---
+            // Detailed request logging
             logger.log(`=> Request: ${options.method || 'GET'} ${request}`);
             console.groupCollapsed('Request Details');
             console.log('Options:', options);
 
             if (userStore.token) {
-                // This correctly adds the token
                 const headers = (options.headers ? new Headers(options.headers) : new Headers());
                 headers.set('Authorization', `Bearer ${userStore.token}`);
                 options.headers = headers;
@@ -34,7 +35,7 @@ export default defineNuxtPlugin((_nuxtApp) => {
             console.groupEnd();
         },
 
-        // --- ADDED: Logging for successful responses ---
+        // Logging for successful responses
         onResponse({ request, response, options }) {
             logger.log(`<= Response (Success): ${response.status} ${request}`);
             console.groupCollapsed('Response Details');
@@ -44,7 +45,7 @@ export default defineNuxtPlugin((_nuxtApp) => {
 
         // This interceptor runs on every API error
         onResponseError({ request, response, options }) {
-            // --- ADDED: Detailed error logging ---
+            // Detailed error logging
             logger.error(`<= Response (Error): ${response.status} ${request}`);
             console.groupCollapsed('Error Response Details');
             console.log('Status:', response.status);
@@ -52,11 +53,16 @@ export default defineNuxtPlugin((_nuxtApp) => {
             console.log('Data:', response._data);
             console.groupEnd();
 
-            // --- KEPT: Your existing modal logic for 401 errors ---
+            // Logic for 401 errors
             if (response.status === 401) {
+                // --- UPDATED: Use dynamic text based on current language ---
                 showActionModal({
-                    title: 'Session Expired',
-                    description: 'Redirecting to the login page in {countdown} seconds...',
+                    title: currentLanguage.value === 'vi'
+                        ? 'Phiên đã hết hạn'
+                        : 'Session Expired',
+                    description: currentLanguage.value === 'vi'
+                        ? 'Đang chuyển hướng đến trang đăng nhập trong {countdown} giây...'
+                        : 'Redirecting to the login page in {countdown} seconds...',
                     icon: 'i-heroicons-clock-solid',
                     color: 'text-amber-500',
                     onComplete: () => {

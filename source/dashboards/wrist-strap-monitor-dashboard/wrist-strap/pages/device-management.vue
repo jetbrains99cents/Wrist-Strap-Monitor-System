@@ -1,5 +1,6 @@
 <template>
   <div class="flex flex-1 min-h-0 overflow-hidden">
+    <!-- Desktop Sidebar -->
     <aside
         class="hidden md:flex md:flex-col bg-gray-100 dark:bg-dark-surface border-r border-gray-200 dark:border-dark-border p-4 w-60 lg:w-64 overflow-y-auto shrink-0"
         aria-label="Desktop Dashboard Navigation"
@@ -15,6 +16,7 @@
       />
     </aside>
 
+    <!-- Main Content Area -->
     <section class="flex-1 flex flex-col overflow-hidden p-3 sm:p-4 md:p-6">
       <div class="md:hidden mb-4 shrink-0">
         <UButton
@@ -26,7 +28,8 @@
         />
       </div>
 
-      <div class="action-bar mb-6 p-4 bg-gray-50 dark:bg-dark-surface rounded-lg shadow shrink-0">
+      <!-- Action Bar -->
+      <div class="action-bar mb-4 p-4 bg-gray-50 dark:bg-dark-surface rounded-lg shadow shrink-0">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div class="flex flex-wrap items-center gap-3">
             <UButton :label="addDeviceLabel" icon="i-heroicons-plus-circle-20-solid" size="md" color="primary"
@@ -48,6 +51,7 @@
         </div>
       </div>
 
+      <!-- Filters Section -->
       <div class="filters-section mb-4 p-4 bg-gray-50 dark:bg-dark-surface rounded-lg shadow shrink-0">
         <div class="flex flex-wrap gap-4">
           <USelectMenu v-model="selectedFilterArea" :options="areaColumnFilterOptions" size="sm" :style="{ minWidth: '180px' }" :placeholder="filterByAreaPlaceholder" value-attribute="value" option-attribute="label" clearable />
@@ -56,7 +60,8 @@
         </div>
       </div>
 
-      <div ref="deviceTableContainerRef" class="device-table-container flex-grow overflow-hidden mb-6 flex flex-col">
+      <!-- Device Table Container -->
+      <div class="device-table-container flex-grow flex flex-col overflow-hidden">
         <UTable
             v-model="selectedDevices"
             :sort="sort"
@@ -67,14 +72,14 @@
             :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: noDevicesMessage }"
             :ui="{
               base: 'min-w-full table-fixed',
-              thead: 'sticky top-0 z-10 bg-gray-50 dark:bg-dark-surface',
+              wrapper: 'flex-grow h-full flex flex-col overflow-hidden custom-scrollbar',
+              thead: 'shrink-0',
+              tbody: 'flex-grow overflow-y-auto custom-scrollbar divide-y divide-gray-200 dark:divide-gray-700',
               th: { base: 'text-left rtl:text-right group align-top whitespace-nowrap', padding: 'px-3 py-3', font: 'font-semibold text-sm', color: 'text-gray-600 dark:text-gray-300' },
               td: { base: 'align-middle whitespace-nowrap overflow-hidden text-ellipsis', padding: 'px-3 py-3', color: 'text-gray-700 dark:text-gray-200' },
-              tbody: 'divide-y divide-gray-200 dark:divide-gray-700',
               tr: { base: 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/50', selected: 'bg-primary-50 dark:bg-primary-900' }
             }"
             @select="handleRowClick"
-            class="h-full"
         >
           <template #installationDate-data="{ row }"><span>{{ formatTimestamp(row.installationDate) }}</span></template>
           <template #status-data="{ row }">
@@ -84,13 +89,10 @@
             <span>{{ row.firmware_version || 'N/A' }}</span>
           </template>
         </UTable>
-        <div v-if="!pending && paginatedDevices.length === 0 && filteredDevices.length > 0 && itemsPerPage > 0" class="flex flex-col items-center justify-center flex-grow text-center py-8 text-gray-500 dark:text-dark-text-secondary">
-          <UIcon name="i-heroicons-exclamation-circle-20-solid" class="w-12 h-12 mb-2"/>
-          <p>{{ noDevicesOnPageMessage }}</p>
-        </div>
       </div>
 
-      <div v-if="totalPages > 1" class="pagination-controls flex justify-center items-center mt-auto pt-4 shrink-0 gap-2">
+      <!-- Pagination Controls -->
+      <div v-if="totalPages > 1" class="pagination-controls flex justify-center items-center mt-4 shrink-0 gap-2">
         <UPagination v-model="currentPage" :page-count="itemsPerPage" :total="filteredDevices.length" :max="5"/>
         <div class="flex items-center gap-1 text-sm">
           <UInput v-model.number="pageInput" type="number" size="xs" class="w-16 text-center" :min="1" :max="totalPages" @keyup.enter="goToPage" @blur="goToPage" />
@@ -99,6 +101,7 @@
       </div>
     </section>
 
+    <!-- Mobile Sidebar -->
     <USlideover v-model="isMobileMenuOpen" side="left" :ui="{ width: 'max-w-xs w-full sm:w-72' }">
       <UCard class="flex flex-col flex-1 h-full" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', body: { padding: '', base: 'flex-1 overflow-y-auto' } }">
         <template #header>
@@ -113,6 +116,7 @@
       </UCard>
     </USlideover>
 
+    <!-- Modals -->
     <UModal v-model="isFormModalOpen">
       <UForm v-if="formState" :state="formState" @submit="isEditing ? handleUpdateDevice() : handleSaveNewDevice()">
         <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
@@ -155,7 +159,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useLanguage } from '~/composables/useLanguage';
 import { useLogger } from '~/composables/useLogger';
 import { useActionStatusModal } from '~/composables/useActionStatusModal';
@@ -188,7 +192,6 @@ const removeDeviceLabel = computed(() => currentLanguage.value === 'vi' ? 'Xóa'
 const exportExcelLabel = computed(() => currentLanguage.value === 'vi' ? 'Xuất Excel' : 'Export Excel');
 const generalSearchPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Tìm tên, MAC...' : 'Search name, MAC...');
 const noDevicesMessage = computed(() => currentLanguage.value === 'vi' ? 'Không có thiết bị nào phù hợp.' : 'No devices match your criteria.');
-const noDevicesOnPageMessage = computed(() => currentLanguage.value === 'vi' ? 'Không có thiết bị để hiển thị trên trang này.' : 'No devices to display on this page.');
 const filterByAreaPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Lọc theo khu vực' : 'Filter by Area');
 const filterByStatusPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Lọc theo trạng thái' : 'Filter by Status');
 const filterByDatePlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Lọc theo ngày' : 'Filter by Date');
@@ -222,7 +225,6 @@ const allAreas = ["POL", "FLW", "CG", "OQC Lighting", "D Inspection", "Assembly 
 const allStatuses: DeviceStatus[] = ['Connected', 'Disconnected', 'Voltage reading failed'];
 const pending = ref(false);
 
-// --- MODIFIED: The entire column definition is now inside a computed property ---
 const localizedColumns = computed(() => [
   {key: 'name', label: deviceNameLabel.value, sortable: true},
   {key: 'mac_address', label: macAddressLabel.value, sortable: false},
@@ -247,15 +249,13 @@ const filteredDevices = computed(() => {
   results.sort((a, b) => { let valA = a[sort.value.column as keyof Device]; let valB = b[sort.value.column as keyof Device]; if (sort.value.column === 'installationDate') { return sort.value.direction === 'asc' ? (valA as number) - (valB as number) : (valB as number) - (valA as number); } if (typeof valA === 'string' && typeof valB === 'string') { return sort.value.direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA); } return 0; });
   return results;
 });
-const deviceTableContainerRef = ref<HTMLElement | null>(null);
-const itemsPerPage = ref(10);
+
+const itemsPerPage = ref(15);
 const currentPage = ref(1);
 const pageInput = ref(currentPage.value);
-const calculateDynamicItemsPerPageForTable = () => { if (!deviceTableContainerRef.value) return; const containerHeight = deviceTableContainerRef.value.offsetHeight; const headerH = 42; const rowH = 45; if (containerHeight > headerH && rowH > 0) { itemsPerPage.value = Math.max(1, Math.floor((containerHeight - headerH) / rowH)); } };
-let tableResizeObserver: ResizeObserver | null = null;
-onMounted(() => { fetchDevices(); nextTick(() => { if (deviceTableContainerRef.value) { calculateDynamicItemsPerPageForTable(); tableResizeObserver = new ResizeObserver(calculateDynamicItemsPerPageForTable); tableResizeObserver.observe(deviceTableContainerRef.value); } }); });
-onBeforeUnmount(() => { if (tableResizeObserver) tableResizeObserver.disconnect(); });
-watch(() => filteredDevices.value.length, () => { nextTick(() => { calculateDynamicItemsPerPageForTable(); if (currentPage.value > totalPages.value) currentPage.value = totalPages.value || 1; }); });
+
+onMounted(() => { fetchDevices(); });
+
 const totalPages = computed(() => Math.ceil(filteredDevices.value.length / itemsPerPage.value) || 1);
 const paginatedDevices = computed(() => { const start = (currentPage.value - 1) * itemsPerPage.value; const end = start + itemsPerPage.value; return filteredDevices.value.slice(start, end); });
 watch(currentPage, (newPage) => { pageInput.value = newPage; });
@@ -283,7 +283,44 @@ const openAddModal = () => { isEditing.value = false; formState.value = { name: 
 const handleRowClick = (row: Device) => { logger.log('[Device Management] Row clicked/selected. Device data:', JSON.parse(JSON.stringify(row))); isEditing.value = true; formState.value = JSON.parse(JSON.stringify(row)); isFormModalOpen.value = true; };
 
 // --- CRUD ---
-const handleSaveNewDevice = async () => { logger.log('[Device Management] Action: Add Device'); isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, mac_address: formState.value.mac_address || null, firmware_version: formState.value.firmware_version || null, device_type: 'WristStrapMonitorV1', }; logger.log('[Device Management] Add payload:', payload); try { const newDeviceResponse = await $api('/api/v1/devices/', { method: 'POST', body: payload }); const newDevice: Device = { id: newDeviceResponse._id, name: newDeviceResponse.name, installationArea: newDeviceResponse.installation_area, installationDate: newDeviceResponse.installation_date, status: (newDeviceResponse.last_event?.status || 'Unknown') as DeviceStatus, mac_address: newDeviceResponse.mac_address, firmware_version: newDeviceResponse.firmware_version, }; allDevices.value.push(newDevice); logger.log('[Device Management] Device added successfully. Response:', newDeviceResponse); isFormModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: addSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to add device:', error); toast.add({ title: 'Error', description: 'Could not add the new device.', color: 'red' }); } finally { isSaving.value = false; } };
+const handleSaveNewDevice = async () => {
+  logger.log('[Device Management] Action: Add Device');
+  isSaving.value = true;
+
+  // --- FIX: Provide a default, valid MAC address if the input is empty ---
+  const payload = {
+    name: formState.value.name,
+    installation_area: formState.value.installationArea,
+    mac_address: formState.value.mac_address || "00:00:00:00:00:00",
+    firmware_version: formState.value.firmware_version || "",
+    device_type: 'WristStrapMonitorV1',
+  };
+  // --- END FIX ---
+
+  logger.log('[Device Management] Add payload:', payload);
+  try {
+    const newDeviceResponse = await $api('/api/v1/devices/', { method: 'POST', body: payload });
+    const newDevice: Device = {
+      id: newDeviceResponse._id,
+      name: newDeviceResponse.name,
+      installationArea: newDeviceResponse.installation_area,
+      installationDate: newDeviceResponse.installation_date,
+      status: (newDeviceResponse.last_event?.status || 'Unknown') as DeviceStatus,
+      mac_address: newDeviceResponse.mac_address,
+      firmware_version: newDeviceResponse.firmware_version,
+    };
+    allDevices.value.push(newDevice);
+    logger.log('[Device Management] Device added successfully. Response:', newDeviceResponse);
+    isFormModalOpen.value = false;
+    showActionStatusModal({ title: successTitle.value, description: addSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} });
+  } catch (error) {
+    logger.error('[Device Management] Failed to add device:', error);
+    toast.add({ title: 'Error', description: 'Could not add the new device.', color: 'red' });
+  } finally {
+    isSaving.value = false;
+  }
+};
+
 const handleUpdateDevice = async () => { if (!formState.value.id) return; logger.log(`[Device Management] Action: Edit Device. ID: ${formState.value.id}`); isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, firmware_version: formState.value.firmware_version, }; logger.log('[Device Management] Update payload:', payload); try { const updatedDevice = await $api(`/api/v1/devices/${formState.value.id}`, { method: 'PUT', body: payload }); const deviceIndex = allDevices.value.findIndex(d => d.id === formState.value.id); if (deviceIndex !== -1) { allDevices.value[deviceIndex].name = updatedDevice.name; allDevices.value[deviceIndex].installationArea = updatedDevice.installation_area; allDevices.value[deviceIndex].firmware_version = updatedDevice.firmware_version; } logger.log(`[Device Management] Device ${formState.value.id} updated successfully. Response:`, updatedDevice); isFormModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: updateSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to update device:', error); toast.add({ title: 'Error', description: 'Could not update the device.', color: 'red' }); } finally { isSaving.value = false; } };
 const handleRemoveDevice = () => { if (selectedDevices.value.length > 0) { logger.log(`[Device Management] Action: Remove Device(s). Opening confirmation for IDs:`, selectedDevices.value.map(d => d.id)); isConfirmDeleteModalOpen.value = true; } };
 const confirmDeleteDevices = async () => { isSaving.value = true; const idsToDelete = selectedDevices.value.map(d => d.id); logger.log(`[Device Management] Deletion confirmed. Removing IDs:`, idsToDelete); try { await Promise.all( idsToDelete.map(id => $api(`/api/v1/devices/${id}`, { method: 'DELETE' })) ); allDevices.value = allDevices.value.filter(device => !idsToDelete.includes(device.id)); selectedDevices.value = []; logger.log('[Device Management] Devices deleted successfully from backend and frontend state.'); isConfirmDeleteModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: deleteSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to delete devices:', error); toast.add({ title: 'Error', description: 'Could not delete one or more devices.', color: 'red' }); } finally { isSaving.value = false; } };
