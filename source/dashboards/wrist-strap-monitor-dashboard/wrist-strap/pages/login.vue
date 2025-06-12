@@ -256,7 +256,7 @@ const loginSubtitle = computed(() => currentLanguage.value === 'vi' ? 'Vui lòng
 const emailInputLabel = computed(() => currentLanguage.value === 'vi' ? 'Địa chỉ email' : 'Email Address');
 const emailPlaceholder = computed(() => currentLanguage.value === 'vi' ? 'ban@email.com' : 'you@example.com');
 const continueButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Tiếp tục' : 'Continue');
-const useBackupCodeLabel = computed(() => currentLanguage.value === 'vi' ? 'Sử dụng mã dự phòng?' : 'Use a backup code?');
+const useBackupCodeLabel = computed(() => currentLanguage.value === 'vi' ? 'Sử dụng mã dự phòng ?' : 'Use a backup code ?');
 const verificationCodePrompt = computed(() => currentLanguage.value === 'vi' ? 'Mã xác thực đã được gửi đến {email}.' : 'We have sent a verification code to {email}.');
 const backupCodePrompt = computed(() => currentLanguage.value === 'vi' ? 'Vui lòng nhập một trong các mã dự phòng của bạn.' : 'Please enter one of your backup codes.');
 const codeInputLabel = computed(() => isBackupMode.value ? (currentLanguage.value === 'vi' ? 'Mã dự phòng' : 'Backup Code') : (currentLanguage.value === 'vi' ? 'Mã xác thực' : 'Verification Code'));

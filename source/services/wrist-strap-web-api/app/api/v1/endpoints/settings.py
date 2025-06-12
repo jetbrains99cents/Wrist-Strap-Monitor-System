@@ -12,6 +12,8 @@ import pymongo.database
 from http import HTTPStatus
 from pydantic import ValidationError
 
+print("--- Loading settings.py endpoints ---")  # <-- ADD THIS LINE
+
 # Get a logger instance for this file
 logger = logging.getLogger(__name__)
 router = APIRouter()

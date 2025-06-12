@@ -35,7 +35,7 @@ const logger = useLogger();
 const props = defineProps({
   src: {type: String, required: true},
   initialPdfRenderScale: {type: Number, default: 1.0},
-  pdfMaxRenderScale: {type: Number, default: 5.0},
+  pdfMaxRenderScale: {type: Number, default: 20.0},
   pdfMinRenderScale: {type: Number, default: 0.2},
   pdfZoomStep: {type: Number, default: 0.2},
   interactionMode: {type: String as () => InteractionMode, default: 'pan'}

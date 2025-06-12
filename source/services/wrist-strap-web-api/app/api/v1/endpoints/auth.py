@@ -10,6 +10,8 @@ from app.crud import user as user_crud
 from app.security import create_access_token
 from app.core.config import settings
 
+print("--- Loading auth.py endpoints ---")  # <-- ADD THIS LINE
+
 # Get a logger instance for this file
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -13,6 +13,8 @@ from fastapi.concurrency import run_in_threadpool
 from app.db.session import get_db
 import pymongo.database
 
+print("--- Loading logs.py endpoints ---")  # <-- ADD THIS LINE
+
 # Get a logger instance for this file
 logger = logging.getLogger(__name__)
 router = APIRouter()

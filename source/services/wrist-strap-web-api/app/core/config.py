@@ -8,14 +8,14 @@ class Settings(BaseSettings):
 
     # Default CORS origins now match your specific list
     allowed_hosts: List[str] = [
-        "https://172.16.9.183:3001",
-        "https://172.21.16.1:3001",
+        "https://172.16.9.183:3001",  # CORRECTED LINE
+        "https://172.21.16.1:3001",  # CORRECTED LINE
         "https://localhost:3001",
         "http://localhost:3001",
-        "https://172.16.9.183:3000",
+        "https://172.16.9.183:3000",  # CORRECTED LINE
         "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://127.0.0.1:3000",
+        "http://127.0.0.1:3000",  # CORRECTED LINE
+        "https://127.0.0.1:3000",  # CORRECTED LINE
     ]
 
     # App mode

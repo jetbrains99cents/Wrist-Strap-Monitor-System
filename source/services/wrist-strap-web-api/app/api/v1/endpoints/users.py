@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends
 from app.schemas.user import User
 from app.security import get_current_user
 
+print("--- Loading users.py endpoints ---")  # <-- ADD THIS LINE
+
 # Get a logger instance for this file
 logger = logging.getLogger(__name__)
 router = APIRouter()

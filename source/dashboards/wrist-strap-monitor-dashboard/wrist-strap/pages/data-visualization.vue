@@ -219,8 +219,8 @@ const rawNavigationItems = ref([
 ]);
 const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({ id: item.id, label: currentLanguage.value === 'vi' ? item.label_vi : item.label_en, icon: item.icon, to: item.to, })));
 
-const pageTitle = computed(() => currentLanguage.value === 'vi' ? 'Trực quan hóa Dữ liệu' : 'Data Visualization');
-const dateRangeLabel = computed(() => currentLanguage.value === 'vi' ? 'Phạm vi Ngày' : 'Date Range');
+const pageTitle = computed(() => currentLanguage.value === 'vi' ? 'Trực quan hóa dữ liệu' : 'Data Visualization');
+const dateRangeLabel = computed(() => currentLanguage.value === 'vi' ? 'Phạm vi ngày' : 'Date Range');
 const todayLabel = computed(() => currentLanguage.value === 'vi' ? 'Hôm nay' : 'Today');
 const last7DaysLabel = computed(() => currentLanguage.value === 'vi' ? '7 ngày qua' : 'Last 7 Days');
 const last30DaysLabel = computed(() => currentLanguage.value === 'vi' ? '30 ngày qua' : 'Last 30 Days');

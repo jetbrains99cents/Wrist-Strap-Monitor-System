@@ -7,6 +7,8 @@ from app.schemas.device import DeviceInDB, DeviceCreate, DeviceUpdate
 from app.crud import device as device_crud
 from app.security import get_current_user, get_current_admin_user
 
+print("--- Loading devices.py endpoints ---")  # <-- ADD THIS LINE
+
 # Get a logger instance for this file
 logger = logging.getLogger(__name__)
 router = APIRouter()

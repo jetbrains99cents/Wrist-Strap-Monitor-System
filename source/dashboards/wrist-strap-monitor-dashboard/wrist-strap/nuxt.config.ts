@@ -54,6 +54,7 @@ export default defineNuxtConfig({
             statusColors: {
                 // Green for OK states
                 "Connected": "green",
+                "Voltage reading ok": "green",
 
                 // Blue for Neutral/Info states
                 "Info": "blue",

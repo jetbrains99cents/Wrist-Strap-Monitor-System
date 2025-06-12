@@ -61,6 +61,14 @@
                      :variant="zoomInputPercentage === 400 ? 'solid' : 'outline'"/>
             <UButton label="500%" @click="setQuickZoom(500)"
                      :variant="zoomInputPercentage === 500 ? 'solid' : 'outline'"/>
+            <UButton label="800%" @click="setQuickZoom(800)"
+                     :variant="zoomInputPercentage === 800 ? 'solid' : 'outline'"/>
+            <UButton label="1000%" @click="setQuickZoom(1000)"
+                     :variant="zoomInputPercentage === 1000 ? 'solid' : 'outline'"/>
+            <UButton label="1200%" @click="setQuickZoom(1200)"
+                     :variant="zoomInputPercentage === 1200 ? 'solid' : 'outline'"/>
+            <UButton label="1600%" @click="setQuickZoom(1600)"
+                     :variant="zoomInputPercentage === 1600 ? 'solid' : 'outline'"/>
           </UButtonGroup>
 
           <span v-if="pdfViewerComponentRef?.totalPages?.value > 1"
@@ -737,7 +745,7 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
       if (row >= 0 && col >= 0 && row < gridProps.rows && col < gridProps.cols) {
         const key = `${row}-${col}`;
         statuses[key] = {
-          status: device.last_event?.status || 'Warning',
+          status: device.last_event?.status || 'Disconnected',
           deviceId: device.id,
           deviceName: device.name,
           installationArea: device.installation_area,

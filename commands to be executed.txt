@@ -33,3 +33,36 @@ npx nuxi preview --host 0.0.0.0 --port 3001 --ssl
 $env:NITRO_SSL_KEY=(Get-Content -Path ".\localhost+2-key.pem" -Raw); $env:NITRO_SSL_CERT=(Get-Content -Path ".\localhost+2.pem" -Raw); node .output/server/index.mjs
 
 $env:PORT=3001; $env:NITRO_SSL_KEY=(Get-Content -Path ".\localhost+2-key.pem" -Raw); $env:NITRO_SSL_CERT=(Get-Content -Path ".\localhost+2.pem" -Raw); node .output/server/index.mjs
+
+npm run start:prod
+
+function Get-FolderTree {
+    param(
+        [string]$Path = (Get-Location),
+        [int]$IndentLevel = 0,
+        # Add or remove patterns here as needed!
+        [string[]]$Exclude = @(".git", ".vscode", "__pycache__", ".venv", ".DS_Store", "*.log", "*.tmp", ".pytest_cache", ".idea", "*.uv.lock", "*.http", ".env", "*.pem")
+    )
+
+    $indent = "    " * $IndentLevel # 4 spaces per indent level
+
+    Get-ChildItem -LiteralPath $Path -Force | ForEach-Object {
+        $currentPath = $_.FullName
+        $name = $_.Name
+
+        # Skip excluded items
+        if ($Exclude | Where-Object { $name -like $_ -or $currentPath -like $_ }) {
+            return # Skip this item and continue
+        }
+
+        if ($_.PSIsContainer) { # Is a directory
+            Write-Host "$($indent)├───$name" -ForegroundColor Cyan
+            # Recursively call for sub-directories
+            Get-FolderTree -Path $currentPath -IndentLevel ($IndentLevel + 1) -Exclude $Exclude
+        } else { # Is a file
+            Write-Host "$($indent)│   $name" -ForegroundColor Green
+        }
+    }
+}
+
+Get-FolderTree -Exclude @(".git", ".vscode", "__pycache__", ".venv", ".DS_Store", "*.log", "*.tmp", ".pytest_cache", ".idea", "*.uv.lock", "*.http", ".env", "*.pem")

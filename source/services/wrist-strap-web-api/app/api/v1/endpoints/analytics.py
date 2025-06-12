@@ -10,6 +10,8 @@ from app.security import get_current_user
 from app.schemas.user import User
 from app.crud import analytics as analytics_crud
 
+print("--- Loading analytics.py endpoints ---")  # <-- ADD THIS LINE
+
 # Get a logger instance for this file
 logger = logging.getLogger(__name__)
 router = APIRouter()
