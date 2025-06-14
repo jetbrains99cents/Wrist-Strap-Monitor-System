@@ -4,27 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7d4c20be-1ab7-41e6-a74c-6889261a0341" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../../commands to be executed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../commands to be executed.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../documentation/design/diagrams/Wrist Strap Monitor System - System Design.drawio" beforeDir="false" afterPath="$PROJECT_DIR$/../../../documentation/design/diagrams/Wrist Strap Monitor System - System Design.drawio" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../documentation/work reports/Báo cáo tiến độ - Hệ thống giám sát ổ xả tĩnh điện.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/../../../documentation/work reports/Báo cáo tiến độ - Hệ thống giám sát ổ xả tĩnh điện.pdf" afterDir="false" />
+    <list default="true" id="7d4c20be-1ab7-41e6-a74c-6889261a0341" name="Changes" comment="Stable version">
+      <change afterPath="$PROJECT_DIR$/app/mqtt/mqtt_client.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/websocket/websocket_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/components/pdf/PdfViewer.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/components/pdf/PdfViewer.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/data-visualization.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/data-visualization.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-management.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-management.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/index.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/login.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/login.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/api.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/api.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/analytics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/devices.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/devices.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/logs.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/logs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/api/v1/endpoints/users.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/api/v1/endpoints/users.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../tools/historical_logs_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/historical_logs_data.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/core/logging_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/core/logging_config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/analytics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/device.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/device.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/db/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/db/session.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/voltage_reading.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/voltage_reading.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/security.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +40,19 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$/../../.." source="master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
   <component name="ProjectColorInfo">{
@@ -62,7 +74,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;69bc31ce&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;83191a19&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;D:/Working/Wrist Strap Monitor System/source/services/wrist-strap-web-api/app/api/v1/endpoints&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -129,8 +141,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-6a121458b545-JavaScript-PY-251.25410.159" />
-        <option value="bundled-python-sdk-e0ed3721d81e-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.25410.159" />
+        <option value="bundled-js-predefined-d6986cc7102b-b26f3e71634d-JavaScript-PY-251.26094.141" />
+        <option value="bundled-python-sdk-9f8e2b94138c-36ea0e71a18c-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-251.26094.141" />
       </set>
     </attachedChunks>
   </component>
@@ -148,15 +160,62 @@
       <workItem from="1749711942617" duration="139000" />
       <workItem from="1749712091542" duration="53000" />
       <workItem from="1749712484596" duration="484000" />
-      <workItem from="1749712984302" duration="1911000" />
+      <workItem from="1749712984302" duration="2417000" />
+      <workItem from="1749715536351" duration="28311000" />
     </task>
+    <task id="LOCAL-00001" summary="Stable version">
+      <option name="closed" value="true" />
+      <created>1749715028212</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1749715028212</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Stable version" />
+    <option name="LAST_COMMIT_MESSAGE" value="Stable version" />
+  </component>
+  <component name="com.gk646.codestats.settings.Save">
+    <option name="commitTimePoints">
+      <list>
+        <TimePoint>
+          <option name="timestamp" value="1749715028374" />
+          <option name="linesCode" value="186331" />
+          <option name="totalLines" value="291464" />
+          <option name="info" value="" />
+        </TimePoint>
+      </list>
+    </option>
+    <option name="genericTimePoints">
+      <list>
+        <TimePoint>
+          <option name="timestamp" value="1749715028374" />
+          <option name="linesCode" value="186331" />
+          <option name="totalLines" value="291464" />
+          <option name="info" value="Jun 12, 2025" />
+        </TimePoint>
+      </list>
+    </option>
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api.coverage" NAME="wrist-strap-web-api Coverage Results" MODIFIED="1749351168385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api_secure.coverage" NAME="wrist-strap-web-api-secure Coverage Results" MODIFIED="1749714851398" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api_secure.coverage" NAME="wrist-strap-web-api-secure Coverage Results" MODIFIED="1749791524373" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>

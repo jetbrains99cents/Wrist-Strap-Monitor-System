@@ -118,6 +118,8 @@ const formatEventValue = (key: string, value: any): string => {
 const statusColorClasses = computed(() => {
   switch (props.device.status) {
     case 'Connected':
+      // --- THIS IS THE ONLY ADDITION ---
+    case 'Voltage reading ok':
       return 'bg-green-600 dark:bg-green-700 text-white dark:text-green-50';
     case 'Voltage reading failed':
       return 'bg-yellow-500 dark:bg-yellow-600 text-yellow-950 dark:text-yellow-50';

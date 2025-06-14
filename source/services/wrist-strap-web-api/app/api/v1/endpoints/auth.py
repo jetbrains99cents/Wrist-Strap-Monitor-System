@@ -1,24 +1,27 @@
 # File: app/api/v1/endpoints/auth.py
 
 import logging
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from datetime import timedelta
+from typing import Any
 
 from app.schemas.token import TokenResponse, VerifyCodeRequest
 from app.schemas.user import User
 from app.crud import user as user_crud
 from app.security import create_access_token
 from app.core.config import settings
+from app.db.session import get_db_global_sync # CHANGED: Import get_db_global_sync
 
-print("--- Loading auth.py endpoints ---")  # <-- ADD THIS LINE
-
-# Get a logger instance for this file
+print("--- Loading auth.py endpoints ---")
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 @router.post("/verify-code", response_model=TokenResponse)
-async def verify_code(request: VerifyCodeRequest):
+async def verify_code(
+    request: VerifyCodeRequest,
+    db: Any = Depends(get_db_global_sync) # CHANGED: Inject the global user DB client here
+):
     """
     Verifies a user's login code and issues a new token.
     This action invalidates all previously issued tokens for the user.
@@ -27,7 +30,7 @@ async def verify_code(request: VerifyCodeRequest):
     logger.info(f"Received email: {request.email}")
     logger.info(f"Received backup code hash: {'Yes' if request.backupCodeHash else 'No'}")
 
-    user_doc = user_crud.get_user_by_email(request.email)
+    user_doc = user_crud.get_user_by_email(db, request.email)
 
     if not user_doc:
         logger.warning(f"Login failed: User not found for email {request.email}")
@@ -38,7 +41,7 @@ async def verify_code(request: VerifyCodeRequest):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User account is disabled")
 
     if request.backupCodeHash:
-        valid_code_index = user_crud.authenticate_backup_code(user_doc, request.backupCodeHash)
+        valid_code_index = user_crud.authenticate_backup_code(db, user_doc, request.backupCodeHash)
         if valid_code_index is None:
             logger.warning(f"Login failed: Invalid or used backup code for {request.email}")
             raise HTTPException(
@@ -46,7 +49,7 @@ async def verify_code(request: VerifyCodeRequest):
                 detail="Invalid or already used backup code",
             )
         if not settings.TEST_MODE:
-            user_crud.invalidate_backup_code(user_doc["_id"], valid_code_index)
+            user_crud.invalidate_backup_code(db, user_doc["_id"], valid_code_index)
             logger.info(f"Backup code at index {valid_code_index} for user {request.email} has been invalidated.")
         else:
             logger.info(f"TEST_MODE ON: Backup code for user {request.email} was validated but not invalidated.")
@@ -64,7 +67,7 @@ async def verify_code(request: VerifyCodeRequest):
             detail="No verification code or backup code provided."
         )
 
-    user_crud.set_min_token_issue_time_for_user(user_doc["_id"])
+    user_crud.set_min_token_issue_time_for_user(db, user_doc["_id"])
 
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token(

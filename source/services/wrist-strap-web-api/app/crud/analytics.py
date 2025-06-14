@@ -1,16 +1,12 @@
-# File: app/crud/analytics.py
-
 import logging
 import pymongo.database
 from typing import Optional, Dict, Any, List
 from datetime import datetime, timedelta, timezone
 
-# Get a logger instance for this file
 logger = logging.getLogger(__name__)
 
 
 # --- Helper Function to Parse Date Ranges ---
-
 def _get_date_range_timestamps(date_range_str: str) -> Dict[str, int]:
     """Converts a string like '7days' into a MongoDB timestamp query."""
     now = datetime.now(timezone.utc)
@@ -34,7 +30,6 @@ def _get_date_range_timestamps(date_range_str: str) -> Dict[str, int]:
 
 
 # --- Main Analytics Function ---
-
 def get_analytics_data(
         db: pymongo.database.Database,
         metric: str,
@@ -52,7 +47,10 @@ def get_analytics_data(
     if time_filter:
         base_match_query["timestamp"] = time_filter
     if area:
-        base_match_query["installation_area"] = area
+        # Use 'area' field in query, assuming it's consistent in voltage_readings
+        # For devices collection, it might be 'installation_area'
+        base_match_query["area"] = area
+
 
     logger.info(f"Constructed base match query: {base_match_query}")
 
@@ -80,35 +78,42 @@ def get_analytics_data(
 
 def _calculate_key_metrics(db: pymongo.database.Database, base_match_query: dict) -> dict:
     logger.info("Calculating key metrics...")
-    historical_logs = db.get_collection("historical_logs")
+    historical_logs_collection = db.get_collection("historical_logs")
     devices_collection = db.get_collection("devices")
+    voltage_readings_collection = db.get_collection("voltage_readings") # Get voltage readings collection
 
-    active_devices_list = historical_logs.distinct("device_id", base_match_query)
+    # Active devices from historical logs (events)
+    active_devices_list = historical_logs_collection.distinct("device_id", base_match_query)
     active_devices = len(active_devices_list)
 
+    # Total alerts from historical logs
     alert_query = {**base_match_query, "event.type": "Alert"}
-    total_alerts = historical_logs.count_documents(alert_query)
+    total_alerts = historical_logs_collection.count_documents(alert_query)
 
-    voltage_query = {**base_match_query, "event.type": "Sensor Reading", "event.value": {"$type": "number"}}
+    # Average Voltage from voltage_readings_collection
+    # Use base_match_query for timestamp/area filters directly on voltage_readings
     voltage_pipeline = [
-        {"$match": voltage_query},
-        {"$group": {"_id": None, "avgVoltage": {"$avg": "$event.value"}}}
+        {"$match": base_match_query},
+        {"$group": {"_id": None, "avgVoltage": {"$avg": "$voltage"}}} # Use $voltage field from voltage_readings
     ]
-    voltage_result = list(historical_logs.aggregate(voltage_pipeline))
-
+    voltage_result = list(voltage_readings_collection.aggregate(voltage_pipeline))
     avg_from_db = voltage_result[0]['avgVoltage'] if voltage_result and 'avgVoltage' in voltage_result[0] else None
     average_voltage = avg_from_db if avg_from_db is not None else 0.0
 
+    # Total devices from devices collection
     total_devices = devices_collection.count_documents({})
+
+    # Uptime calculation: connected devices from voltage_readings
     if total_devices == 0:
         uptime_percentage = 0.0
     else:
         connected_devices_pipeline = [
+            {"$match": base_match_query}, # Apply general date/area filters
             {"$sort": {"timestamp": -1}},
-            {"$group": {"_id": "$device_id", "lastStatus": {"$first": "$event.status"}}},
-            {"$match": {"lastStatus": "Connected"}}
+            {"$group": {"_id": "$device_id", "lastStatus": {"$first": "$status"}}}, # Use '$status' from voltage_readings
+            {"$match": {"lastStatus": "Voltage reading ok"}} # Using new status naming
         ]
-        connected_count = len(list(historical_logs.aggregate(connected_devices_pipeline)))
+        connected_count = len(list(voltage_readings_collection.aggregate(connected_devices_pipeline))) # Query voltage_readings_collection
         uptime_percentage = (connected_count / total_devices) * 100 if total_devices > 0 else 0
 
     logger.info(
@@ -125,8 +130,8 @@ def _get_device_distribution(db: pymongo.database.Database, base_match_query: di
     logger.info("Calculating device distribution...")
     devices_collection = db.get_collection("devices")
     match_query = {}
-    if "installation_area" in base_match_query:
-        match_query["installation_area"] = base_match_query["installation_area"]
+    if "area" in base_match_query: # Check for 'area' key in query, which might be 'installation_area' in devices
+        match_query["installation_area"] = base_match_query["area"] # Match 'area' from query with 'installation_area' in DB
 
     pipeline = [
         {"$match": match_query},
@@ -143,14 +148,15 @@ def _get_device_distribution(db: pymongo.database.Database, base_match_query: di
 
 def _get_device_status_overview(db: pymongo.database.Database, base_match_query: dict, date_range: str) -> dict:
     logger.info("Calculating device status overview...")
-    historical_logs = db.get_collection("historical_logs")
+    # This should query voltage_readings for latest status
+    voltage_readings_collection = db.get_collection("voltage_readings")
     pipeline = [
-        {"$match": base_match_query},
+        {"$match": base_match_query}, # Will match on timestamp/area
         {"$sort": {"timestamp": -1}},
-        {"$group": {"_id": "$device_id", "last_status": {"$first": "$event.status"}}},
+        {"$group": {"_id": "$device_id", "last_status": {"$first": "$status"}}}, # Use '$status' from voltage_readings
         {"$group": {"_id": "$last_status", "count": {"$sum": 1}}}
     ]
-    results = list(historical_logs.aggregate(pipeline))
+    results = list(voltage_readings_collection.aggregate(pipeline))
 
     labels = [r["_id"] for r in results if r["_id"]]
     data = [r["count"] for r in results if r["_id"]]
@@ -160,23 +166,20 @@ def _get_device_status_overview(db: pymongo.database.Database, base_match_query:
 
 def _get_connection_status_timeline(db: pymongo.database.Database, base_match_query: dict, date_range: str) -> dict:
     logger.info("Calculating connection status timeline...")
-    return _get_grouped_time_series_data(db, base_match_query, date_range, "Connection", "Connection Events")
-
+    # This should query voltage_readings for 'Voltage reading ok' status over time
+    return _get_grouped_time_series_data(db, base_match_query, date_range, "Voltage reading ok", "Connection Events", collection_name="voltage_readings") # Use new status and collection
 
 def _get_alert_frequencies(db: pymongo.database.Database, base_match_query: dict, date_range: str) -> dict:
     logger.info("Calculating alert frequencies...")
-    return _get_grouped_time_series_data(db, base_match_query, date_range, "Alert", "Alerts")
+    # Assuming 'Alert's are still logged in 'historical_logs'
+    return _get_grouped_time_series_data(db, base_match_query, date_range, "Alert", "Alerts", collection_name="historical_logs")
 
 
 def _get_voltage_readings(db: pymongo.database.Database, base_match_query: dict, date_range: str) -> dict:
     logger.info("Calculating voltage readings...")
     voltage_readings_collection = db.get_collection("voltage_readings")
 
-    match_query = {}
-    if "timestamp" in base_match_query:
-        match_query["timestamp"] = base_match_query["timestamp"]
-    if "area" in base_match_query:  # Note: Your original code had "area", but the query had "installation_area". Sticking with "area" as per your code.
-        match_query["area"] = base_match_query["area"]
+    match_query = {**base_match_query} # Use base_match_query for timestamp/area filters
 
     group_id_format = "%Y-%m-%d"
     if date_range == 'today':
@@ -185,7 +188,7 @@ def _get_voltage_readings(db: pymongo.database.Database, base_match_query: dict,
     pipeline = [
         {"$match": match_query},
         {"$group": {
-            "_id": {"$dateToString": {"format": group_id_format, "date": {"$toDate": "$timestamp"}}},
+            "_id": {"$dateToString": {"format": group_id_format, "date": {"$toDate": {"$convert": {"input": "$timestamp", "to": "date"}}}}}, # Corrected $toDate input
             "value": {"$avg": "$voltage"}
         }},
         {"$sort": {"_id": 1}}
@@ -198,26 +201,48 @@ def _get_voltage_readings(db: pymongo.database.Database, base_match_query: dict,
     return {"labels": labels, "datasets": [{"label": "Average Voltage", "data": data}]}
 
 
+# CHANGED: Add 'db' as the first parameter and optional collection_name
 def _get_grouped_time_series_data(
-        db: pymongo.database.Database, base_match_query: dict, date_range: str, event_type: str,
-        label: str, aggregate_type: str = "count"
+        db: pymongo.database.Database, # Accept db parameter
+        base_match_query: dict, date_range: str, event_type: str,
+        label: str, aggregate_type: str = "count", collection_name: str = "historical_logs" # Default to historical_logs
 ) -> dict:
     logger.info(f"Calculating grouped time series for event_type: '{event_type}', aggregate: '{aggregate_type}'")
-    historical_logs = db.get_collection("historical_logs")
-    match_query = {**base_match_query, "event.type": event_type}
-    if aggregate_type == "avg":
-        match_query["event.value"] = {"$type": "number"}
+
+    target_collection = db.get_collection(collection_name)
+
+    match_query = {**base_match_query}
+    # Add specific event type filter IF it's relevant for the target collection
+    if collection_name == "historical_logs":
+        match_query["event.type"] = event_type
+        if aggregate_type == "avg":
+            match_query["event.value"] = {"$type": "number"}
+    elif collection_name == "voltage_readings":
+        # For voltage_readings, 'event_type' might correspond to 'status' field, not 'event.type'
+        # And the field for average is 'voltage', not 'event.value'
+        if event_type: # Assuming event_type here is for 'status'
+            match_query["status"] = event_type
+
+
     group_id_format = "%Y-%m-%d"
     if date_range == 'today':
         group_id_format = "%Y-%m-%d %H:00"
-    group_operator = {"$avg": "$event.value"} if aggregate_type == "avg" else {"$sum": 1}
+
+    # Adjust group operator based on collection and aggregate type
+    group_operator = {"$sum": 1} # Default for count
+    if aggregate_type == "avg":
+        if collection_name == "historical_logs":
+            group_operator = {"$avg": "$event.value"}
+        elif collection_name == "voltage_readings":
+            group_operator = {"$avg": "$voltage"} # Use $voltage for voltage_readings
+
     pipeline = [
         {"$match": match_query},
-        {"$group": {"_id": {"$dateToString": {"format": group_id_format, "date": {"$toDate": "$timestamp"}}},
+        {"$group": {"_id": {"$dateToString": {"format": group_id_format, "date": {"$toDate": {"$convert": {"input": "$timestamp", "to": "date"}}}}},
                     "value": group_operator}},
         {"$sort": {"_id": 1}}
     ]
-    results = list(historical_logs.aggregate(pipeline))
+    results = list(target_collection.aggregate(pipeline))
     labels = [r["_id"] for r in results]
     data = [round(r["value"], 2) if isinstance(r["value"], float) else r["value"] for r in results]
     return {"labels": labels, "datasets": [{"label": label, "data": data}]}

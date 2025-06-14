@@ -17,7 +17,6 @@
         class="grid-row-group"
         :style="{ display: 'contents' }"
     >
-      <!-- UTooltip removed, using native title for performance testing -->
       <div
           v-for="c_idx in cols"
           :key="`cell-${r_idx - 1}-${c_idx - 1}`"
@@ -51,6 +50,7 @@ type InteractionMode = 'pan' | 'select';
 type LogStatus =
     "Connected"
     | "Disconnected"
+    | "Voltage reading ok"
     | "Voltage reading failed"
     | "Info"
     | "Warning"
@@ -68,6 +68,8 @@ interface GridCellStatusInfo {
   lastEventType?: EventCategory;
   createdAtFormatted?: string;
   installedAtFormatted?: string;
+  localizedStatus: string;
+  localizedEventType: string;
 }
 
 
@@ -137,7 +139,6 @@ const getCellClasses = (r: number, c: number) => {
     classes['bg-yellow-400'] = true;
     classes['dark:bg-yellow-500'] = true;
     classes['opacity-60'] = true;
-    // classes['blinking-cell'] = true; // Blinking disabled
   } else if (status) {
     const statusClass = status.toLowerCase().replace(/\s+/g, '-');
     classes[`cell-status-${statusClass}`] = true;
@@ -158,21 +159,28 @@ const getCellClasses = (r: number, c: number) => {
   return classes;
 }
 
+// MODIFIED: This function will now always show the Status and Type labels.
 const getCellTooltipText = (r: number, c: number): string => {
   const key = `${r}-${c}`;
   const cellInfo = props.cellStatuses[key];
   if (cellInfo && cellInfo.deviceName) {
     let tooltipLines: string[] = [];
     tooltipLines.push(`${props.tooltipNameLabel}: ${cellInfo.deviceName}`);
+
     if (cellInfo.installationArea) {
       tooltipLines.push(`${props.tooltipAreaLabel}: ${cellInfo.installationArea}`);
     }
-    if (cellInfo.status) {
-      tooltipLines.push(`${props.tooltipLastEventStatusLabel}: ${cellInfo.status}`);
+
+    // Always show the Status line, even if the value is 'N/A'
+    if (cellInfo.localizedStatus) {
+      tooltipLines.push(`${props.tooltipLastEventStatusLabel}: ${cellInfo.localizedStatus}`);
     }
-    if (cellInfo.lastEventType) {
-      tooltipLines.push(`${props.tooltipLastEventTypeLabel}: ${cellInfo.lastEventType}`);
+
+    // Always show the Type line, even if the value is 'N/A'
+    if (cellInfo.localizedEventType) {
+      tooltipLines.push(`${props.tooltipLastEventTypeLabel}: ${cellInfo.localizedEventType}`);
     }
+
     if (cellInfo.createdAtFormatted) {
       tooltipLines.push(`${props.tooltipCreatedAtLabel}: ${cellInfo.createdAtFormatted}`);
     }
@@ -183,7 +191,6 @@ const getCellTooltipText = (r: number, c: number): string => {
   }
   return `${props.tooltipCellLabel}: ${props.tooltipRowLabel} ${r}, ${props.tooltipColLabel} ${c}`;
 };
-
 </script>
 
 <style scoped>
@@ -202,6 +209,10 @@ const getCellTooltipText = (r: number, c: number): string => {
 /* Status specific backgrounds */
 .cell-status-connected {
   background-color: #22c55e;
+}
+
+.cell-status-voltage-reading-ok {
+  background-color: #22c55e; /* Green for OK status */
 }
 
 .cell-status-warning {
@@ -235,17 +246,4 @@ const getCellTooltipText = (r: number, c: number): string => {
 .cell-status-critical {
   background-color: #dc2626;
 }
-
-
-/* Blinking Animation Commented Out */
-/*
-@keyframes blink {
-  0%, 100% { opacity: inherit; }
-  50% { opacity: 0.2; }
-}
-
-.blinking-cell {
-  animation: blink 1.5s infinite ease-in-out;
-}
-*/
 </style>

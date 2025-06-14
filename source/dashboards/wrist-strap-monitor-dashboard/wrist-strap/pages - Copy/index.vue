@@ -310,10 +310,11 @@
 </template>
 
 <script setup lang="ts">
-import {ref, computed, onMounted, nextTick, onUnmounted, watch} from 'vue';
+import {ref, computed, onMounted, nextTick, onUnmounted, watch} from 'vue'; // Added watch
 import {useLanguage} from '~/composables/useLanguage';
 import {useLogger} from '~/composables/useLogger';
 import PdfViewer from '~/components/pdf/PdfViewer.vue';
+// The import is simplified back to the default, as we can no longer import types
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
 import {definePageMeta, useNuxtApp, useRuntimeConfig, useToast} from "#imports";
 import {useDeviceRealtimeStore} from '~/stores/deviceRealtime';
@@ -322,7 +323,8 @@ definePageMeta({
   middleware: 'auth'
 });
 
-// SECTION: Type Definitions
+// SECTION: Type Definitions (Local to this file)
+// These types are defined here to match the structure of the types in GridOverlay.vue
 type InteractionMode = 'pan' | 'select';
 
 type LogStatus =
@@ -365,14 +367,11 @@ interface GridCellStatus {
   status: LogStatus;
   deviceId: string;
   deviceName: string;
-  color: string;
+  color: string; // <-- ADD THIS LINE
   installationArea?: string;
   lastEventType?: EventCategory;
   createdAtFormatted?: string;
   installedAtFormatted?: string;
-  // Add these two new properties
-  localizedStatus: string;
-  localizedEventType: string;
 }
 
 interface SelectableDevice {
@@ -476,8 +475,8 @@ const modalDeviceNameLabel = computed(() => currentLanguage.value === 'vi' ? 'T�
 const modalDeviceAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt' : 'Installation area');
 const tooltipNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên' : 'Name');
 const tooltipAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực' : 'Area');
-const tooltipLastEventStatusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái' : 'Status');
-const tooltipLastEventTypeLabel = computed(() => currentLanguage.value === 'vi' ? 'Loại' : 'Type');
+const tooltipLastEventStatusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái sự kiện cuối' : 'Last Event Status');
+const tooltipLastEventTypeLabel = computed(() => currentLanguage.value === 'vi' ? 'Loại sự kiện cuối' : 'Last Event Type');
 const tooltipCreatedAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày tạo' : 'Created At');
 const tooltipInstalledAtLabel = computed(() => currentLanguage.value === 'vi' ? 'Ngày lắp đặt' : 'Installed At');
 const tooltipCellLabel = computed(() => currentLanguage.value === 'vi' ? 'Ô' : 'Cell');
@@ -648,21 +647,6 @@ const getLocalizedStatus = (status?: LogStatus | null): string => {
   }
   return status;
 };
-
-const getLocalizedEventType = (type?: EventCategory | null): string => {
-  if (!type) return 'N/A';
-  if (currentLanguage.value === 'vi') {
-    const typeMap: Record<EventCategory, string> = {
-      "Connection": "Kết nối",
-      "Sensor Reading": "Đọc cảm biến",
-      "Alert": "Cảnh báo",
-      "User action": "Hành động người dùng",
-      "System": "Hệ thống"
-    };
-    return typeMap[type] || type;
-  }
-  return type;
-};
 // !SECTION
 
 
@@ -715,7 +699,8 @@ onMounted(async () => {
   deviceRealtimeStore.initRealtimeListeners();
 
   await fetchAndSetDevices();
-  window.addEventListener('keydown', handleKeydown); });
+  window.addEventListener('keydown', handleKeydown);
+});
 
 onUnmounted(() => {
   logger.log('[index.vue] Cleaning up real-time listeners...');
@@ -778,6 +763,8 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
   const statuses: Record<string, GridCellStatus> = {};
   const gridProps = computedGridOverlayProps.value;
   const realtimeSnapshots = deviceRealtimeStore.latestDeviceSnapshots;
+
+  // Get the color map from your nuxt.config.ts
   const colorMap = runtimeConfig.public.statusColors as Record<string, string>;
 
   if (!gridProps.visible) return {};
@@ -791,20 +778,17 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
         const realtimeSnapshot = realtimeSnapshots.get(device.id);
         const lastEvent = realtimeSnapshot ? realtimeSnapshot.last_event : device.last_event;
         const currentStatus = lastEvent?.status || 'Disconnected';
-        const currentType = lastEvent?.type; // Can be null or undefined
 
         statuses[key] = {
           status: currentStatus,
-          color: colorMap[currentStatus] || 'slate',
+          // Use the map to find the color, defaulting to 'slate' (Unknown) if not found
+          color: colorMap[currentStatus] || 'slate', // <-- THIS IS THE KEY CHANGE
           deviceId: device.id,
           deviceName: device.name,
           installationArea: device.installation_area,
-          lastEventType: currentType,
+          lastEventType: lastEvent?.type,
           createdAtFormatted: formatDateForTooltip(device.createdAt),
           installedAtFormatted: formatDateForTooltip(device.installation_date),
-          // Populate the new fields with the results of your translation functions
-          localizedStatus: getLocalizedStatus(currentStatus),
-          localizedEventType: getLocalizedEventType(currentType),
         };
       }
     }
@@ -827,12 +811,7 @@ const handleCellMouseEnter = (payload: { row: number; col: number; event: MouseE
     text = `${tooltipNameLabel.value}: ${cellData.deviceName}`;
     if (cellData.installationArea) text += `\n${tooltipAreaLabel.value}: ${cellData.installationArea}`;
     if (cellData.status) text += `\n${tooltipLastEventStatusLabel.value}: ${getLocalizedStatus(cellData.status)}`;
-    if (cellData.lastEventType) text += `\n${tooltipLastEventTypeLabel.value}: ${getLocalizedEventType(cellData.lastEventType)}`;
   }
-
-  // Log the final tooltip content to the console
-  logger.log(`[Tooltip Hover] Displaying tooltip with content:\n---\n${text}\n---`);
-
   sharedTooltipText.value = text;
   sharedTooltipStyle.value = {
     top: `${payload.event.clientY - 10}px`,
@@ -866,12 +845,18 @@ const closeAndResetModal = () => {
 const handleGridCellClick = (cell: { row: number; col: number; }) => {
   if (interactionMode.value !== 'select' || isPdfCurrentlyPanning.value) return;
   resetModalState();
+
+  // MODIFICATION: Use the computed overlay data to get the most up-to-date device info
   const cellKey = `${cell.row}-${cell.col}`;
   const statusInfo = cellStatusesForOverlay.value[cellKey];
   const deviceId = statusInfo?.deviceId;
+
   const existingDeviceOnCell = deviceId ? deviceDataStream.value.find(d => d.id === deviceId) : undefined;
+
   modalCellData.value = {row: cell.row, col: cell.col, device: existingDeviceOnCell};
+
   if (existingDeviceOnCell) {
+    // Also update the device's last_event in the modal with real-time data if available
     const realtimeSnapshot = deviceRealtimeStore.latestDeviceSnapshots.get(existingDeviceOnCell.id);
     if (realtimeSnapshot && modalCellData.value.device) {
       modalCellData.value.device.last_event = realtimeSnapshot.last_event;
@@ -933,6 +918,7 @@ const handleSaveCellAssignment = async () => {
         isSaving.value = false;
         return;
       }
+
       const payload = {
         name: newDeviceForm.value.name.trim(),
         mac_address: newDeviceForm.value.mac_address.trim() || '00:00:00:00:00:00',
@@ -943,9 +929,11 @@ const handleSaveCellAssignment = async () => {
         firmware_version: newDeviceForm.value.firmware_version || "",
         installation_date: new Date().toISOString()
       };
+
       logger.log('[API] Creating new device with payload:', payload);
       await $api('/api/v1/devices', {method: 'POST', body: payload});
       toast.add({title: 'Success', description: `Device ${payload.name} created and assigned.`, color: 'green'});
+
     } else {
       const newlySelectedDeviceId = modalSelectedDeviceId.value;
       const deviceCurrentlyOnCell = modalCellData.value.device;
@@ -994,6 +982,7 @@ const handleSaveCellAssignment = async () => {
 // !SECTION
 
 // SECTION: Reactivity Debugging
+// MODIFICATION: Added a watcher to explicitly log when the real-time store changes.
 watch(() => deviceRealtimeStore.latestDeviceSnapshots, (newSnapshots) => {
   logger.log(`[Reactivity] Watcher triggered: Real-time store updated. Total snapshots: ${newSnapshots.size}`);
 }, { deep: true });

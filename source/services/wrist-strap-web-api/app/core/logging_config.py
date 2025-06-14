@@ -1,5 +1,3 @@
-# File: app/core/logging_config.py
-
 import logging
 import colorlog
 from datetime import datetime, timezone, timedelta
@@ -28,8 +26,7 @@ def setup_logging():
     """
     Configures the root logger for the application using colorlog.
     """
-    # --- UPDATED: Moved '%(log_color)s' to the front to color the entire line ---
-    log_format = "%(log_color)s[%(asctime)s] [%(levelname)-8s] [%(name)s] - %(message)s"
+    log_format = "%(log_color)s[%(asctime)s] [%(levelname)-8s] [%(name)s] - %(message)s%(reset)s"  # Added %(reset)s at the end
     date_format = "%d-%m-%Y %H:%M:%S"
 
     formatter = TimezoneFormatter(
@@ -37,8 +34,8 @@ def setup_logging():
         datefmt=date_format,
         reset=True,
         log_colors={
-            'DEBUG': 'cyan',
-            'INFO': 'white',
+            'DEBUG': 'white',
+            'INFO': 'white',  # Set INFO to white as well
             'WARNING': 'yellow',
             'ERROR': 'red',
             'CRITICAL': 'bold_red',
@@ -48,15 +45,29 @@ def setup_logging():
     )
 
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.INFO)
+    root_logger.setLevel(logging.DEBUG)  # Keep root at DEBUG to capture all levels
 
-    handler = colorlog.StreamHandler()
-    handler.setFormatter(formatter)
-
+    # CRITICAL: Ensure existing handlers are cleared, especially important for reloaders
     if root_logger.hasHandlers():
         root_logger.handlers.clear()
-    root_logger.addHandler(handler)
 
-    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    # Add the new stream handler with the custom formatter
+    stream_handler = colorlog.StreamHandler()  # Use colorlog.StreamHandler directly
+    stream_handler.setFormatter(formatter)
+    root_logger.addHandler(stream_handler)
 
-    logging.info("Colorized logging configured with GMT+7 timezone.")
+    # --- Silence verbose third-party loggers if not actively debugging them ---
+    # Uvicorn's access logs (HTTP requests)
+    logging.getLogger("uvicorn.access").setLevel(logging.INFO)  # Changed to INFO to see common requests, but not DEBUG
+
+    # Uvicorn's general logger
+    logging.getLogger("uvicorn").setLevel(logging.INFO)  # Set Uvicorn to INFO to reduce noise
+
+    # PyMongo's loggers can be very verbose at DEBUG level
+    logging.getLogger("pymongo.connection").setLevel(logging.INFO)
+    logging.getLogger("pymongo.topology").setLevel(logging.INFO)
+    logging.getLogger("pymongo.serverSelection").setLevel(logging.INFO)
+    logging.getLogger("pymongo.command").setLevel(logging.INFO)
+
+    logger = logging.getLogger(__name__)
+    logger.info("Colorized logging configured with GMT+7 timezone and DEBUG level.")

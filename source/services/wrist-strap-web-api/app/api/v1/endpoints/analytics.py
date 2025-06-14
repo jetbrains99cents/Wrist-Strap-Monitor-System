@@ -1,18 +1,14 @@
-# File: app/api/v1/endpoints/analytics.py
-
 import logging
 from fastapi import APIRouter, Depends, Query, HTTPException, status
-from typing import Optional
+from typing import Optional, Any
 import pymongo.database
 
-from app.db.session import get_db
+from app.db.session import get_db # Use get_db for synchronous DB access
 from app.security import get_current_user
-from app.schemas.user import User
+from app.schemas.user import User # Assuming User schema is defined and correctly imported
 from app.crud import analytics as analytics_crud
 
-print("--- Loading analytics.py endpoints ---")  # <-- ADD THIS LINE
-
-# Get a logger instance for this file
+print("--- Loading analytics.py endpoints ---")
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
@@ -25,7 +21,7 @@ router = APIRouter()
 )
 def get_analytics(
         metric: str,
-        db: pymongo.database.Database = Depends(get_db),
+        db: pymongo.database.Database = Depends(get_db), # INJECTED: The synchronous DB client
         dateRange: str = Query("7days", enum=["today", "7days", "30days", "all"]),
         area: Optional[str] = Query(None),
         current_user: User = Depends(get_current_user)
@@ -53,7 +49,7 @@ def get_analytics(
     except Exception as e:
         logger.error(
             f"Error processing analytics for user '{user_email}' with filters: {log_details}. Error: {e}",
-            exc_info=True  # This will include the full traceback in the log
+            exc_info=True
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
