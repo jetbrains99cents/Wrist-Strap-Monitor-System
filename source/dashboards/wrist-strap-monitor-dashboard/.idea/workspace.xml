@@ -18,23 +18,8 @@
       <change afterPath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/types/nuxt.d.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/mqtt/mqtt_client.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/websocket/websocket_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/analytics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/devices.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/devices.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/core/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/core/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/core/logging_config.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/core/logging_config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/analytics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/device.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/device.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/db/session.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/db/session.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/voltage_reading.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/schemas/voltage_reading.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/security.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/security.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
