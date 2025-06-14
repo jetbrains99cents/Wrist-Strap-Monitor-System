@@ -5,20 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1920967b-ce8e-42f0-b6c9-49e2d29d39a4" name="Changes" comment="Complete dashboard phase 1">
-      <change afterPath="$PROJECT_DIR$/wrist-strap/components/layout/ActionStatusModal.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useActionStatusModal.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useLogger.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useStatusColor.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/layouts/empty.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/middleware/auth.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/pages/login.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/plugins/api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/plugins/websocket.client.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/prod-server.mjs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/wrist-strap/types/nuxt.d.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/editor.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -117,6 +112,15 @@
       <workItem from="1749713683644" duration="29619000" />
       <workItem from="1749803120415" duration="3245000" />
     </task>
+    <task id="LOCAL-00001" summary="Complete dashboard phase 1">
+      <option name="closed" value="true" />
+      <created>1749866266319</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1749866266319</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

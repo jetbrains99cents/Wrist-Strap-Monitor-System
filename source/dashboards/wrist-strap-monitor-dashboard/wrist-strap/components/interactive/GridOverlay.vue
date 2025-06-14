@@ -43,10 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import {computed} from 'vue';
-
+// --- Type Definitions ---
 type InteractionMode = 'pan' | 'select';
-
 type LogStatus =
     "Connected"
     | "Disconnected"
@@ -64,14 +62,14 @@ interface GridCellStatusInfo {
   status: LogStatus;
   deviceId: string;
   deviceName: string;
+  color: string; // Expects a color NAME, e.g., 'amber'
   installationArea?: string;
-  lastEventType?: EventCategory;
+  lastEventType?: EventCategory | null;
   createdAtFormatted?: string;
   installedAtFormatted?: string;
   localizedStatus: string;
   localizedEventType: string;
 }
-
 
 interface Props {
   rows: number;
@@ -101,6 +99,25 @@ const emit = defineEmits<{
   (e: 'cell-mouse-leave'): void;
 }>();
 
+// --- MODIFICATION: This "translator" function now lives inside the component ---
+const mapColorNameToTailwindClass = (colorName?: string): string => {
+  if (!colorName) return 'bg-slate-400 dark:bg-slate-700';
+
+  const colorClassMap: Record<string, string> = {
+    green: 'bg-green-500',
+    red: 'bg-red-500',
+    amber: 'bg-amber-500',
+    yellow: 'bg-yellow-500',
+    blue: 'bg-blue-500',
+    orange: 'bg-orange-500',
+    purple: 'bg-purple-500',
+    indigo: 'bg-indigo-500',
+    slate: 'bg-slate-400 dark:bg-slate-700'
+  };
+  return colorClassMap[colorName.toLowerCase()] || 'bg-slate-400 dark:bg-slate-700';
+};
+
+
 const onCellClick = (rowIndex: number, colIndex: number) => {
   if (props.interactionMode !== 'select' || props.isPdfPanning) return;
   emit('cell-click', {row: rowIndex, col: colIndex});
@@ -114,10 +131,10 @@ const onCellMouseEnter = (rowIndex: number, colIndex: number, event: MouseEvent)
 const onCellMouseLeave = () => {
   emit('cell-mouse-leave');
 };
+
 const onOverlayMouseLeave = () => {
   emit('cell-mouse-leave');
 }
-
 
 const isSelected = (rowIndex: number, colIndex: number) => {
   return props.selectedCell && props.selectedCell.row === rowIndex && props.selectedCell.col === colIndex;
@@ -126,40 +143,34 @@ const isSelected = (rowIndex: number, colIndex: number) => {
 const getCellClasses = (r: number, c: number) => {
   const key = `${r}-${c}`;
   const cellInfo = props.cellStatuses[key];
-  const status = cellInfo?.status;
 
-  let classes: Record<string, boolean | string> = {
+  let classes: Record<string, any> = {
     'border': true,
     'box-border': true,
   };
 
   if (isSelected(r, c)) {
-    classes['border-yellow-500'] = true;
-    classes['dark:border-yellow-300'] = true;
-    classes['bg-yellow-400'] = true;
-    classes['dark:bg-yellow-500'] = true;
+    classes['border-yellow-500 dark:border-yellow-300'] = true;
+    classes['bg-yellow-400 dark:bg-yellow-500'] = true;
     classes['opacity-60'] = true;
-  } else if (status) {
-    const statusClass = status.toLowerCase().replace(/\s+/g, '-');
-    classes[`cell-status-${statusClass}`] = true;
-    classes['border-gray-500'] = true;
-    classes['dark:border-gray-600'] = true;
+  } else if (cellInfo) {
+    // --- MODIFICATION: Use the internal translator to get the correct CSS class ---
+    const bgColorClass = mapColorNameToTailwindClass(cellInfo.color);
+    classes[bgColorClass] = true;
+
+    classes['border-gray-500 dark:border-gray-600'] = true;
     classes['opacity-50'] = true;
   } else {
-    classes['border-blue-500'] = true;
-    classes['dark:border-yellow-400'] = true;
+    classes['border-blue-500 dark:border-yellow-400'] = true;
     classes['opacity-10'] = true;
 
     if (props.interactionMode === 'select' && !props.isPdfPanning) {
-      classes['hover:opacity-30'] = true;
-      classes['hover:bg-gray-500'] = true;
-      classes['hover:bg-opacity-10'] = true;
+      classes['hover:opacity-30 hover:bg-gray-500 hover:bg-opacity-10'] = true;
     }
   }
   return classes;
 }
 
-// MODIFIED: This function will now always show the Status and Type labels.
 const getCellTooltipText = (r: number, c: number): string => {
   const key = `${r}-${c}`;
   const cellInfo = props.cellStatuses[key];
@@ -171,12 +182,10 @@ const getCellTooltipText = (r: number, c: number): string => {
       tooltipLines.push(`${props.tooltipAreaLabel}: ${cellInfo.installationArea}`);
     }
 
-    // Always show the Status line, even if the value is 'N/A'
     if (cellInfo.localizedStatus) {
       tooltipLines.push(`${props.tooltipLastEventStatusLabel}: ${cellInfo.localizedStatus}`);
     }
 
-    // Always show the Type line, even if the value is 'N/A'
     if (cellInfo.localizedEventType) {
       tooltipLines.push(`${props.tooltipLastEventTypeLabel}: ${cellInfo.localizedEventType}`);
     }
@@ -204,46 +213,5 @@ const getCellTooltipText = (r: number, c: number): string => {
 
 .grid-cell[style*="pointer-events: auto"] {
   cursor: pointer;
-}
-
-/* Status specific backgrounds */
-.cell-status-connected {
-  background-color: #22c55e;
-}
-
-.cell-status-voltage-reading-ok {
-  background-color: #22c55e; /* Green for OK status */
-}
-
-.cell-status-warning {
-  background-color: #eab308;
-}
-
-.cell-status-error {
-  background-color: #f59e0b;
-}
-
-.cell-status-disconnected {
-  background-color: #ef4444;
-}
-
-.cell-status-info {
-  background-color: #3b82f6;
-}
-
-.cell-status-voltage-reading-failed {
-  background-color: #ef4444;
-}
-
-.cell-status-configured {
-  background-color: #a855f7;
-}
-
-.cell-status-reset {
-  background-color: #6366f1;
-}
-
-.cell-status-critical {
-  background-color: #dc2626;
 }
 </style>

@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-1 min-h-0 overflow-hidden">
-    <!-- Desktop Sidebar -->
     <aside
         class="hidden md:flex md:flex-col bg-gray-100 dark:bg-dark-surface border-r border-gray-200 dark:border-dark-border p-4 w-60 lg:w-64 overflow-y-auto shrink-0"
         aria-label="Desktop Dashboard Navigation"
@@ -16,7 +15,6 @@
       />
     </aside>
 
-    <!-- Main Content Area -->
     <section class="flex-1 flex flex-col overflow-hidden p-3 sm:p-4 md:p-6">
       <div class="md:hidden mb-4 shrink-0">
         <UButton
@@ -28,7 +26,6 @@
         />
       </div>
 
-      <!-- Action Bar -->
       <div class="action-bar mb-4 p-4 bg-gray-50 dark:bg-dark-surface rounded-lg shadow shrink-0">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div class="flex flex-wrap items-center gap-3">
@@ -51,7 +48,6 @@
         </div>
       </div>
 
-      <!-- Filters Section -->
       <div class="filters-section mb-4 p-4 bg-gray-50 dark:bg-dark-surface rounded-lg shadow shrink-0">
         <div class="flex flex-wrap gap-4">
           <USelectMenu v-model="selectedFilterArea" :options="areaColumnFilterOptions" size="sm" :style="{ minWidth: '180px' }" :placeholder="filterByAreaPlaceholder" value-attribute="value" option-attribute="label" clearable />
@@ -60,7 +56,6 @@
         </div>
       </div>
 
-      <!-- Device Table Container -->
       <div class="device-table-container flex-grow flex flex-col overflow-hidden">
         <UTable
             v-model="selectedDevices"
@@ -91,7 +86,6 @@
         </UTable>
       </div>
 
-      <!-- Pagination Controls -->
       <div v-if="totalPages > 1" class="pagination-controls flex justify-center items-center mt-4 shrink-0 gap-2">
         <UPagination v-model="currentPage" :page-count="itemsPerPage" :total="filteredDevices.length" :max="5"/>
         <div class="flex items-center gap-1 text-sm">
@@ -101,7 +95,6 @@
       </div>
     </section>
 
-    <!-- Mobile Sidebar -->
     <USlideover v-model="isMobileMenuOpen" side="left" :ui="{ width: 'max-w-xs w-full sm:w-72' }">
       <UCard class="flex flex-col flex-1 h-full" :ui="{ ring: '', divide: 'divide-y divide-gray-100 dark:divide-gray-800', body: { padding: '', base: 'flex-1 overflow-y-auto' } }">
         <template #header>
@@ -116,7 +109,6 @@
       </UCard>
     </USlideover>
 
-    <!-- Modals -->
     <UModal v-model="isFormModalOpen">
       <UForm v-if="formState" :state="formState" @submit="isEditing ? handleUpdateDevice() : handleSaveNewDevice()">
         <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
@@ -159,14 +151,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'; // --- ADDED onUnmounted ---
+import { ref, computed, watch, onMounted } from 'vue';
 import { useLanguage } from '~/composables/useLanguage';
 import { useLogger } from '~/composables/useLogger';
 import { useActionStatusModal } from '~/composables/useActionStatusModal';
-import { useDeviceRealtimeStore } from '~/stores/deviceRealtime'; // --- ADDED: Import the real-time store ---
+import { useDeviceRealtimeStore } from '~/stores/deviceRealtime';
 
 type AppBadgeColor = 'green' | 'red' | 'amber' | 'gray';
-// --- MODIFICATION: Add 'Voltage reading ok' to the status type ---
 type DeviceStatus = 'Connected' | 'Disconnected' | 'Voltage reading failed' | 'Voltage reading ok' | 'Unknown';
 
 const { currentLanguage } = useLanguage();
@@ -174,7 +165,7 @@ const logger = useLogger();
 const toast = useToast();
 const { $api } = useNuxtApp();
 const { show: showActionStatusModal } = useActionStatusModal();
-const deviceRealtimeStore = useDeviceRealtimeStore(); // --- ADDED: Get an instance of the store ---
+const deviceRealtimeStore = useDeviceRealtimeStore();
 
 // --- General State & Navigation ---
 const isMobileMenuOpen = ref(false);
@@ -225,7 +216,6 @@ const deleteSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'CÃ
 interface Device { id: string; name: string; installationArea: string; installationDate: number; status: DeviceStatus | null; mac_address: string; firmware_version?: string | null; }
 const allDevices = ref<Device[]>([]);
 const allAreas = ["POL", "FLW", "CG", "OQC Lighting", "D Inspection", "Assembly X", "Testing Y", "Warehouse Z"];
-// --- MODIFICATION: Add 'Voltage reading ok' to the known statuses for filtering ---
 const allStatuses: DeviceStatus[] = ['Connected', 'Disconnected', 'Voltage reading failed', 'Voltage reading ok'];
 const pending = ref(false);
 
@@ -238,11 +228,10 @@ const localizedColumns = computed(() => [
   {key: 'status', label: statusLabel.value, sortable: true},
 ]);
 
-// --- MODIFICATION: Create a new computed property to merge API data with real-time updates ---
 const liveDeviceData = computed(() => {
   const realtimeSnapshots = deviceRealtimeStore.latestDeviceSnapshots;
   if (realtimeSnapshots.size === 0) {
-    return allDevices.value; // Return static list if no real-time data
+    return allDevices.value;
   }
   return allDevices.value.map(device => {
     const snapshot = realtimeSnapshots.get(device.id);
@@ -252,10 +241,9 @@ const liveDeviceData = computed(() => {
         status: (snapshot.last_event?.status || 'Unknown') as DeviceStatus,
       };
     }
-    return device; // Return original if no update
+    return device;
   });
 });
-
 
 // --- Filtering, Sorting & Pagination ---
 const searchTerm = ref('');
@@ -264,9 +252,8 @@ const selectedFilterStatus = ref<DeviceStatus | undefined>(undefined);
 const selectedFilterDate = ref<number | undefined>(undefined);
 const sort = ref<{ column: string; direction: 'asc' | 'desc' }>({column: 'name', direction: 'asc'});
 
-// --- MODIFICATION: Base the filtered devices on the new 'liveDeviceData' computed property ---
 const filteredDevices = computed(() => {
-  let results = [...liveDeviceData.value]; // Use live data source
+  let results = [...liveDeviceData.value];
   if (searchTerm.value) { const term = searchTerm.value.toLowerCase(); results = results.filter(device => (device.name.toLowerCase().includes(term)) || (device.mac_address.toLowerCase().includes(term))); }
   if (selectedFilterArea.value) results = results.filter(device => device.installationArea === selectedFilterArea.value);
   if (selectedFilterStatus.value) results = results.filter(device => device.status === selectedFilterStatus.value);
@@ -279,19 +266,10 @@ const itemsPerPage = ref(15);
 const currentPage = ref(1);
 const pageInput = ref(currentPage.value);
 
-// --- MODIFICATION: Add real-time listeners on mount ---
+// --- MODIFICATION: The onMounted hook is now only responsible for fetching initial data ---
 onMounted(() => {
-  logger.log('[Device Management] Initializing real-time listeners...');
-  deviceRealtimeStore.initRealtimeListeners();
   fetchDevices();
 });
-
-// --- MODIFICATION: Clean up listeners on unmount ---
-onUnmounted(() => {
-  logger.log('[Device Management] Cleaning up real-time listeners...');
-  deviceRealtimeStore.cleanupRealtimeListeners();
-});
-
 
 const totalPages = computed(() => Math.ceil(filteredDevices.value.length / itemsPerPage.value) || 1);
 const paginatedDevices = computed(() => { const start = (currentPage.value - 1) * itemsPerPage.value; const end = start + itemsPerPage.value; return filteredDevices.value.slice(start, end); });
@@ -302,7 +280,6 @@ watch([searchTerm, selectedFilterArea, selectedFilterStatus, selectedFilterDate]
 // --- Table Data Formatting ---
 const formatTimestamp = (timestamp: number) => new Date(timestamp).toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US');
 
-// --- MODIFICATION: Add Vietnamese translation and handling for 'Voltage reading ok' ---
 const getLocalizedStatus = (status: DeviceStatus | null): string => {
   if (!status) return 'N/A';
   if (currentLanguage.value === 'vi') {
@@ -321,12 +298,11 @@ const areaColumnFilterOptions = computed(() => [{ label: filterByAreaPlaceholder
 const statusColumnFilterOptions = computed(() => [{ label: filterByStatusPlaceholder.value, value: undefined }, ...allStatuses.map(s => ({ label: getLocalizedStatus(s as DeviceStatus), value: s }))]);
 const dateColumnFilterOptions = computed(() => { const uniqueDates = [...new Set(allDevices.value.map(d => new Date(d.installationDate).toDateString()))]; return [{ label: filterByDatePlaceholder.value, value: undefined }, ...uniqueDates.map(d => ({ label: new Date(d).toLocaleDateString(), value: new Date(d).getTime() }))]; });
 
-// --- MODIFICATION: Add color for 'Voltage reading ok' ---
 const getStatusColor = (status: DeviceStatus | null): AppBadgeColor => {
   if (!status) return 'gray';
   switch (status) {
     case 'Connected':
-    case 'Voltage reading ok': // Treat as a good status
+    case 'Voltage reading ok':
       return 'green';
     case 'Disconnected':
       return 'red';
@@ -347,11 +323,10 @@ const formState = ref<any>({});
 
 // --- Modal Logic ---
 const openAddModal = () => { isEditing.value = false; formState.value = { name: '', installationArea: allAreas[0], mac_address: '', firmware_version: '' }; isFormModalOpen.value = true; };
-const handleRowClick = (row: Device) => { logger.log('[Device Management] Row clicked/selected. Device data:', JSON.parse(JSON.stringify(row))); isEditing.value = true; formState.value = JSON.parse(JSON.stringify(row)); isFormModalOpen.value = true; };
+const handleRowClick = (row: Device) => { isEditing.value = true; formState.value = JSON.parse(JSON.stringify(row)); isFormModalOpen.value = true; };
 
 // --- CRUD ---
 const handleSaveNewDevice = async () => {
-  logger.log('[Device Management] Action: Add Device');
   isSaving.value = true;
   const payload = {
     name: formState.value.name,
@@ -360,7 +335,6 @@ const handleSaveNewDevice = async () => {
     firmware_version: formState.value.firmware_version || "",
     device_type: 'WristStrapMonitorV1',
   };
-  logger.log('[Device Management] Add payload:', payload);
   try {
     const newDeviceResponse = await $api('/api/v1/devices/', { method: 'POST', body: payload });
     const newDevice: Device = {
@@ -373,7 +347,6 @@ const handleSaveNewDevice = async () => {
       firmware_version: newDeviceResponse.firmware_version,
     };
     allDevices.value.push(newDevice);
-    logger.log('[Device Management] Device added successfully. Response:', newDeviceResponse);
     isFormModalOpen.value = false;
     showActionStatusModal({ title: successTitle.value, description: addSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} });
   } catch (error) {
@@ -384,17 +357,15 @@ const handleSaveNewDevice = async () => {
   }
 };
 
-const handleUpdateDevice = async () => { if (!formState.value.id) return; logger.log(`[Device Management] Action: Edit Device. ID: ${formState.value.id}`); isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, firmware_version: formState.value.firmware_version, }; logger.log('[Device Management] Update payload:', payload); try { const updatedDevice = await $api(`/api/v1/devices/${formState.value.id}`, { method: 'PUT', body: payload }); const deviceIndex = allDevices.value.findIndex(d => d.id === formState.value.id); if (deviceIndex !== -1) { allDevices.value[deviceIndex].name = updatedDevice.name; allDevices.value[deviceIndex].installationArea = updatedDevice.installation_area; allDevices.value[deviceIndex].firmware_version = updatedDevice.firmware_version; } logger.log(`[Device Management] Device ${formState.value.id} updated successfully. Response:`, updatedDevice); isFormModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: updateSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to update device:', error); toast.add({ title: 'Error', description: 'Could not update the device.', color: 'red' }); } finally { isSaving.value = false; } };
-const handleRemoveDevice = () => { if (selectedDevices.value.length > 0) { logger.log(`[Device Management] Action: Remove Device(s). Opening confirmation for IDs:`, selectedDevices.value.map(d => d.id)); isConfirmDeleteModalOpen.value = true; } };
-const confirmDeleteDevices = async () => { isSaving.value = true; const idsToDelete = selectedDevices.value.map(d => d.id); logger.log(`[Device Management] Deletion confirmed. Removing IDs:`, idsToDelete); try { await Promise.all( idsToDelete.map(id => $api(`/api/v1/devices/${id}`, { method: 'DELETE' })) ); allDevices.value = allDevices.value.filter(device => !idsToDelete.includes(device.id)); selectedDevices.value = []; logger.log('[Device Management] Devices deleted successfully from backend and frontend state.'); isConfirmDeleteModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: deleteSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to delete devices:', error); toast.add({ title: 'Error', description: 'Could not delete one or more devices.', color: 'red' }); } finally { isSaving.value = false; } };
-const handleExportExcel = async () => { logger.log('[Device Management] Action: Export to Excel'); const XLSX = await import('xlsx'); const dataToExport = filteredDevices.value.map(device => ({ [deviceNameLabel.value]: device.name, [macAddressLabel.value]: device.mac_address, [areaLabel.value]: device.installationArea, [firmwareVersionLabel.value]: device.firmware_version || 'N/A', [installationDateLabel.value]: formatTimestamp(device.installationDate), [statusLabel.value]: getLocalizedStatus(device.status), })); if (dataToExport.length === 0) { logger.warn("[Device Management] No data available to export."); toast.add({ title: 'No Data', description: 'There is no data to export.', color: 'orange' }); return; } const worksheet = XLSX.utils.json_to_sheet(dataToExport); const colWidths = Object.keys(dataToExport[0]).map(key => ({ wch: Math.max(key.length, 25) })); worksheet['!cols'] = colWidths; const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, "Device List"); const today = new Date(); const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; const fileName = `Device_List_${dateStr}.xlsx`; XLSX.writeFile(workbook, fileName); logger.log(`[Device Management] Successfully exported data to ${fileName}`); };
+const handleUpdateDevice = async () => { if (!formState.value.id) return; isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, firmware_version: formState.value.firmware_version, }; try { const updatedDevice = await $api(`/api/v1/devices/${formState.value.id}`, { method: 'PUT', body: payload }); const deviceIndex = allDevices.value.findIndex(d => d.id === formState.value.id); if (deviceIndex !== -1) { allDevices.value[deviceIndex].name = updatedDevice.name; allDevices.value[deviceIndex].installationArea = updatedDevice.installation_area; allDevices.value[deviceIndex].firmware_version = updatedDevice.firmware_version; } isFormModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: updateSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to update device:', error); toast.add({ title: 'Error', description: 'Could not update the device.', color: 'red' }); } finally { isSaving.value = false; } };
+const handleRemoveDevice = () => { if (selectedDevices.value.length > 0) { isConfirmDeleteModalOpen.value = true; } };
+const confirmDeleteDevices = async () => { isSaving.value = true; const idsToDelete = selectedDevices.value.map(d => d.id); try { await Promise.all( idsToDelete.map(id => $api(`/api/v1/devices/${id}`, { method: 'DELETE' })) ); allDevices.value = allDevices.value.filter(device => !idsToDelete.includes(device.id)); selectedDevices.value = []; isConfirmDeleteModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: deleteSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to delete devices:', error); toast.add({ title: 'Error', description: 'Could not delete one or more devices.', color: 'red' }); } finally { isSaving.value = false; } };
+const handleExportExcel = async () => { const XLSX = await import('xlsx'); const dataToExport = filteredDevices.value.map(device => ({ [deviceNameLabel.value]: device.name, [macAddressLabel.value]: device.mac_address, [areaLabel.value]: device.installationArea, [firmwareVersionLabel.value]: device.firmware_version || 'N/A', [installationDateLabel.value]: formatTimestamp(device.installationDate), [statusLabel.value]: getLocalizedStatus(device.status), })); if (dataToExport.length === 0) { toast.add({ title: 'No Data', description: 'There is no data to export.', color: 'orange' }); return; } const worksheet = XLSX.utils.json_to_sheet(dataToExport); const colWidths = Object.keys(dataToExport[0]).map(key => ({ wch: Math.max(key.length, 25) })); worksheet['!cols'] = colWidths; const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, "Device List"); const today = new Date(); const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; const fileName = `Device_List_${dateStr}.xlsx`; XLSX.writeFile(workbook, fileName); };
 
 async function fetchDevices() {
   pending.value = true;
-  logger.log('[Device Management] Fetching devices from API...');
   try {
     const response: any[] = await $api('/api/v1/devices/');
-    logger.log('[Device Management] Raw fetched data:', JSON.parse(JSON.stringify(response)));
     allDevices.value = response.map((device: any) => ({
       id: device._id,
       name: device.name,
@@ -404,7 +375,6 @@ async function fetchDevices() {
       mac_address: device.mac_address,
       firmware_version: device.firmware_version,
     }));
-    logger.log('[Device Management] Mapped frontend device objects:', JSON.parse(JSON.stringify(allDevices.value)));
   } catch (error) {
     logger.error('[Device Management] Failed to fetch devices:', error);
     toast.add({ title: 'Error', description: 'Could not fetch devices.', color: 'red' });

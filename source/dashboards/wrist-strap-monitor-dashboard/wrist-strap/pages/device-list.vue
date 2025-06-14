@@ -114,7 +114,6 @@ import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useLanguage } from '~/composables/useLanguage';
 import { useLogger } from '~/composables/useLogger';
 import DeviceCard from '~/components/device/DeviceCard.vue';
-// --- MODIFICATION: Import the real-time store ---
 import { useDeviceRealtimeStore } from '~/stores/deviceRealtime';
 
 const { currentLanguage } = useLanguage();
@@ -123,9 +122,7 @@ const { $api } = useNuxtApp();
 const toast = useToast();
 const isMobileMenuOpen = ref(false);
 
-// --- MODIFICATION: Get an instance of the real-time store ---
 const deviceRealtimeStore = useDeviceRealtimeStore();
-
 
 // --- Sidebar Navigation Items ---
 const rawNavigationItems = ref([
@@ -177,8 +174,6 @@ const fetchLiveDevices = async () => {
   logger.log('[DeviceList] Fetching devices from API...');
   try {
     const response: any[] = await $api('/api/v1/devices/');
-    logger.log('[DeviceList] Raw data received from API:', JSON.parse(JSON.stringify(response)));
-
     allDevices.value = response.map((d: any) => ({
       id: d._id,
       name: d.name,
@@ -190,7 +185,6 @@ const fetchLiveDevices = async () => {
       installationDate: d.installation_date,
       last_event: d.last_event || null
     }));
-    logger.log('[DeviceList] Mapped frontend device objects:', JSON.parse(JSON.stringify(allDevices.value)));
 
     const uniqueAreas = [...new Set(allDevices.value.map(d => d.area))].filter(Boolean);
     areasData.value = uniqueAreas.sort();
@@ -203,25 +197,21 @@ const fetchLiveDevices = async () => {
   }
 };
 
-// --- MODIFICATION: Create a new computed property to merge API data with real-time updates ---
 const liveDeviceList = computed<Device[]>(() => {
   const realtimeSnapshots = deviceRealtimeStore.latestDeviceSnapshots;
   if (realtimeSnapshots.size === 0) {
-    return allDevices.value; // If no real-time data, return the static list
+    return allDevices.value;
   }
-
-  // Map over the static list and update it with any real-time data
   return allDevices.value.map(device => {
     const snapshot = realtimeSnapshots.get(device.id);
     if (snapshot) {
-      // Create a new object to ensure reactivity
       return {
         ...device,
         status: snapshot.last_event?.status || 'Unknown',
         last_event: snapshot.last_event
       };
     }
-    return device; // Return the original device if no update
+    return device;
   });
 });
 
@@ -255,10 +245,8 @@ const localizedAreaOptions = computed(() => [
   ...areasData.value.map(area => ({ label: area, value: area }))
 ]);
 
-// --- MODIFICATION: Base the filtered devices on the new 'liveDeviceList' ---
 const filteredDevices = computed(() => {
   if (isLoading.value) return [];
-  // Use liveDeviceList instead of allDevices
   return liveDeviceList.value.filter(device => {
     const nameMatch = filterName.value ? device.name.toLowerCase().includes(filterName.value.toLowerCase()) : true;
     const statusMatch = selectedStatusValue.value !== undefined ? device.status === selectedStatusValue.value : true;
@@ -299,11 +287,9 @@ const calculateDynamicItemsPerPage = () => {
 };
 
 let resizeObserver: ResizeObserver | null = null;
-onMounted(() => {
-  // --- MODIFICATION: Initialize WebSocket listeners ---
-  logger.log('[DeviceList] Initializing real-time listeners...');
-  deviceRealtimeStore.initRealtimeListeners();
 
+// --- MODIFICATION: Lifecycle hooks no longer manage WebSocket listeners ---
+onMounted(() => {
   fetchLiveDevices().then(() => {
     nextTick(() => {
       if (deviceGridAreaRef.value) {
@@ -315,13 +301,11 @@ onMounted(() => {
   });
 });
 onBeforeUnmount(() => {
-  // --- MODIFICATION: Clean up WebSocket listeners ---
-  logger.log('[DeviceList] Cleaning up real-time listeners...');
-  deviceRealtimeStore.cleanupRealtimeListeners();
-
   if (resizeObserver && deviceGridAreaRef.value) resizeObserver.unobserve(deviceGridAreaRef.value);
   if (resizeObserver) resizeObserver.disconnect();
 });
+
+
 watch(
     () => filteredDevices.value.length,
     () => {

@@ -184,7 +184,7 @@
                 getLocalizedStatus(modalCellData.device.last_event?.status)
               }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalLastEventTypeLabel }}:</span>
-              <span class="dark:text-white">{{ modalCellData.device.last_event?.type || 'N/A' }}</span>
+              <span class="dark:text-white">{{ getLocalizedEventType(modalCellData.device.last_event?.type) }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{
                   modalFirmwareVersionLabel
                 }}:</span> <span class="dark:text-white">{{ modalCellData.device.firmware_version || 'N/A' }}</span>
@@ -340,7 +340,7 @@ type LogStatus =
 type EventCategory = "Connection" | "Sensor Reading" | "Alert" | "User action" | "System";
 
 interface EventDetails {
-  type: EventCategory;
+  type: EventCategory | null;
   status?: LogStatus | null;
   timestamp: number;
   value: string | Record<string, any> | number;
@@ -365,12 +365,11 @@ interface GridCellStatus {
   status: LogStatus;
   deviceId: string;
   deviceName: string;
-  color: string;
+  color: string; // Will hold the color *name*, e.g., 'amber'
   installationArea?: string;
-  lastEventType?: EventCategory;
+  lastEventType?: EventCategory | null;
   createdAtFormatted?: string;
   installedAtFormatted?: string;
-  // Add these two new properties
   localizedStatus: string;
   localizedEventType: string;
 }
@@ -531,41 +530,11 @@ const handlePdfScaleUpdated = (newScale: number) => {
 // SECTION: Navigation Items
 const rawNavigationItems = ref([
   {id: 'home', label_en: 'Home', label_vi: 'Trang chủ', icon: 'i-heroicons-home-solid', to: '/'},
-  {
-    id: 'device-list',
-    label_en: 'Device List',
-    label_vi: 'Danh sách thiết bị',
-    icon: 'i-heroicons-queue-list-solid',
-    to: '/device-list'
-  },
-  {
-    id: 'device-management',
-    label_en: 'Device Management',
-    label_vi: 'Quản lý thiết bị',
-    icon: 'i-heroicons-cog-8-tooth-solid',
-    to: '/device-management'
-  },
-  {
-    id: 'production-plan',
-    label_en: 'Production Plan\n& Working Time',
-    label_vi: 'Kế hoạch & Thời gian\nsản xuất',
-    icon: 'i-heroicons-calendar-days-solid',
-    to: '/production-plan'
-  },
-  {
-    id: 'data-visualization',
-    label_en: 'Data Visualization',
-    label_vi: 'Trực quan hóa dữ liệu',
-    icon: 'i-heroicons-chart-pie-solid',
-    to: '/data-visualization'
-  },
-  {
-    id: 'data-analysis',
-    label_en: 'Data Analysis',
-    label_vi: 'Phân tích dữ liệu',
-    icon: 'i-heroicons-presentation-chart-line-solid',
-    to: '/data-analysis'
-  },
+  {id: 'device-list', label_en: 'Device List', label_vi: 'Danh sách thiết bị', icon: 'i-heroicons-queue-list-solid', to: '/device-list'},
+  {id: 'device-management', label_en: 'Device Management', label_vi: 'Quản lý thiết bị', icon: 'i-heroicons-cog-8-tooth-solid', to: '/device-management'},
+  {id: 'production-plan', label_en: 'Production Plan\n& Working Time', label_vi: 'Kế hoạch & Thời gian\nsản xuất', icon: 'i-heroicons-calendar-days-solid', to: '/production-plan'},
+  {id: 'data-visualization', label_en: 'Data Visualization', label_vi: 'Trực quan hóa dữ liệu', icon: 'i-heroicons-chart-pie-solid', to: '/data-visualization'},
+  {id: 'data-analysis', label_en: 'Data Analysis', label_vi: 'Phân tích dữ liệu', icon: 'i-heroicons-presentation-chart-line-solid', to: '/data-analysis'},
 ]);
 const localizedNavigationItems = computed(() => rawNavigationItems.value.map(item => ({
   id: item.id,
@@ -665,11 +634,9 @@ const getLocalizedEventType = (type?: EventCategory | null): string => {
 };
 // !SECTION
 
-
 // SECTION: API Interaction
 const fetchAndSetDevices = async () => {
   try {
-    logger.log('[API] Fetching devices...');
     const response = await $api<any[]>('/api/v1/devices/');
     deviceDataStream.value = response.map((device: any): DeviceData => ({
       id: device._id,
@@ -685,7 +652,6 @@ const fetchAndSetDevices = async () => {
       installation_date: device.installation_date,
       updatedAt: device.updatedAt,
     }));
-    logger.log(`[API] Successfully fetched and mapped ${deviceDataStream.value.length} devices.`);
   } catch (error: any) {
     logger.error('[API] Failed to fetch devices:', error);
     toast.add({
@@ -697,7 +663,6 @@ const fetchAndSetDevices = async () => {
   }
 };
 // !SECTION
-
 
 // SECTION: Lifecycle Hooks and Event Listeners
 const handleKeydown = (event: KeyboardEvent) => {
@@ -711,16 +676,11 @@ const handleKeydown = (event: KeyboardEvent) => {
 };
 
 onMounted(async () => {
-  logger.log('[index.vue] Initializing real-time listeners...');
-  deviceRealtimeStore.initRealtimeListeners();
-
   await fetchAndSetDevices();
-  window.addEventListener('keydown', handleKeydown); });
+  window.addEventListener('keydown', handleKeydown);
+});
 
 onUnmounted(() => {
-  logger.log('[index.vue] Cleaning up real-time listeners...');
-  deviceRealtimeStore.cleanupRealtimeListeners();
-
   window.removeEventListener('keydown', handleKeydown);
 });
 // !SECTION
@@ -773,83 +733,51 @@ const computedGridOverlayProps = computed(() => {
 });
 
 const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
-  logger.log('[Reactivity] `cellStatusesForOverlay` is re-computing...');
-
   const statuses: Record<string, GridCellStatus> = {};
   const gridProps = computedGridOverlayProps.value;
   const realtimeSnapshots = deviceRealtimeStore.latestDeviceSnapshots;
-  const colorMap = runtimeConfig.public.statusColors as Record<string, string>;
+  const colorNameMap = runtimeConfig.public.statusColors as Record<string, string>;
 
   if (!gridProps.visible) return {};
 
-  for (const device of deviceDataStream.value) {
+  const combinedDeviceData = deviceDataStream.value.map(device => {
+    const snapshot = realtimeSnapshots.get(device.id);
+    return snapshot ? { ...device, last_event: snapshot.last_event } : device;
+  });
+
+  for (const device of combinedDeviceData) {
     if (device.coordinates) {
       const {row, col} = device.coordinates;
       if (row >= 0 && col >= 0 && row < gridProps.rows && col < gridProps.cols) {
         const key = `${row}-${col}`;
-
-        const realtimeSnapshot = realtimeSnapshots.get(device.id);
-        const lastEvent = realtimeSnapshot ? realtimeSnapshot.last_event : device.last_event;
+        const lastEvent = device.last_event;
         const currentStatus = lastEvent?.status || 'Disconnected';
-        const currentType = lastEvent?.type; // Can be null or undefined
+        const currentType = lastEvent?.type;
+
+        // --- MODIFICATION: This now passes the simple color NAME to the overlay ---
+        const colorName = colorNameMap[currentStatus] || 'slate';
 
         statuses[key] = {
           status: currentStatus,
-          color: colorMap[currentStatus] || 'slate',
+          color: colorName, // Pass the color NAME (e.g., 'amber')
           deviceId: device.id,
           deviceName: device.name,
           installationArea: device.installation_area,
-          lastEventType: currentType,
+          lastEventType: currentType || null,
           createdAtFormatted: formatDateForTooltip(device.createdAt),
           installedAtFormatted: formatDateForTooltip(device.installation_date),
-          // Populate the new fields with the results of your translation functions
           localizedStatus: getLocalizedStatus(currentStatus),
           localizedEventType: getLocalizedEventType(currentType),
         };
       }
     }
   }
-  logger.log(`[Reactivity] Generated ${Object.keys(statuses).length} cell statuses.`);
   return statuses;
 });
 
-const sharedTooltipText = ref('');
-const sharedTooltipVisible = ref(false);
-const sharedTooltipStyle = ref<Record<string, string | number>>({});
-let tooltipHideTimeout: ReturnType<typeof setTimeout> | null = null;
-
-const handleCellMouseEnter = (payload: { row: number; col: number; event: MouseEvent }) => {
-  if (tooltipHideTimeout) clearTimeout(tooltipHideTimeout);
-  const cellKey = `${payload.row}-${payload.col}`;
-  const cellData = cellStatusesForOverlay.value[cellKey];
-  let text = `${tooltipCellLabel.value}: ${modalRowLabel.value} ${payload.row}, ${modalColLabel.value} ${payload.col}`;
-  if (cellData) {
-    text = `${tooltipNameLabel.value}: ${cellData.deviceName}`;
-    if (cellData.installationArea) text += `\n${tooltipAreaLabel.value}: ${cellData.installationArea}`;
-    if (cellData.status) text += `\n${tooltipLastEventStatusLabel.value}: ${getLocalizedStatus(cellData.status)}`;
-    if (cellData.lastEventType) text += `\n${tooltipLastEventTypeLabel.value}: ${getLocalizedEventType(cellData.lastEventType)}`;
-  }
-
-  // Log the final tooltip content to the console
-  logger.log(`[Tooltip Hover] Displaying tooltip with content:\n---\n${text}\n---`);
-
-  sharedTooltipText.value = text;
-  sharedTooltipStyle.value = {
-    top: `${payload.event.clientY - 10}px`,
-    left: `${payload.event.clientX + 15}px`,
-    transform: 'translateY(-100%)',
-    visibility: 'visible'
-  };
-  sharedTooltipVisible.value = true;
-};
-
-const handleCellMouseLeave = () => {
-  tooltipHideTimeout = setTimeout(() => {
-    sharedTooltipVisible.value = false;
-  }, 100);
-};
+const handleCellMouseEnter = (payload: { row: number; col: number; event: MouseEvent }) => {};
+const handleCellMouseLeave = () => {};
 // !SECTION
-
 
 // SECTION: Modal and Cell Assignment Logic
 const resetModalState = () => {
@@ -869,14 +797,24 @@ const handleGridCellClick = (cell: { row: number; col: number; }) => {
   const cellKey = `${cell.row}-${cell.col}`;
   const statusInfo = cellStatusesForOverlay.value[cellKey];
   const deviceId = statusInfo?.deviceId;
-  const existingDeviceOnCell = deviceId ? deviceDataStream.value.find(d => d.id === deviceId) : undefined;
-  modalCellData.value = {row: cell.row, col: cell.col, device: existingDeviceOnCell};
-  if (existingDeviceOnCell) {
-    const realtimeSnapshot = deviceRealtimeStore.latestDeviceSnapshots.get(existingDeviceOnCell.id);
-    if (realtimeSnapshot && modalCellData.value.device) {
-      modalCellData.value.device.last_event = realtimeSnapshot.last_event;
+
+  const baseDeviceData = deviceId
+      ? deviceDataStream.value.find(d => d.id === deviceId)
+      : undefined;
+
+  const finalDeviceData = baseDeviceData ? { ...baseDeviceData } : undefined;
+
+  if (finalDeviceData) {
+    const snapshot = deviceRealtimeStore.latestDeviceSnapshots.get(finalDeviceData.id);
+    if (snapshot) {
+      finalDeviceData.last_event = snapshot.last_event;
     }
-    modalSelectedDeviceId.value = existingDeviceOnCell.id;
+  }
+
+  modalCellData.value = {row: cell.row, col: cell.col, device: finalDeviceData};
+
+  if (finalDeviceData) {
+    modalSelectedDeviceId.value = finalDeviceData.id;
   }
   isGridCellModalOpen.value = true;
 };
@@ -887,7 +825,6 @@ const handleRemoveAssignment = async () => {
     toast.add({title: 'Error', description: 'No device is assigned to this cell.', color: 'orange'});
     return;
   }
-  logger.log(`[API] Removing assignment for device ID: ${deviceToRemove.id}`);
   isSaving.value = true;
   try {
     await $api(`/api/v1/devices/${deviceToRemove.id}`, {
@@ -908,12 +845,8 @@ const handleRemoveAssignment = async () => {
   }
 };
 
-
 const handleSaveCellAssignment = async () => {
-  logger.log('[Save Assignment] Function initiated.');
-
   if (!modalCellData.value) {
-    logger.error('[Save Assignment] Exit: modalCellData is null.');
     return;
   }
   isSaving.value = true;
@@ -929,7 +862,6 @@ const handleSaveCellAssignment = async () => {
           description: 'Device Name and Installation Area are required.',
           color: 'orange'
         });
-        logger.warn('[Save Assignment] Exit: New device form is invalid (missing name or area).');
         isSaving.value = false;
         return;
       }
@@ -943,7 +875,6 @@ const handleSaveCellAssignment = async () => {
         firmware_version: newDeviceForm.value.firmware_version || "",
         installation_date: new Date().toISOString()
       };
-      logger.log('[API] Creating new device with payload:', payload);
       await $api('/api/v1/devices', {method: 'POST', body: payload});
       toast.add({title: 'Success', description: `Device ${payload.name} created and assigned.`, color: 'green'});
     } else {
@@ -952,26 +883,22 @@ const handleSaveCellAssignment = async () => {
 
       if (!newlySelectedDeviceId) {
         toast.add({title: 'Error', description: 'No device selected to assign.', color: 'orange'});
-        logger.warn('[Save Assignment] Exit: No new device was selected from the dropdown.');
         isSaving.value = false;
         return;
       }
       if (newlySelectedDeviceId === deviceCurrentlyOnCell?.id) {
         toast.add({title: 'Info', description: 'No changes detected.', color: 'blue'});
-        logger.log('[Save Assignment] Exit: The selected device is already assigned to this cell. No change needed.');
         isSaving.value = false;
         return;
       }
 
       if (deviceCurrentlyOnCell) {
-        logger.log(`[API] Un-assigning old device: ${deviceCurrentlyOnCell.id}`);
         await $api(`/api/v1/devices/${deviceCurrentlyOnCell.id}`, {
           method: 'PUT',
           body: {coordinates: null, scale_at_creation_time: null}
         });
       }
 
-      logger.log(`[API] Assigning new device: ${newlySelectedDeviceId} to cell R${row},C${col}`);
       await $api(`/api/v1/devices/${newlySelectedDeviceId}`, {
         method: 'PUT',
         body: {coordinates: {row, col}, scale_at_creation_time: scaleToSave}
@@ -994,8 +921,7 @@ const handleSaveCellAssignment = async () => {
 // !SECTION
 
 // SECTION: Reactivity Debugging
-watch(() => deviceRealtimeStore.latestDeviceSnapshots, (newSnapshots) => {
-  logger.log(`[Reactivity] Watcher triggered: Real-time store updated. Total snapshots: ${newSnapshots.size}`);
+watch(() => deviceRealtimeStore.latestDeviceSnapshots, () => {
 }, { deep: true });
 // !SECTION
 </script>
