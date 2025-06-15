@@ -95,7 +95,7 @@
             <p>{{ selectedMetric ? noDataAvailableLabel : selectMetricPrompt }}</p>
           </div>
           <div v-else class="chart-container w-full h-full overflow-x-auto custom-scrollbar">
-            <Line v-if="selectedMetric === 'connectionStatusTimeline'" :data="chartData"
+            <Line v-if="selectedMetric === 'deviceStatusTrends'" :data="chartData"
                   :options="dynamicChartOptions as ChartOptions<'line'>" :ref="(el: any) => chartComponentRef = el"/>
             <Line v-else-if="selectedMetric === 'voltageReadings'" :data="chartData"
                   :options="dynamicChartOptions as ChartOptions<'line'>" :ref="(el: any) => chartComponentRef = el"/>
@@ -155,7 +155,6 @@
 import {ref, computed, watch, onMounted} from 'vue';
 import {useLanguage} from '~/composables/useLanguage';
 import {useLogger} from '~/composables/useLogger';
-import {useStatusColor} from '~/composables/useStatusColor';
 import {Line, Bar, Pie} from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -168,12 +167,14 @@ import {
   LinearScale,
   PointElement,
   ArcElement,
-  Colors
+  Colors,
+  Filler // --- MODIFICATION: Import 'Filler' for area charts
 } from 'chart.js'
 import type {ChartOptions, Plugin} from 'chart.js';
 import zoomPlugin from 'chartjs-plugin-zoom';
 import {useNuxtApp, useRuntimeConfig, useToast, useColorMode} from "#imports";
 import tailwindColors from '#tailwind-config/theme';
+import { useLocalization } from '~/composables/useLocalization';
 
 // SECTION: Chart.js Setup
 const customCanvasBackgroundColor: Plugin = {
@@ -191,7 +192,8 @@ const customCanvasBackgroundColor: Plugin = {
 
 ChartJS.register(
     Title, Tooltip, Legend, LineElement, BarElement, CategoryScale,
-    LinearScale, PointElement, ArcElement, Colors, customCanvasBackgroundColor, zoomPlugin
+    LinearScale, PointElement, ArcElement, Colors, Filler, // --- MODIFICATION: Register 'Filler'
+    customCanvasBackgroundColor, zoomPlugin
 );
 // !SECTION
 
@@ -199,10 +201,10 @@ ChartJS.register(
 const {currentLanguage} = useLanguage();
 const colorMode = useColorMode();
 const logger = useLogger();
-const { getStatusColor } = useStatusColor();
 const { $api } = useNuxtApp();
 const runtimeConfig = useRuntimeConfig();
 const toast = useToast();
+const { getLocalizedStatus } = useLocalization();
 
 const isMobileMenuOpen = ref(false);
 const chartComponentRef = ref<any | null>(null);
@@ -234,7 +236,8 @@ const totalAlertsLabel = computed(() => currentLanguage.value === 'vi' ? 'Tổng
 const averageVoltageLabel = computed(() => currentLanguage.value === 'vi' ? 'Điện áp trung bình' : 'Average Voltage');
 const noDataAvailableLabel = computed(() => currentLanguage.value === 'vi' ? 'Không có dữ liệu cho các tiêu chí đã chọn.' : 'No data available for the selected criteria.');
 const selectMetricPrompt = computed(() => currentLanguage.value === 'vi' ? 'Vui lòng chọn một loại số liệu để hiển thị biểu đồ.' : 'Please select a metric type to display a chart.');
-const connectionStatusTimelineLabel = computed(() => currentLanguage.value === 'vi' ? 'Dòng thời gian trạng thái kết nối' : 'Connection Status Timeline');
+// --- MODIFICATION: Changed label for the new chart ---
+const deviceFleetHealthLabel = computed(() => currentLanguage.value === 'vi' ? 'Sức khỏe hệ thống (Theo thời gian)' : 'Device Fleet Health (Timeline)');
 const voltageReadingsLabel = computed(() => currentLanguage.value === 'vi' ? 'Giá trị điện áp' : 'Voltage Readings');
 const alertFrequenciesLabel = computed(() => currentLanguage.value === 'vi' ? 'Tần suất cảnh báo' : 'Alert Frequencies');
 const deviceDistributionLabel = computed(() => currentLanguage.value === 'vi' ? 'Phân bố thiết bị' : 'Device Distribution');
@@ -245,25 +248,6 @@ const zoomEnableLabel = computed(() => currentLanguage.value === 'vi' ? 'Bật t
 const zoomDisableLabel = computed(() => currentLanguage.value === 'vi' ? 'Tắt thu phóng' : 'Disable zoom');
 const resetZoomLabel = computed(() => currentLanguage.value === 'vi' ? 'Đặt lại thu phóng' : 'Reset zoom');
 
-// --- NEW: Translation maps for chart content ---
-// --- FIX: Add explicit return types with index signatures ---
-const statusTranslations = computed((): { [key: string]: string } => {
-  if (currentLanguage.value !== 'vi') return {};
-  return {
-    "Connected": "Đã kết nối",
-    "Disconnected": "Mất kết nối",
-    "Configured": "Đã cấu hình",
-    "Reset": "Đặt lại",
-    "System": "Hệ thống",
-    "User action": "Hành động người dùng",
-    "Warning": "Cảnh báo",
-    "Voltage reading failed": "Đọc điện áp thất bại",
-    "Error": "Lỗi",
-    "Critical": "Lỗi nghiêm trọng",
-    "Unknown": "Không xác định",
-  };
-});
-
 const datasetLabelTranslations = computed((): { [key: string]: string } => {
   if (currentLanguage.value !== 'vi') return {};
   return {
@@ -272,14 +256,11 @@ const datasetLabelTranslations = computed((): { [key: string]: string } => {
     'Connection Status': 'Trạng thái kết nối',
     'Voltage': 'Điện áp',
     'Alerts': 'Cảnh báo',
-    // Add other potential labels from your API here
-    // --- NEW TRANSLATIONS ---
     'Connection Events': 'Sự kiện kết nối',
     'Average Voltage': 'Điện áp trung bình',
     'Devices by Area': 'Thiết bị theo khu vực'
   };
 });
-// --- END NEW SECTION ---
 
 useHead({title: pageTitle});
 watch(pageTitle, (newTitle) => { useHead({title: `${newTitle} - Wrist Strap Dashboard | IoT Hub`}); });
@@ -287,12 +268,13 @@ watch(pageTitle, (newTitle) => { useHead({title: `${newTitle} - Wrist Strap Dash
 
 // SECTION: Filters and Data State
 type DateRangeType = 'today' | '7days' | '30days' | 'all';
-type MetricTypeWithoutNull = 'connectionStatusTimeline' | 'voltageReadings' | 'alertFrequencies' | 'deviceDistribution' | 'deviceStatusOverview';
+// --- MODIFICATION: Changed metric type value ---
+type MetricTypeWithoutNull = 'deviceStatusTrends' | 'voltageReadings' | 'alertFrequencies' | 'deviceDistribution' | 'deviceStatusOverview';
 type MetricType = MetricTypeWithoutNull | undefined;
 
 const selectedDateRange = ref<DateRangeType>('7days');
 const selectedArea = ref<string | undefined>(undefined);
-const selectedMetric = ref<MetricType>('connectionStatusTimeline');
+const selectedMetric = ref<MetricType>('deviceStatusTrends');
 
 const areaOptions = computed(() => [
   {label: areaFilterPlaceholder.value, value: undefined},
@@ -300,7 +282,8 @@ const areaOptions = computed(() => [
 ]);
 
 const metricOptions = computed(() => [
-  {label: connectionStatusTimelineLabel.value, value: 'connectionStatusTimeline' as MetricTypeWithoutNull},
+  // --- MODIFICATION: Updated the first metric option ---
+  {label: deviceFleetHealthLabel.value, value: 'deviceStatusTrends' as MetricTypeWithoutNull},
   {label: voltageReadingsLabel.value, value: 'voltageReadings' as MetricTypeWithoutNull},
   {label: alertFrequenciesLabel.value, value: 'alertFrequencies' as MetricTypeWithoutNull},
   {label: deviceDistributionLabel.value, value: 'deviceDistribution' as MetricTypeWithoutNull},
@@ -322,12 +305,12 @@ const chartData = ref<{ labels: (string | number)[]; datasets: any[] }>({labels:
 const isPanEnabled = ref(true);
 const isZoomEnabled = ref(true);
 
-// --- NEW: Computed properties for dynamic, translated axis titles ---
 const xAxisLabel = computed(() => {
   const metric = selectedMetric.value;
+  // --- MODIFICATION: Updated label for the new metric ---
   if (currentLanguage.value !== 'vi') {
     switch (metric) {
-      case 'connectionStatusTimeline': return 'Time';
+      case 'deviceStatusTrends': return 'Time';
       case 'voltageReadings': return 'Time';
       case 'alertFrequencies': return 'Alert Type';
       case 'deviceDistribution': return 'Installation Area';
@@ -336,7 +319,7 @@ const xAxisLabel = computed(() => {
     }
   } else {
     switch (metric) {
-      case 'connectionStatusTimeline': return 'Thời gian';
+      case 'deviceStatusTrends': return 'Thời gian';
       case 'voltageReadings': return 'Thời gian';
       case 'alertFrequencies': return 'Loại cảnh báo';
       case 'deviceDistribution': return 'Khu vực lắp đặt';
@@ -348,10 +331,10 @@ const xAxisLabel = computed(() => {
 
 const yAxisLabel = computed(() => {
   const metric = selectedMetric.value;
-  const isPieOrBar = metric === 'deviceStatusOverview' || metric === 'deviceDistribution' || metric === 'alertFrequencies';
+  // --- MODIFICATION: Updated label for the new metric ---
   if (currentLanguage.value !== 'vi') {
     switch (metric) {
-      case 'connectionStatusTimeline': return 'Status Code';
+      case 'deviceStatusTrends': return 'Number of Devices';
       case 'voltageReadings': return 'Voltage (V)';
       case 'alertFrequencies': return 'Count';
       case 'deviceDistribution': return 'Number of Devices';
@@ -360,7 +343,7 @@ const yAxisLabel = computed(() => {
     }
   } else {
     switch (metric) {
-      case 'connectionStatusTimeline': return 'Mã trạng thái';
+      case 'deviceStatusTrends': return 'Số lượng thiết bị';
       case 'voltageReadings': return 'Điện áp (V)';
       case 'alertFrequencies': return 'Số lần';
       case 'deviceDistribution': return 'Số lượng thiết bị';
@@ -369,8 +352,6 @@ const yAxisLabel = computed(() => {
     }
   }
 });
-// --- END NEW SECTION ---
-
 
 const dynamicChartOptions = computed(() => {
   const isDark = colorMode.value === 'dark';
@@ -382,6 +363,10 @@ const dynamicChartOptions = computed(() => {
   return {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: 'index' as const,
+      intersect: false,
+    },
     plugins: {
       customCanvasBackgroundColor: { color: chartCanvasBackgroundColor },
       legend: { position: 'top' as const, labels: { color: textColor, font: { size: 14 } } },
@@ -390,21 +375,21 @@ const dynamicChartOptions = computed(() => {
       zoom: { pan: { enabled: isPanEnabled.value, mode: 'xy' as const, threshold: 5, }, zoom: { wheel: { enabled: isZoomEnabled.value, }, pinch: { enabled: isZoomEnabled.value }, mode: 'xy' as const, } }
     },
     scales: {
-      // --- UPDATED: Add dynamic, translated titles to axes ---
       x: {
-        ticks: { color: textColor, font: { size: 13 }, maxRotation: 45, minRotation: 45, autoSkip: false, padding: 5, },
+        ticks: { color: textColor, font: { size: 13 }, maxRotation: 45, minRotation: 45, autoSkip: true, padding: 5, },
         grid: { color: gridColor, },
         border: { display: true, color: scaleBorderColor },
         title: { display: !!xAxisLabel.value, text: xAxisLabel.value, color: textColor, font: { size: 14, weight: 'bold' } }
       },
       y: {
+        // --- MODIFICATION: Make the Y-axis stacked for the new chart ---
+        stacked: selectedMetric.value === 'deviceStatusTrends',
         beginAtZero: true,
         ticks: { color: textColor, font: { size: 13 } },
         grid: { color: gridColor, },
         border: { display: true, color: scaleBorderColor },
         title: { display: !!yAxisLabel.value, text: yAxisLabel.value, color: textColor, font: { size: 14, weight: 'bold' } }
       }
-      // --- END UPDATE ---
     }
   };
 });
@@ -414,8 +399,6 @@ const toggleZoom = () => { isZoomEnabled.value = !isZoomEnabled.value; };
 const resetChartZoom = () => {
   if (chartComponentRef.value && chartComponentRef.value.chart) {
     (chartComponentRef.value.chart as any).resetZoom();
-  } else {
-    logger.warn("Chart instance not available to reset zoom.");
   }
 };
 // !SECTION
@@ -455,65 +438,57 @@ const applyFilters = async () => {
 
     if (response.chartData) {
       const data = response.chartData;
+      const colorNameMap = runtimeConfig.public.statusColors as Record<string, string>;
 
-      // --- UPDATED: Color mapping and translation logic ---
+      // --- MODIFICATION: Reworked this block to handle different chart data structures ---
       if (selectedMetric.value === 'deviceStatusOverview' && data.datasets[0]) {
-        // STEP 1: Map colors using the ORIGINAL English labels first.
+        // Handle colors and translations for the Pie Chart
         data.datasets[0].backgroundColor = data.labels.map((label: string) => {
-          try {
-            const colorName = getStatusColor(label);
-            const colorPalette = (tailwindColors as any).colors[colorName];
-            if (!colorPalette) {
-              logger.warn(`Color name '${colorName}' (for label '${label}') not found in tailwindColors.colors. Using fallback.`);
-              return (tailwindColors as any).colors.slate['500'];
-            }
-            return colorPalette['500'];
-          } catch (e) {
-            logger.error(`Error processing color for label: '${label}'`, e);
-            return (tailwindColors as any).colors.slate['500'];
-          }
+          const colorName = colorNameMap[label] || 'slate';
+          const colorPalette = (tailwindColors as any).colors[colorName];
+          return colorPalette ? colorPalette['500'] : (tailwindColors as any).colors.slate['500'];
         });
 
-        // STEP 2: Now translate the labels for display in the chart legend and tooltips.
         if (currentLanguage.value === 'vi') {
-          data.labels = data.labels.map((label: string) => statusTranslations.value[label] || label);
+          data.labels = data.labels.map((label: string) => getLocalizedStatus(label));
         }
-      } else if (data.datasets[0]) {
-        // Handle colors for other chart types (Line, Bar)
-        const metricColorMap: Record<string, string> = {
-          connectionStatusTimeline: 'green',
-          voltageReadings: 'blue',
-          alertFrequencies: 'amber',
-          deviceDistribution: 'purple',
-        };
-        const colorName = metricColorMap[selectedMetric.value] || 'slate';
-        const colorPalette = (tailwindColors as any).colors[colorName];
-        if (colorPalette) {
-          data.datasets[0].backgroundColor = colorPalette['400'];
-          data.datasets[0].borderColor = colorPalette['500'];
-        }
+
+      } else if (selectedMetric.value === 'deviceStatusTrends' && data.datasets.length > 0) {
+        // Handle colors and translations for the new Stacked Area Chart
+        data.datasets.forEach((dataset: any) => {
+          const originalLabel = dataset.label; // e.g., "Connected", "Disconnected"
+          const colorName = colorNameMap[originalLabel] || 'slate';
+          const colorPalette = (tailwindColors as any).colors[colorName];
+
+          if (colorPalette) {
+            dataset.backgroundColor = colorPalette['400']; // Area fill color
+            dataset.borderColor = colorPalette['500'];     // Line color
+          }
+
+          dataset.fill = true; // This makes it an area chart
+          dataset.tension = 0.4; // Smooths the lines
+
+          if (currentLanguage.value === 'vi') {
+            dataset.label = getLocalizedStatus(originalLabel);
+          }
+        });
       }
 
-      // Universal translation for dataset and other categorical labels
+      // Universal translation for dataset labels if they exist
       if (currentLanguage.value === 'vi') {
-        // Translate the main dataset label (for tooltips)
         if (data.datasets[0] && data.datasets[0].label) {
           const originalLabel = data.datasets[0].label;
           data.datasets[0].label = datasetLabelTranslations.value[originalLabel] || originalLabel;
         }
-        // Translate labels for other charts with categorical data (like Alert Frequencies)
         if (selectedMetric.value === 'alertFrequencies') {
-          data.labels = data.labels.map((label: string) => statusTranslations.value[label] || label);
+          data.labels = data.labels.map((label: string) => getLocalizedStatus(label));
         }
       }
-      // --- END UPDATE ---
 
       chartData.value = data;
     } else {
       chartData.value = {labels: [], datasets: []};
     }
-
-    logger.log("Successfully fetched and applied analytics data.");
 
   } catch (error: any) {
     logger.error(`Failed to fetch analytics for metric: ${selectedMetric.value}`, error);
@@ -523,7 +498,6 @@ const applyFilters = async () => {
     isLoadingChart.value = false;
   }
 };
-
 // !SECTION
 
 // SECTION: Lifecycle and Watchers
@@ -532,7 +506,7 @@ onMounted(() => {
 });
 
 watch(
-    [selectedDateRange, selectedArea, selectedMetric, currentLanguage], // Watch for language changes too
+    [selectedDateRange, selectedArea, selectedMetric, currentLanguage],
     () => {
       if (!isLoadingChart.value) {
         applyFilters();

@@ -1,4 +1,6 @@
 // nuxt.config.ts for wrist-strap-dashboard
+import { LOG_STATUSES, EVENT_TYPES } from './config/constants'
+
 export default defineNuxtConfig({
     compatibilityDate: '2025-05-27',
     devtools: {enabled: false},
@@ -27,19 +29,20 @@ export default defineNuxtConfig({
         port: 3001,
         host: '0.0.0.0',
         https: {
-            key: './localhost+2-key.pem', // Path to your key file
-            cert: './localhost+2.pem'     // Path to your cert file
+            key: './localhost+2-key.pem',
+            cert: './localhost+2.pem'
         }
     },
 
-    // --- ADDED: Runtime Configuration for API Base URL ---
     runtimeConfig: {
-        // Public keys are exposed to the client-side
         public: {
             apiBase: 'https://172.16.9.183:3002',
-            // --- ADD THIS NEW LINE ---
-            // This will be true when you run `npm run dev` and false for `npm run build`
             loggingEnabled: process.env.NODE_ENV === 'development',
+
+            // --- MODIFICATION: Create mutable copies using spread syntax (...) ---
+            logStatuses: [...LOG_STATUSES],
+            eventTypes: [...EVENT_TYPES],
+
             installationAreas: [
                 "POL",
                 "FLW",
@@ -50,32 +53,23 @@ export default defineNuxtConfig({
                 "Logistics",
                 "Packaging",
             ],
-            // --- ADD THIS NEW OBJECT ---
+
             statusColors: {
-                // Green for OK states
                 "Connected": "green",
                 "Voltage reading ok": "green",
-
-                // Blue for Neutral/Info states
                 "Info": "blue",
                 "Configured": "blue",
                 "Reset": "blue",
                 "System": "blue",
                 "User action": "blue",
-
-                // Amber for Warnings
-                "Warning": "amber",
+                "Warning": "yellow",
                 "Voltage reading failed": "amber",
-
-                // Red for Failures
+                "Error": "orange",
                 "Disconnected": "red",
-                "Error": "red",
                 "Critical": "red",
-
-                // Slate (dark gray/black) for Unknown
+                "Fault": "red",
                 "Unknown": "slate"
             }
         }
     },
-    // --- END ADDED SECTION ---
 })

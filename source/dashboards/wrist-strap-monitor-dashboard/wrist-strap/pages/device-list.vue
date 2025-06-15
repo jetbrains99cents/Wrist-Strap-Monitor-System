@@ -115,14 +115,20 @@ import { useLanguage } from '~/composables/useLanguage';
 import { useLogger } from '~/composables/useLogger';
 import DeviceCard from '~/components/device/DeviceCard.vue';
 import { useDeviceRealtimeStore } from '~/stores/deviceRealtime';
+// --- MODIFICATION: Import centralized types, config, and new composable ---
+import type { LogStatus } from '~/config/constants';
+import { useLocalization } from '~/composables/useLocalization';
+import { useRuntimeConfig, useNuxtApp, useToast } from '#imports';
 
 const { currentLanguage } = useLanguage();
 const logger = useLogger();
 const { $api } = useNuxtApp();
 const toast = useToast();
 const isMobileMenuOpen = ref(false);
-
 const deviceRealtimeStore = useDeviceRealtimeStore();
+const runtimeConfig = useRuntimeConfig();
+// --- MODIFICATION: Instantiate the centralized translation composable ---
+const { getLocalizedStatus } = useLocalization();
 
 // --- Sidebar Navigation Items ---
 const rawNavigationItems = ref([
@@ -155,7 +161,7 @@ interface Device {
   id: string;
   name: string;
   area: string;
-  status: string;
+  status: LogStatus | 'Unknown';
   macAddress: string;
   firmwareVersion: string | null;
   createdAt: number;
@@ -166,12 +172,11 @@ interface Device {
 const allDevices = ref<Device[]>([]);
 const isLoading = ref(false);
 const areasData = ref<string[]>([]);
-const knownStatuses: string[] = ['Connected', 'Disconnected', 'Voltage reading failed', 'Voltage reading ok'];
+const knownStatuses = runtimeConfig.public.logStatuses;
 
 // --- API Fetch ---
 const fetchLiveDevices = async () => {
   isLoading.value = true;
-  logger.log('[DeviceList] Fetching devices from API...');
   try {
     const response: any[] = await $api('/api/v1/devices/');
     allDevices.value = response.map((d: any) => ({
@@ -185,10 +190,8 @@ const fetchLiveDevices = async () => {
       installationDate: d.installation_date,
       last_event: d.last_event || null
     }));
-
     const uniqueAreas = [...new Set(allDevices.value.map(d => d.area))].filter(Boolean);
     areasData.value = uniqueAreas.sort();
-
   } catch (error) {
     logger.error('[DeviceList] Failed to fetch devices:', error);
     toast.add({ title: 'Error', description: 'Could not fetch device list.', color: 'red' });
@@ -207,7 +210,7 @@ const liveDeviceList = computed<Device[]>(() => {
     if (snapshot) {
       return {
         ...device,
-        status: snapshot.last_event?.status || 'Unknown',
+        status: (snapshot.last_event?.status as LogStatus) || 'Unknown',
         last_event: snapshot.last_event
       };
     }
@@ -221,19 +224,7 @@ const selectedStatusValue = ref<string | undefined>(undefined);
 const selectedAreaValue = ref<string | undefined>(undefined);
 
 // --- Dynamic Filter Options ---
-const getLocalizedStatus = (status: string): string => {
-  if (currentLanguage.value === 'vi') {
-    switch (status) {
-      case 'Connected': return 'Đã kết nối';
-      case 'Disconnected': return 'Mất kết nối';
-      case 'Voltage reading failed': return 'Lỗi đọc điện áp';
-      case 'Voltage reading ok': return 'Đọc điện áp OK';
-      case 'Unknown': return 'Không rõ';
-      default: return status;
-    }
-  }
-  return status;
-};
+// --- MODIFICATION: Local getLocalizedStatus function is no longer needed ---
 
 const localizedStatusOptions = computed(() => [
   { label: filterByStatusPlaceholder.value, value: undefined },
@@ -288,7 +279,6 @@ const calculateDynamicItemsPerPage = () => {
 
 let resizeObserver: ResizeObserver | null = null;
 
-// --- MODIFICATION: Lifecycle hooks no longer manage WebSocket listeners ---
 onMounted(() => {
   fetchLiveDevices().then(() => {
     nextTick(() => {
@@ -300,11 +290,11 @@ onMounted(() => {
     });
   });
 });
+
 onBeforeUnmount(() => {
   if (resizeObserver && deviceGridAreaRef.value) resizeObserver.unobserve(deviceGridAreaRef.value);
   if (resizeObserver) resizeObserver.disconnect();
 });
-
 
 watch(
     () => filteredDevices.value.length,

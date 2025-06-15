@@ -156,9 +156,12 @@ import { useLanguage } from '~/composables/useLanguage';
 import { useLogger } from '~/composables/useLogger';
 import { useActionStatusModal } from '~/composables/useActionStatusModal';
 import { useDeviceRealtimeStore } from '~/stores/deviceRealtime';
+import type { LogStatus } from '~/config/constants';
+import { useLocalization } from '~/composables/useLocalization';
+import { useRuntimeConfig, useNuxtApp, useToast } from '#imports';
 
-type AppBadgeColor = 'green' | 'red' | 'amber' | 'gray';
-type DeviceStatus = 'Connected' | 'Disconnected' | 'Voltage reading failed' | 'Voltage reading ok' | 'Unknown';
+// --- MODIFICATION: Define a type that matches the valid colors for UBadge ---
+type AppBadgeColor = 'green' | 'red' | 'amber' | 'gray' | 'blue' | 'purple' | 'indigo' | 'orange' | 'yellow';
 
 const { currentLanguage } = useLanguage();
 const logger = useLogger();
@@ -166,6 +169,8 @@ const toast = useToast();
 const { $api } = useNuxtApp();
 const { show: showActionStatusModal } = useActionStatusModal();
 const deviceRealtimeStore = useDeviceRealtimeStore();
+const runtimeConfig = useRuntimeConfig();
+const { getLocalizedStatus } = useLocalization();
 
 // --- General State & Navigation ---
 const isMobileMenuOpen = ref(false);
@@ -213,10 +218,10 @@ const updateSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Th
 const deleteSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Các thiết bị đã được xóa thành công.' : 'The selected devices have been deleted successfully.');
 
 // --- Device Data & Table State ---
-interface Device { id: string; name: string; installationArea: string; installationDate: number; status: DeviceStatus | null; mac_address: string; firmware_version?: string | null; }
+interface Device { id: string; name: string; installationArea: string; installationDate: number; status: LogStatus | 'Unknown' | null; mac_address: string; firmware_version?: string | null; }
 const allDevices = ref<Device[]>([]);
-const allAreas = ["POL", "FLW", "CG", "OQC Lighting", "D Inspection", "Assembly X", "Testing Y", "Warehouse Z"];
-const allStatuses: DeviceStatus[] = ['Connected', 'Disconnected', 'Voltage reading failed', 'Voltage reading ok'];
+const allAreas = runtimeConfig.public.installationAreas;
+const allStatuses = runtimeConfig.public.logStatuses;
 const pending = ref(false);
 
 const localizedColumns = computed(() => [
@@ -238,17 +243,18 @@ const liveDeviceData = computed(() => {
     if (snapshot) {
       return {
         ...device,
-        status: (snapshot.last_event?.status || 'Unknown') as DeviceStatus,
+        status: (snapshot.last_event?.status || 'Unknown') as LogStatus | 'Unknown',
       };
     }
     return device;
   });
 });
 
+
 // --- Filtering, Sorting & Pagination ---
 const searchTerm = ref('');
 const selectedFilterArea = ref<string | undefined>(undefined);
-const selectedFilterStatus = ref<DeviceStatus | undefined>(undefined);
+const selectedFilterStatus = ref<LogStatus | 'Unknown' | undefined>(undefined);
 const selectedFilterDate = ref<number | undefined>(undefined);
 const sort = ref<{ column: string; direction: 'asc' | 'desc' }>({column: 'name', direction: 'asc'});
 
@@ -266,7 +272,6 @@ const itemsPerPage = ref(15);
 const currentPage = ref(1);
 const pageInput = ref(currentPage.value);
 
-// --- MODIFICATION: The onMounted hook is now only responsible for fetching initial data ---
 onMounted(() => {
   fetchDevices();
 });
@@ -280,37 +285,19 @@ watch([searchTerm, selectedFilterArea, selectedFilterStatus, selectedFilterDate]
 // --- Table Data Formatting ---
 const formatTimestamp = (timestamp: number) => new Date(timestamp).toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US');
 
-const getLocalizedStatus = (status: DeviceStatus | null): string => {
-  if (!status) return 'N/A';
-  if (currentLanguage.value === 'vi') {
-    switch (status) {
-      case 'Connected': return 'Đã kết nối';
-      case 'Disconnected': return 'Mất kết nối';
-      case 'Voltage reading failed': return 'Lỗi đọc điện áp';
-      case 'Voltage reading ok': return 'Đọc điện áp OK';
-      case 'Unknown': return 'Không rõ';
-    }
-  }
-  return status;
-};
-
 const areaColumnFilterOptions = computed(() => [{ label: filterByAreaPlaceholder.value, value: undefined }, ...allAreas.map(a => ({ label: a, value: a }))]);
-const statusColumnFilterOptions = computed(() => [{ label: filterByStatusPlaceholder.value, value: undefined }, ...allStatuses.map(s => ({ label: getLocalizedStatus(s as DeviceStatus), value: s }))]);
+const statusColumnFilterOptions = computed(() => [{ label: filterByStatusPlaceholder.value, value: undefined }, ...allStatuses.map(s => ({ label: getLocalizedStatus(s), value: s }))]);
 const dateColumnFilterOptions = computed(() => { const uniqueDates = [...new Set(allDevices.value.map(d => new Date(d.installationDate).toDateString()))]; return [{ label: filterByDatePlaceholder.value, value: undefined }, ...uniqueDates.map(d => ({ label: new Date(d).toLocaleDateString(), value: new Date(d).getTime() }))]; });
 
-const getStatusColor = (status: DeviceStatus | null): AppBadgeColor => {
+// --- MODIFICATION: The function is now correctly typed and handles the 'slate' case ---
+const getStatusColor = (status: LogStatus | 'Unknown' | null): AppBadgeColor => {
   if (!status) return 'gray';
-  switch (status) {
-    case 'Connected':
-    case 'Voltage reading ok':
-      return 'green';
-    case 'Disconnected':
-      return 'red';
-    case 'Voltage reading failed':
-      return 'amber';
-    default:
-      return 'gray';
+  const colorName = runtimeConfig.public.statusColors[status] || 'gray';
+  // UBadge expects 'gray' for neutral colors, so we ensure 'slate' from config is mapped to 'gray'.
+  if (colorName === 'slate') {
+    return 'gray';
   }
+  return colorName as AppBadgeColor;
 };
 
 // --- Modal & Action State ---
@@ -334,21 +321,13 @@ const handleSaveNewDevice = async () => {
     mac_address: formState.value.mac_address || "00:00:00:00:00:00",
     firmware_version: formState.value.firmware_version || "",
     device_type: 'WristStrapMonitorV1',
+    installation_date: new Date().toISOString()
   };
   try {
-    const newDeviceResponse = await $api('/api/v1/devices/', { method: 'POST', body: payload });
-    const newDevice: Device = {
-      id: newDeviceResponse._id,
-      name: newDeviceResponse.name,
-      installationArea: newDeviceResponse.installation_area,
-      installationDate: newDeviceResponse.installation_date,
-      status: (newDeviceResponse.last_event?.status || 'Unknown') as DeviceStatus,
-      mac_address: newDeviceResponse.mac_address,
-      firmware_version: newDeviceResponse.firmware_version,
-    };
-    allDevices.value.push(newDevice);
+    await $api('/api/v1/devices/', { method: 'POST', body: payload });
+    toast.add({ title: successTitle.value, description: addSuccessMessage.value, color: 'green' });
     isFormModalOpen.value = false;
-    showActionStatusModal({ title: successTitle.value, description: addSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} });
+    await fetchDevices();
   } catch (error) {
     logger.error('[Device Management] Failed to add device:', error);
     toast.add({ title: 'Error', description: 'Could not add the new device.', color: 'red' });
@@ -357,9 +336,9 @@ const handleSaveNewDevice = async () => {
   }
 };
 
-const handleUpdateDevice = async () => { if (!formState.value.id) return; isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, firmware_version: formState.value.firmware_version, }; try { const updatedDevice = await $api(`/api/v1/devices/${formState.value.id}`, { method: 'PUT', body: payload }); const deviceIndex = allDevices.value.findIndex(d => d.id === formState.value.id); if (deviceIndex !== -1) { allDevices.value[deviceIndex].name = updatedDevice.name; allDevices.value[deviceIndex].installationArea = updatedDevice.installation_area; allDevices.value[deviceIndex].firmware_version = updatedDevice.firmware_version; } isFormModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: updateSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to update device:', error); toast.add({ title: 'Error', description: 'Could not update the device.', color: 'red' }); } finally { isSaving.value = false; } };
+const handleUpdateDevice = async () => { if (!formState.value.id) return; isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, firmware_version: formState.value.firmware_version, }; try { await $api(`/api/v1/devices/${formState.value.id}`, { method: 'PUT', body: payload }); toast.add({ title: successTitle.value, description: updateSuccessMessage.value, color: 'green' }); isFormModalOpen.value = false; await fetchDevices(); } catch (error) { logger.error('[Device Management] Failed to update device:', error); toast.add({ title: 'Error', description: 'Could not update the device.', color: 'red' }); } finally { isSaving.value = false; } };
 const handleRemoveDevice = () => { if (selectedDevices.value.length > 0) { isConfirmDeleteModalOpen.value = true; } };
-const confirmDeleteDevices = async () => { isSaving.value = true; const idsToDelete = selectedDevices.value.map(d => d.id); try { await Promise.all( idsToDelete.map(id => $api(`/api/v1/devices/${id}`, { method: 'DELETE' })) ); allDevices.value = allDevices.value.filter(device => !idsToDelete.includes(device.id)); selectedDevices.value = []; isConfirmDeleteModalOpen.value = false; showActionStatusModal({ title: successTitle.value, description: deleteSuccessMessage.value, icon: 'i-heroicons-check-circle-20-solid', color: 'text-green-500', duration: 3, onComplete: () => {} }); } catch (error) { logger.error('[Device Management] Failed to delete devices:', error); toast.add({ title: 'Error', description: 'Could not delete one or more devices.', color: 'red' }); } finally { isSaving.value = false; } };
+const confirmDeleteDevices = async () => { isSaving.value = true; const idsToDelete = selectedDevices.value.map(d => d.id); try { await Promise.all( idsToDelete.map(id => $api(`/api/v1/devices/${id}`, { method: 'DELETE' })) ); allDevices.value = allDevices.value.filter(device => !idsToDelete.includes(device.id)); selectedDevices.value = []; isConfirmDeleteModalOpen.value = false; toast.add({ title: successTitle.value, description: deleteSuccessMessage.value, color: 'green' }); } catch (error) { logger.error('[Device Management] Failed to delete devices:', error); toast.add({ title: 'Error', description: 'Could not delete one or more devices.', color: 'red' }); } finally { isSaving.value = false; } };
 const handleExportExcel = async () => { const XLSX = await import('xlsx'); const dataToExport = filteredDevices.value.map(device => ({ [deviceNameLabel.value]: device.name, [macAddressLabel.value]: device.mac_address, [areaLabel.value]: device.installationArea, [firmwareVersionLabel.value]: device.firmware_version || 'N/A', [installationDateLabel.value]: formatTimestamp(device.installationDate), [statusLabel.value]: getLocalizedStatus(device.status), })); if (dataToExport.length === 0) { toast.add({ title: 'No Data', description: 'There is no data to export.', color: 'orange' }); return; } const worksheet = XLSX.utils.json_to_sheet(dataToExport); const colWidths = Object.keys(dataToExport[0]).map(key => ({ wch: Math.max(key.length, 25) })); worksheet['!cols'] = colWidths; const workbook = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(workbook, worksheet, "Device List"); const today = new Date(); const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`; const fileName = `Device_List_${dateStr}.xlsx`; XLSX.writeFile(workbook, fileName); };
 
 async function fetchDevices() {
@@ -370,8 +349,8 @@ async function fetchDevices() {
       id: device._id,
       name: device.name,
       installationArea: device.installation_area,
-      installationDate: device.installation_date,
-      status: (device.last_event?.status || 'Unknown') as DeviceStatus,
+      installationDate: new Date(device.installation_date).getTime(),
+      status: (device.last_event?.status || 'Unknown') as LogStatus | 'Unknown',
       mac_address: device.mac_address,
       firmware_version: device.firmware_version,
     }));

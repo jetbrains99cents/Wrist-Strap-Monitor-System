@@ -178,6 +178,8 @@
               <span class="dark:text-white font-semibold">{{ modalCellData.device.name }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalDeviceAreaLabel }}:</span>
               <span class="dark:text-white">{{ modalCellData.device.installation_area }}</span>
+              <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{ modalDeviceMacAddressLabel }}:</span>
+              <span class="dark:text-white">{{ modalCellData.device.mac_address || 'N/A' }}</span>
               <span class="text-gray-600 dark:text-gray-400 text-left font-medium">{{
                   modalDeviceLastEventStatusLabel
                 }}:</span> <span class="dark:text-white">{{
@@ -317,6 +319,9 @@ import PdfViewer from '~/components/pdf/PdfViewer.vue';
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
 import {definePageMeta, useNuxtApp, useRuntimeConfig, useToast} from "#imports";
 import {useDeviceRealtimeStore} from '~/stores/deviceRealtime';
+// --- MODIFICATION: Import centralized types and translation logic ---
+import type { LogStatus, EventType } from '~/config/constants';
+import { useLocalization } from '~/composables/useLocalization';
 
 definePageMeta({
   middleware: 'auth'
@@ -325,22 +330,8 @@ definePageMeta({
 // SECTION: Type Definitions
 type InteractionMode = 'pan' | 'select';
 
-type LogStatus =
-    "Connected"
-    | "Disconnected"
-    | "Voltage reading ok"
-    | "Voltage reading failed"
-    | "Info"
-    | "Warning"
-    | "Error"
-    | "Critical"
-    | "Configured"
-    | "Reset";
-
-type EventCategory = "Connection" | "Sensor Reading" | "Alert" | "User action" | "System";
-
 interface EventDetails {
-  type: EventCategory | null;
+  type: EventType | null;
   status?: LogStatus | null;
   timestamp: number;
   value: string | Record<string, any> | number;
@@ -365,9 +356,9 @@ interface GridCellStatus {
   status: LogStatus;
   deviceId: string;
   deviceName: string;
-  color: string; // Will hold the color *name*, e.g., 'amber'
+  color: string;
   installationArea?: string;
-  lastEventType?: EventCategory | null;
+  lastEventType?: EventType | null;
   createdAtFormatted?: string;
   installedAtFormatted?: string;
   localizedStatus: string;
@@ -416,6 +407,8 @@ const runtimeConfig = useRuntimeConfig();
 const toast = useToast();
 const {$api} = useNuxtApp();
 const deviceRealtimeStore = useDeviceRealtimeStore();
+// --- MODIFICATION: Instantiate the centralized translation composable ---
+const { getLocalizedStatus, getLocalizedEventType } = useLocalization();
 
 const isMobileMenuOpen = ref(false);
 const isSaving = ref(false);
@@ -473,6 +466,7 @@ const noDeviceAssignedToCellLabel = computed(() => currentLanguage.value === 'vi
 const selectedCellInfoLabel = computed(() => currentLanguage.value === 'vi' ? 'Thông tin ô đã chọn' : 'Selected cell info');
 const modalDeviceNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên thiết bị' : 'Device name');
 const modalDeviceAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt' : 'Installation area');
+const modalDeviceMacAddressLabel = computed(() => currentLanguage.value === 'vi' ? 'Địa chỉ MAC' : 'MAC Address');
 const tooltipNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên' : 'Name');
 const tooltipAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực' : 'Area');
 const tooltipLastEventStatusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng thái' : 'Status');
@@ -517,7 +511,6 @@ const handlePdfLoaded = async () => {
 };
 
 const handlePdfScaleUpdated = (newScale: number) => {
-  logger.log(`[index.vue] Received 'scale-updated' event with scale: ${newScale}`);
   if (typeof newScale === 'number' && Number.isFinite(newScale) && newScale > 0) {
     const newPercentage = Math.round(newScale * 100);
     if (newPercentage !== zoomInputPercentage.value) {
@@ -598,40 +591,10 @@ const formatDateForTooltip = (isoString: string): string => {
   }
 };
 
-const getLocalizedStatus = (status?: LogStatus | null): string => {
-  if (!status) return 'N/A';
-  if (currentLanguage.value === 'vi') {
-    const statusMap: Record<LogStatus, string> = {
-      "Connected": "Đã kết nối",
-      "Disconnected": "Mất kết nối",
-      "Voltage reading ok": "Đọc điện áp OK",
-      "Voltage reading failed": "Lỗi đọc điện áp",
-      "Info": "Thông tin",
-      "Warning": "Cảnh báo",
-      "Error": "Lỗi",
-      "Critical": "Nghiêm trọng",
-      "Configured": "Đã cấu hình",
-      "Reset": "Đã đặt lại"
-    };
-    return statusMap[status] || status;
-  }
-  return status;
-};
+// --- MODIFICATION: Local translation functions are no longer needed ---
+// const getLocalizedStatus = ... (REMOVED)
+// const getLocalizedEventType = ... (REMOVED)
 
-const getLocalizedEventType = (type?: EventCategory | null): string => {
-  if (!type) return 'N/A';
-  if (currentLanguage.value === 'vi') {
-    const typeMap: Record<EventCategory, string> = {
-      "Connection": "Kết nối",
-      "Sensor Reading": "Đọc cảm biến",
-      "Alert": "Cảnh báo",
-      "User action": "Hành động người dùng",
-      "System": "Hệ thống"
-    };
-    return typeMap[type] || type;
-  }
-  return type;
-};
 // !SECTION
 
 // SECTION: API Interaction
@@ -753,13 +716,11 @@ const cellStatusesForOverlay = computed((): Record<string, GridCellStatus> => {
         const lastEvent = device.last_event;
         const currentStatus = lastEvent?.status || 'Disconnected';
         const currentType = lastEvent?.type;
-
-        // --- MODIFICATION: This now passes the simple color NAME to the overlay ---
         const colorName = colorNameMap[currentStatus] || 'slate';
 
         statuses[key] = {
           status: currentStatus,
-          color: colorName, // Pass the color NAME (e.g., 'amber')
+          color: colorName,
           deviceId: device.id,
           deviceName: device.name,
           installationArea: device.installation_area,

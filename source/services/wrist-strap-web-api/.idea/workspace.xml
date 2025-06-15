@@ -5,14 +5,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7d4c20be-1ab7-41e6-a74c-6889261a0341" name="Changes" comment="Stable version">
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/editor.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/database_model.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/database_model.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/screen.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/screen.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../tools/generate_device_data.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/nuxt.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/data-visualization.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/data-visualization.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-list.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-list.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-management.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/device-management.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/index.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/wrist-strap/pages/index.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/crud/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/crud/analytics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/generate_historical_logs_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/generate_historical_logs_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../tools/generate_voltage_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/generate_voltage_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,8 +143,8 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="FastAPI.wrist-strap-web-api" />
       <item itemvalue="FastAPI.wrist-strap-web-api-secure" />
+      <item itemvalue="FastAPI.wrist-strap-web-api" />
     </list>
   </component>
   <component name="SharedIndexes">
@@ -205,6 +225,6 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api.coverage" NAME="wrist-strap-web-api Coverage Results" MODIFIED="1749351168385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api_secure.coverage" NAME="wrist-strap-web-api-secure Coverage Results" MODIFIED="1749791524373" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/wrist_strap_web_api$wrist_strap_web_api_secure.coverage" NAME="wrist-strap-web-api-secure Coverage Results" MODIFIED="1749894788914" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
   </component>
 </project>
