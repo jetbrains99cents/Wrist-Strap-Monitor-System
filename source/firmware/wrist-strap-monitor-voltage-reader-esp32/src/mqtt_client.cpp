@@ -29,8 +29,7 @@ void MqttClient::connect_to_broker() {
 void MqttClient::_on_connect(bool sessionPresent) {
     Logger::get_instance().log_info("Connected to MQTT Broker.");
     _mediator->notify(event_t::MQTT_CONNECTED);
-    // Immediately try to publish any queued messages upon connection
-    publish_from_queue(); 
+    publish_from_queue();
 }
 
 void MqttClient::_on_disconnect(AsyncMqttClientDisconnectReason reason) {
@@ -49,10 +48,12 @@ void MqttClient::publish_from_queue() {
     if (_database->retrieve_oldest_reading_filename(filename)) {
         char payload_buffer[512];
         if (_database->read_file(filename, payload_buffer, sizeof(payload_buffer))) {
-            
-            String topic = "devices/" + WiFi.macAddress() + "/data";
-            
-            uint16_t packet_id = _mqtt_client.publish(topic.c_str(), 1, true, payload_buffer);
+
+            String topic = "devices/wrist-strap/" + WiFi.macAddress();
+            Logger::get_instance().log_info("Attempting to publish to topic: %s", topic.c_str());
+
+            // Changed QoS from 1 to 2 here
+            uint16_t packet_id = _mqtt_client.publish(topic.c_str(), 2, true, payload_buffer);
 
             if (packet_id != 0) {
                 Logger::get_instance().log_info("Publishing message with packet ID %u from file %s", packet_id, filename.c_str());
@@ -66,14 +67,11 @@ void MqttClient::publish_from_queue() {
 
 void MqttClient::_on_publish(uint16_t packet_id) {
     Logger::get_instance().log_info("MQTT Message with packet ID %u published successfully.", packet_id);
-    
-    // Message sent, now delete it from the queue
+
     _database->delete_file(_last_published_filename);
     _last_published_filename = "";
-    
+
     _mediator->notify(event_t::MQTT_MESSAGE_PUBLISHED_SUCCESS);
 
-    // After a successful publish, immediately check if there's more to send.
-    // This creates a fast "chain reaction" to clear the queue.
     publish_from_queue();
 }

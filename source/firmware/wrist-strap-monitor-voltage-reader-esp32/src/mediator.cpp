@@ -8,7 +8,7 @@
 #include "peripheral.h"
 #include "database.h"
 #include <ArduinoJson.h>
-#include <WiFi.h> // ADDED: Required for WiFi.macAddress()
+#include <WiFi.h>
 
 void Mediator::init() {
     _mqtt_reconnect_time = 0;
@@ -54,7 +54,6 @@ void Mediator::notify(event_t event, void* data) {
 
         case event_t::TIME_SYNC_SUCCESS:
             _logger->log_info("Time sync successful, system is fully operational.");
-            notify(event_t::SENSOR_READ_REQUESTED);
             break;
 
         case event_t::MQTT_CONNECT_REQUESTED:
@@ -62,8 +61,6 @@ void Mediator::notify(event_t event, void* data) {
             break;
 
         case event_t::MQTT_DISCONNECTED:
-            // The async client handles reconnects. We could add a timer here
-            // for more complex logic if needed, but for now we just log it.
             _logger->log_warn("MQTT disconnected. Async client will handle reconnect.");
             break;
 
@@ -83,6 +80,7 @@ void Mediator::notify(event_t event, void* data) {
             doc["timestamp"] = timestamp_ms;
 
             doc["voltage_value"] = reading->voltage;
+            // Removed: doc["status"] = (reading->status == wrist_strap_status_t::STATUS_PASS) ? "PASS" : "FAIL";
 
             char json_buffer[256];
             serializeJson(doc, json_buffer);
@@ -93,7 +91,6 @@ void Mediator::notify(event_t event, void* data) {
         }
 
         case event_t::MQTT_MESSAGE_PUBLISHED_SUCCESS:
-             // This event is now handled inside the MqttClient itself
              break;
 
         case event_t::SENSOR_READ_REQUESTED:

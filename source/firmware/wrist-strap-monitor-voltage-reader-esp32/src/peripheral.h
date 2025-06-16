@@ -20,6 +20,7 @@ public:
 private:
     Mediator* _mediator;
     Ina219* _sensor;
+    wrist_strap_status_t _last_reported_status; // New: To track the last sent status
 };
 
 #endif // PERIPHERAL_H

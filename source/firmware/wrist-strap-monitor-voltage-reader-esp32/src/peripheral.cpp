@@ -7,10 +7,11 @@
 void Peripheral::init(Mediator* mediator, Ina219* sensor) {
     _mediator = mediator;
     _sensor = sensor;
+    _last_reported_status = wrist_strap_status_t::STATUS_UNKNOWN; // Initialize last reported status
 }
 
 void Peripheral::begin() {
-    Logger::get_instance().log_info("Initializing peripheral module...");
+    Logger::get_instance().log_info("Initializing peripheral module.");
     if (_sensor) {
         _sensor->begin();
     } else {
@@ -24,20 +25,27 @@ void Peripheral::read_and_process_data() {
         return;
     }
 
-    reading_data_t reading;
-    reading.voltage = _sensor->get_voltage();
-    
+    reading_data_t current_reading;
+    current_reading.voltage = _sensor->get_voltage();
+
     float threshold = Config::get_instance().get_voltage_threshold();
 
-    if (reading.voltage > threshold) {
-        reading.status = wrist_strap_status_t::STATUS_PASS;
+    if (current_reading.voltage > threshold) {
+        current_reading.status = wrist_strap_status_t::STATUS_PASS;
     } else {
-        reading.status = wrist_strap_status_t::STATUS_FAIL;
+        current_reading.status = wrist_strap_status_t::STATUS_FAIL;
     }
-    
-    Logger::get_instance().log_info("New reading: Status=%s, Voltage=%.2fV", 
-        (reading.status == wrist_strap_status_t::STATUS_PASS) ? "PASS" : "FAIL", 
-        reading.voltage);
 
-    _mediator->notify(event_t::WRIST_STRAP_STATE_UPDATED, &reading);
+    // Log every reading, regardless of whether it's sent
+    Logger::get_instance().log_info("New measurement: Status=%s, Voltage=%.2fV",
+        (current_reading.status == wrist_strap_status_t::STATUS_PASS) ? "PASS" :
+        (current_reading.status == wrist_strap_status_t::STATUS_FAIL) ? "FAIL" : "UNKNOWN",
+        current_reading.voltage);
+
+    // Only notify Mediator if the status has changed
+    if (current_reading.status != _last_reported_status) {
+        Logger::get_instance().log_info("Status change detected. Notifying Mediator.");
+        _last_reported_status = current_reading.status; // Update last reported status
+        _mediator->notify(event_t::WRIST_STRAP_STATE_UPDATED, &current_reading);
+    }
 }
