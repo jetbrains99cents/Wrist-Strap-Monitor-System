@@ -255,6 +255,16 @@
             <UFormGroup :label="newDeviceNameLabel" name="newDeviceName" required :ui="{label: { base: 'text-sm' }}">
               <UInput v-model="newDeviceForm.name" :placeholder="newDeviceNamePlaceholderLabel" size="md"/>
             </UFormGroup>
+            <UFormGroup :label="newDeviceTypeLabel" name="newDeviceType" required :ui="{label: { base: 'text-sm' }}">
+              <USelectMenu
+                  v-model="newDeviceForm.device_type"
+                  :options="deviceTypeOptionsForModal"
+                  value-attribute="value"
+                  option-attribute="label"
+                  :placeholder="selectDeviceTypePlaceholder"
+                  size="md"
+              />
+            </UFormGroup>
             <UFormGroup :label="newDeviceAreaLabel" name="newDeviceArea" required :ui="{label: { base: 'text-sm' }}">
               <USelectMenu
                   v-model="newDeviceForm.installation_area"
@@ -319,7 +329,6 @@ import PdfViewer from '~/components/pdf/PdfViewer.vue';
 import GridOverlay from '~/components/interactive/GridOverlay.vue';
 import {definePageMeta, useNuxtApp, useRuntimeConfig, useToast} from "#imports";
 import {useDeviceRealtimeStore} from '~/stores/deviceRealtime';
-// --- MODIFICATION: Import centralized types and translation logic ---
 import type { LogStatus, EventType } from '~/config/constants';
 import { useLocalization } from '~/composables/useLocalization';
 
@@ -407,8 +416,7 @@ const runtimeConfig = useRuntimeConfig();
 const toast = useToast();
 const {$api} = useNuxtApp();
 const deviceRealtimeStore = useDeviceRealtimeStore();
-// --- MODIFICATION: Instantiate the centralized translation composable ---
-const { getLocalizedStatus, getLocalizedEventType } = useLocalization();
+const { getLocalizedStatus, getLocalizedEventType, getFormattedDeviceType } = useLocalization();
 
 const isMobileMenuOpen = ref(false);
 const isSaving = ref(false);
@@ -446,6 +454,8 @@ const createNewDeviceTitleLabel = computed(() => currentLanguage.value === 'vi' 
 const selectExistingDeviceButtonLabel = computed(() => currentLanguage.value === 'vi' ? 'Hoặc chọn thiết bị hiện có' : 'Or select existing device');
 const newDeviceNameLabel = computed(() => currentLanguage.value === 'vi' ? 'Tên thiết bị mới' : 'New device name');
 const newDeviceNamePlaceholderLabel = computed(() => currentLanguage.value === 'vi' ? 'Ví dụ: Device 123' : 'Example: Device 123');
+const newDeviceTypeLabel = computed(() => currentLanguage.value === 'vi' ? 'Loại thiết bị' : 'Device Type');
+const selectDeviceTypePlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Chọn một loại...' : 'Select a type...');
 const newDeviceAreaLabel = computed(() => currentLanguage.value === 'vi' ? 'Khu vực lắp đặt' : 'Installation area');
 const selectAreaPlaceholderLabel = computed(() => currentLanguage.value === 'vi' ? 'Chọn khu vực...' : 'Select area...');
 const newDeviceMacAddressLabel = computed(() => currentLanguage.value === 'vi' ? 'Địa chỉ MAC' : 'MAC Address');
@@ -548,6 +558,7 @@ const modalSelectedDeviceId = ref<string | undefined>(undefined);
 
 const newDeviceForm = ref({
   name: '',
+  device_type: undefined as string | undefined,
   installation_area: undefined as string | undefined,
   mac_address: '',
   firmware_version: ''
@@ -560,6 +571,12 @@ const availableDevices = computed<SelectableDevice[]>(() =>
 const availableInstallationAreas = ref<string[]>(runtimeConfig.public.installationAreas);
 const areaOptionsForModal = computed(() => availableInstallationAreas.value.map(area => ({label: area, value: area})));
 const availableDeviceOptionsForModal = computed(() => availableDevices.value);
+const deviceTypeOptionsForModal = computed(() =>
+    runtimeConfig.public.deviceTypes.map((type: string) => ({
+      label: getFormattedDeviceType(type),
+      value: type
+    }))
+);
 // !SECTION
 
 // SECTION: Utility and Formatting Functions
@@ -590,11 +607,6 @@ const formatDateForTooltip = (isoString: string): string => {
     return 'Invalid Date';
   }
 };
-
-// --- MODIFICATION: Local translation functions are no longer needed ---
-// const getLocalizedStatus = ... (REMOVED)
-// const getLocalizedEventType = ... (REMOVED)
-
 // !SECTION
 
 // SECTION: API Interaction
@@ -744,7 +756,7 @@ const handleCellMouseLeave = () => {};
 const resetModalState = () => {
   isCreatingNewDeviceInModal.value = false;
   modalSelectedDeviceId.value = undefined;
-  newDeviceForm.value = {name: '', installation_area: undefined, mac_address: '', firmware_version: ''};
+  newDeviceForm.value = {name: '', device_type: undefined, installation_area: undefined, mac_address: '', firmware_version: ''};
 };
 
 const closeAndResetModal = () => {
@@ -817,10 +829,10 @@ const handleSaveCellAssignment = async () => {
 
   try {
     if (isCreatingNewDeviceInModal.value) {
-      if (!newDeviceForm.value.name.trim() || !newDeviceForm.value.installation_area) {
+      if (!newDeviceForm.value.name.trim() || !newDeviceForm.value.installation_area || !newDeviceForm.value.device_type) {
         toast.add({
           title: 'Validation Error',
-          description: 'Device Name and Installation Area are required.',
+          description: 'Device Name, Type, and Installation Area are required.',
           color: 'orange'
         });
         isSaving.value = false;
@@ -829,7 +841,7 @@ const handleSaveCellAssignment = async () => {
       const payload = {
         name: newDeviceForm.value.name.trim(),
         mac_address: newDeviceForm.value.mac_address.trim() || '00:00:00:00:00:00',
-        device_type: "WristStrapMonitorV1",
+        device_type: newDeviceForm.value.device_type,
         installation_area: newDeviceForm.value.installation_area,
         coordinates: {row, col},
         scale_at_creation_time: scaleToSave,

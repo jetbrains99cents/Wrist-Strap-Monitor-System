@@ -56,8 +56,9 @@
         </div>
       </div>
 
-      <div class="device-table-container flex-grow flex flex-col overflow-hidden">
+      <div ref="deviceTableContainerRef" class="device-table-container flex-grow flex flex-col overflow-hidden min-h-0">
         <UTable
+            ref="tableRef"
             v-model="selectedDevices"
             :sort="sort"
             :columns="localizedColumns"
@@ -67,9 +68,8 @@
             :empty-state="{ icon: 'i-heroicons-circle-stack-20-solid', label: noDevicesMessage }"
             :ui="{
               base: 'min-w-full table-fixed',
-              wrapper: 'flex-grow h-full flex flex-col overflow-hidden custom-scrollbar',
-              thead: 'shrink-0',
-              tbody: 'flex-grow overflow-y-auto custom-scrollbar divide-y divide-gray-200 dark:divide-gray-700',
+              wrapper: '',
+              tbody: 'divide-y divide-gray-200 dark:divide-gray-700',
               th: { base: 'text-left rtl:text-right group align-top whitespace-nowrap', padding: 'px-3 py-3', font: 'font-semibold text-sm', color: 'text-gray-600 dark:text-gray-300' },
               td: { base: 'align-middle whitespace-nowrap overflow-hidden text-ellipsis', padding: 'px-3 py-3', color: 'text-gray-700 dark:text-gray-200' },
               tr: { base: 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800/50', selected: 'bg-primary-50 dark:bg-primary-900' }
@@ -77,11 +77,26 @@
             @select="handleRowClick"
         >
           <template #installationDate-data="{ row }"><span>{{ formatTimestamp(row.installationDate) }}</span></template>
+
           <template #status-data="{ row }">
             <UBadge :color="getStatusColor(row.status)" variant="subtle" size="md">{{ getLocalizedStatus(row.status) }}</UBadge>
           </template>
+
           <template #firmware_version-data="{ row }">
             <span>{{ row.firmware_version || 'N/A' }}</span>
+          </template>
+
+          <template #lastEventActions-data="{ row }">
+            <div class="flex justify-center items-center">
+              <UButton
+                  icon="i-heroicons-document-text"
+                  size="sm"
+                  color="gray"
+                  variant="ghost"
+                  :aria-label="latestDataLabel"
+                  @click.stop="showLastEventModal(row.last_event)"
+              />
+            </div>
           </template>
         </UTable>
       </div>
@@ -117,6 +132,16 @@
           </template>
           <div class="p-4 space-y-4">
             <UFormGroup :label="deviceNameLabel" name="name" required><UInput v-model="formState.name" /></UFormGroup>
+            <UFormGroup :label="newDeviceTypeLabel" name="device_type" required>
+              <USelectMenu
+                  v-model="formState.device_type"
+                  :options="deviceTypeOptionsForModal"
+                  value-attribute="value"
+                  option-attribute="label"
+                  :placeholder="selectDeviceTypePlaceholder"
+                  :disabled="isEditing"
+              />
+            </UFormGroup>
             <UFormGroup :label="areaLabel" name="installationArea" required><USelectMenu v-model="formState.installationArea" :options="allAreas" /></UFormGroup>
             <UFormGroup :label="macAddressLabel" name="mac_address"><UInput v-model="formState.mac_address" :disabled="isEditing"/></UFormGroup>
             <UFormGroup :label="firmwareVersionLabel" name="firmware_version"><UInput v-model="formState.firmware_version" /></UFormGroup>
@@ -147,20 +172,35 @@
         </template>
       </UCard>
     </UModal>
+
+    <UModal v-model="isLastEventModalOpen">
+      <UCard :ui="{ divide: 'divide-y divide-gray-100 dark:divide-gray-800' }">
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
+              {{ lastEventModalTitle }}
+            </h3>
+            <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark-20-solid" class="-my-1" @click="isLastEventModalOpen = false"/>
+          </div>
+        </template>
+        <div class="p-4">
+          <pre class="text-xs p-3 bg-gray-900 text-white rounded-md overflow-auto">{{ prettifiedLastEvent }}</pre>
+        </div>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useLanguage } from '~/composables/useLanguage';
 import { useLogger } from '~/composables/useLogger';
 import { useActionStatusModal } from '~/composables/useActionStatusModal';
 import { useDeviceRealtimeStore } from '~/stores/deviceRealtime';
-import type { LogStatus } from '~/config/constants';
+import type { LogStatus, EventType } from '~/config/constants';
 import { useLocalization } from '~/composables/useLocalization';
 import { useRuntimeConfig, useNuxtApp, useToast } from '#imports';
 
-// --- MODIFICATION: Define a type that matches the valid colors for UBadge ---
 type AppBadgeColor = 'green' | 'red' | 'amber' | 'gray' | 'blue' | 'purple' | 'indigo' | 'orange' | 'yellow';
 
 const { currentLanguage } = useLanguage();
@@ -170,7 +210,7 @@ const { $api } = useNuxtApp();
 const { show: showActionStatusModal } = useActionStatusModal();
 const deviceRealtimeStore = useDeviceRealtimeStore();
 const runtimeConfig = useRuntimeConfig();
-const { getLocalizedStatus } = useLocalization();
+const { getLocalizedStatus, getFormattedDeviceType } = useLocalization();
 
 // --- General State & Navigation ---
 const isMobileMenuOpen = ref(false);
@@ -205,6 +245,8 @@ const statusLabel = computed(() => currentLanguage.value === 'vi' ? 'Trạng th�
 const cancelLabel = computed(() => currentLanguage.value === 'vi' ? 'Hủy' : 'Cancel');
 const saveLabel = computed(() => currentLanguage.value === 'vi' ? 'Lưu' : 'Save');
 const deleteLabel = computed(() => currentLanguage.value === 'vi' ? 'Xóa' : 'Delete');
+const newDeviceTypeLabel = computed(() => currentLanguage.value === 'vi' ? 'Loại thiết bị' : 'Device Type');
+const selectDeviceTypePlaceholder = computed(() => currentLanguage.value === 'vi' ? 'Chọn một loại...' : 'Select a type...');
 const confirmDeleteTitle = computed(() => currentLanguage.value === 'vi' ? 'Xác nhận Xóa' : 'Confirm Deletion');
 const confirmDeleteMessage = computed(() => {
   const count = selectedDevices.value.length;
@@ -216,12 +258,17 @@ const successTitle = computed(() => currentLanguage.value === 'vi' ? 'Thành cô
 const addSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Thiết bị đã được thêm thành công.' : 'Device has been added successfully.');
 const updateSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Thiết bị đã được cập nhật thành công.' : 'Device has been updated successfully.');
 const deleteSuccessMessage = computed(() => currentLanguage.value === 'vi' ? 'Các thiết bị đã được xóa thành công.' : 'The selected devices have been deleted successfully.');
+const latestDataLabel = computed(() => currentLanguage.value === 'vi' ? 'Dữ liệu gần nhất' : 'Latest Data');
+const lastEventModalTitle = computed(() => currentLanguage.value === 'vi' ? 'Dữ liệu Sự kiện Cuối' : 'Last Event Data');
 
 // --- Device Data & Table State ---
-interface Device { id: string; name: string; installationArea: string; installationDate: number; status: LogStatus | 'Unknown' | null; mac_address: string; firmware_version?: string | null; }
+interface EventDetails { type: EventType | null; status?: LogStatus | null; timestamp: number; value: any; }
+interface Device { id: string; name: string; installationArea: string; installationDate: number; status: LogStatus | 'Unknown' | null; mac_address: string; firmware_version?: string | null; device_type: string; last_event: EventDetails | null; createdAt: number; }
 const allDevices = ref<Device[]>([]);
 const allAreas = runtimeConfig.public.installationAreas;
 const allStatuses = runtimeConfig.public.logStatuses;
+const allDeviceTypes = runtimeConfig.public.deviceTypes;
+const deviceTypeOptionsForModal = computed(() => allDeviceTypes.map((type: string) => ({ label: getFormattedDeviceType(type), value: type })));
 const pending = ref(false);
 
 const localizedColumns = computed(() => [
@@ -231,6 +278,7 @@ const localizedColumns = computed(() => [
   {key: 'firmware_version', label: firmwareVersionLabel.value, sortable: true},
   {key: 'installationDate', label: installationDateLabel.value, sortable: true},
   {key: 'status', label: statusLabel.value, sortable: true},
+  {key: 'lastEventActions', label: latestDataLabel.value, sortable: false, class: 'w-16 text-center'},
 ]);
 
 const liveDeviceData = computed(() => {
@@ -244,12 +292,12 @@ const liveDeviceData = computed(() => {
       return {
         ...device,
         status: (snapshot.last_event?.status || 'Unknown') as LogStatus | 'Unknown',
+        last_event: snapshot.last_event
       };
     }
     return device;
   });
 });
-
 
 // --- Filtering, Sorting & Pagination ---
 const searchTerm = ref('');
@@ -268,19 +316,18 @@ const filteredDevices = computed(() => {
   return results;
 });
 
-const itemsPerPage = ref(15);
+const deviceTableContainerRef = ref<HTMLElement | null>(null);
+const tableRef = ref<any>(null);
+const itemsPerPage = ref(15); // Start with a reasonable default
 const currentPage = ref(1);
 const pageInput = ref(currentPage.value);
-
-onMounted(() => {
-  fetchDevices();
-});
+let resizeObserver: ResizeObserver | null = null;
 
 const totalPages = computed(() => Math.ceil(filteredDevices.value.length / itemsPerPage.value) || 1);
 const paginatedDevices = computed(() => { const start = (currentPage.value - 1) * itemsPerPage.value; const end = start + itemsPerPage.value; return filteredDevices.value.slice(start, end); });
 watch(currentPage, (newPage) => { pageInput.value = newPage; });
 const goToPage = () => { let page = Number(pageInput.value); if (isNaN(page) || page < 1) page = 1; if (page > totalPages.value) page = totalPages.value; currentPage.value = page; };
-watch([searchTerm, selectedFilterArea, selectedFilterStatus, selectedFilterDate], () => { currentPage.value = 1; });
+watch([searchTerm, selectedFilterArea, selectedFilterStatus, selectedFilterDate, sort], () => { currentPage.value = 1; });
 
 // --- Table Data Formatting ---
 const formatTimestamp = (timestamp: number) => new Date(timestamp).toLocaleDateString(currentLanguage.value === 'vi' ? 'vi-VN' : 'en-US');
@@ -289,15 +336,10 @@ const areaColumnFilterOptions = computed(() => [{ label: filterByAreaPlaceholder
 const statusColumnFilterOptions = computed(() => [{ label: filterByStatusPlaceholder.value, value: undefined }, ...allStatuses.map(s => ({ label: getLocalizedStatus(s), value: s }))]);
 const dateColumnFilterOptions = computed(() => { const uniqueDates = [...new Set(allDevices.value.map(d => new Date(d.installationDate).toDateString()))]; return [{ label: filterByDatePlaceholder.value, value: undefined }, ...uniqueDates.map(d => ({ label: new Date(d).toLocaleDateString(), value: new Date(d).getTime() }))]; });
 
-// --- MODIFICATION: The function is now correctly typed and handles the 'slate' case ---
 const getStatusColor = (status: LogStatus | 'Unknown' | null): AppBadgeColor => {
   if (!status) return 'gray';
   const colorName = runtimeConfig.public.statusColors[status] || 'gray';
-  // UBadge expects 'gray' for neutral colors, so we ensure 'slate' from config is mapped to 'gray'.
-  if (colorName === 'slate') {
-    return 'gray';
-  }
-  return colorName as AppBadgeColor;
+  return colorName === 'slate' ? 'gray' : colorName as AppBadgeColor;
 };
 
 // --- Modal & Action State ---
@@ -307,35 +349,24 @@ const isConfirmDeleteModalOpen = ref(false);
 const isEditing = ref(false);
 const isSaving = ref(false);
 const formState = ref<any>({});
+const isLastEventModalOpen = ref(false);
+const selectedLastEvent = ref<EventDetails | null>(null);
+const prettifiedLastEvent = computed(() => JSON.stringify(selectedLastEvent.value, null, 2));
 
 // --- Modal Logic ---
-const openAddModal = () => { isEditing.value = false; formState.value = { name: '', installationArea: allAreas[0], mac_address: '', firmware_version: '' }; isFormModalOpen.value = true; };
+const openAddModal = () => { isEditing.value = false; formState.value = { name: '', device_type: allDeviceTypes[0], installationArea: allAreas[0], mac_address: '', firmware_version: '' }; isFormModalOpen.value = true; };
 const handleRowClick = (row: Device) => { isEditing.value = true; formState.value = JSON.parse(JSON.stringify(row)); isFormModalOpen.value = true; };
-
-// --- CRUD ---
-const handleSaveNewDevice = async () => {
-  isSaving.value = true;
-  const payload = {
-    name: formState.value.name,
-    installation_area: formState.value.installationArea,
-    mac_address: formState.value.mac_address || "00:00:00:00:00:00",
-    firmware_version: formState.value.firmware_version || "",
-    device_type: 'WristStrapMonitorV1',
-    installation_date: new Date().toISOString()
-  };
-  try {
-    await $api('/api/v1/devices/', { method: 'POST', body: payload });
-    toast.add({ title: successTitle.value, description: addSuccessMessage.value, color: 'green' });
-    isFormModalOpen.value = false;
-    await fetchDevices();
-  } catch (error) {
-    logger.error('[Device Management] Failed to add device:', error);
-    toast.add({ title: 'Error', description: 'Could not add the new device.', color: 'red' });
-  } finally {
-    isSaving.value = false;
+const showLastEventModal = (lastEvent: EventDetails | null) => {
+  if (!lastEvent) {
+    toast.add({ title: 'Info', description: 'No last event data available for this device.', color: 'blue' });
+    return;
   }
+  selectedLastEvent.value = lastEvent;
+  isLastEventModalOpen.value = true;
 };
 
+// --- CRUD ---
+const handleSaveNewDevice = async () => { isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, mac_address: formState.value.mac_address || "00:00:00:00:00:00", firmware_version: formState.value.firmware_version || "", device_type: formState.value.device_type, installation_date: new Date().toISOString() }; try { await $api('/api/v1/devices/', { method: 'POST', body: payload }); toast.add({ title: successTitle.value, description: addSuccessMessage.value, color: 'green' }); isFormModalOpen.value = false; await fetchDevices(); } catch (error) { logger.error('[Device Management] Failed to add device:', error); toast.add({ title: 'Error', description: 'Could not add the new device.', color: 'red' }); } finally { isSaving.value = false; } };
 const handleUpdateDevice = async () => { if (!formState.value.id) return; isSaving.value = true; const payload = { name: formState.value.name, installation_area: formState.value.installationArea, firmware_version: formState.value.firmware_version, }; try { await $api(`/api/v1/devices/${formState.value.id}`, { method: 'PUT', body: payload }); toast.add({ title: successTitle.value, description: updateSuccessMessage.value, color: 'green' }); isFormModalOpen.value = false; await fetchDevices(); } catch (error) { logger.error('[Device Management] Failed to update device:', error); toast.add({ title: 'Error', description: 'Could not update the device.', color: 'red' }); } finally { isSaving.value = false; } };
 const handleRemoveDevice = () => { if (selectedDevices.value.length > 0) { isConfirmDeleteModalOpen.value = true; } };
 const confirmDeleteDevices = async () => { isSaving.value = true; const idsToDelete = selectedDevices.value.map(d => d.id); try { await Promise.all( idsToDelete.map(id => $api(`/api/v1/devices/${id}`, { method: 'DELETE' })) ); allDevices.value = allDevices.value.filter(device => !idsToDelete.includes(device.id)); selectedDevices.value = []; isConfirmDeleteModalOpen.value = false; toast.add({ title: successTitle.value, description: deleteSuccessMessage.value, color: 'green' }); } catch (error) { logger.error('[Device Management] Failed to delete devices:', error); toast.add({ title: 'Error', description: 'Could not delete one or more devices.', color: 'red' }); } finally { isSaving.value = false; } };
@@ -353,6 +384,9 @@ async function fetchDevices() {
       status: (device.last_event?.status || 'Unknown') as LogStatus | 'Unknown',
       mac_address: device.mac_address,
       firmware_version: device.firmware_version,
+      device_type: device.device_type,
+      last_event: device.last_event,
+      createdAt: new Date(device.createdAt).getTime(),
     }));
   } catch (error) {
     logger.error('[Device Management] Failed to fetch devices:', error);
@@ -362,16 +396,75 @@ async function fetchDevices() {
   }
 }
 
+const calculateDynamicItemsPerPage = () => {
+  // Ensure the container element is available
+  if (!deviceTableContainerRef.value) return;
+
+  const tableContainer = deviceTableContainerRef.value;
+  if (tableContainer.clientHeight === 0) return;
+
+  // Subtract the header height to find the available space for rows
+  const thead = tableContainer.querySelector('thead');
+  const theadHeight = thead ? thead.clientHeight : 0;
+  const availableBodyHeight = tableContainer.clientHeight - theadHeight;
+
+  // We need at least one rendered row to measure its height
+  const firstRowEl = tableContainer.querySelector('tbody tr');
+  if (!firstRowEl) {
+    // Can't calculate without a row to measure
+    return;
+  }
+
+  const rowHeight = firstRowEl.getBoundingClientRect().height;
+  if (rowHeight <= 0) return; // Avoid division by zero
+
+  const numRowsThatFit = Math.floor(availableBodyHeight / rowHeight);
+  const newItemsPerPage = Math.max(1, numRowsThatFit);
+
+  if (itemsPerPage.value !== newItemsPerPage) {
+    itemsPerPage.value = newItemsPerPage;
+  }
+};
+
+onMounted(() => {
+  fetchDevices().then(async () => {
+    // Wait for the DOM to update with the fetched data
+    await nextTick();
+
+    // Now perform the initial calculation and set up the observer
+    calculateDynamicItemsPerPage();
+    if (deviceTableContainerRef.value) {
+      resizeObserver = new ResizeObserver(calculateDynamicItemsPerPage);
+      resizeObserver.observe(deviceTableContainerRef.value);
+    }
+  });
+});
+
+onBeforeUnmount(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
+});
+
+// Recalculate when filters change the number of available rows
+watch(filteredDevices, async () => {
+  // Wait for the DOM to potentially re-render with the new filtered list
+  await nextTick();
+  calculateDynamicItemsPerPage();
+});
+
+
 // --- Page Head ---
 useHead({title: pageTitle.value});
 watch(pageTitle, (newTitle) => { useHead({title: newTitle}); });
 </script>
 
 <style scoped>
-.custom-scrollbar::-webkit-scrollbar { width: 8px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #4a5568; }
-.custom-scrollbar { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
-html.dark .custom-scrollbar { scrollbar-color: #4a5568 transparent; }
+/* All custom scrollbar styles have been removed */
+.custom-scrollbar {
+  scrollbar-width: none; /* For Firefox */
+}
+.custom-scrollbar::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
 </style>

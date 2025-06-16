@@ -1,5 +1,5 @@
 // nuxt.config.ts for wrist-strap-dashboard
-import { LOG_STATUSES, EVENT_TYPES } from './config/constants'
+import { LOG_STATUSES, EVENT_TYPES, DEVICE_TYPES } from './config/constants'
 
 export default defineNuxtConfig({
     compatibilityDate: '2025-05-27',
@@ -39,9 +39,10 @@ export default defineNuxtConfig({
             apiBase: 'https://172.16.9.183:3002',
             loggingEnabled: process.env.NODE_ENV === 'development',
 
-            // --- MODIFICATION: Create mutable copies using spread syntax (...) ---
             logStatuses: [...LOG_STATUSES],
             eventTypes: [...EVENT_TYPES],
+            // --- MODIFICATION: Added spread syntax to create a mutable copy ---
+            deviceTypes: [...DEVICE_TYPES],
 
             installationAreas: [
                 "POL",

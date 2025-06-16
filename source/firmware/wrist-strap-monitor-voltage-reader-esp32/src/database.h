@@ -7,7 +7,7 @@
 
 
 
-class database_model {
+class database {
 
 };
 

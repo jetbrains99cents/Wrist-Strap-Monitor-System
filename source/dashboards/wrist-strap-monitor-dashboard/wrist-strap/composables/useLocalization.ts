@@ -5,14 +5,8 @@ import type { LogStatus, EventType } from '~/config/constants';
  * A centralized composable for handling all language-specific translations.
  */
 export function useLocalization() {
-    // Internally uses the useLanguage composable to react to language changes.
     const { currentLanguage } = useLanguage();
 
-    /**
-     * Translates a device status into the currently selected language.
-     * @param status The status string to translate.
-     * @returns The translated string, or the original string if no translation is available.
-     */
     const getLocalizedStatus = (status: LogStatus | string | null | undefined): string => {
         if (!status) return 'N/A';
         if (currentLanguage.value !== 'vi') {
@@ -36,11 +30,6 @@ export function useLocalization() {
         return translations[status] || status;
     };
 
-    /**
-     * Translates an event type into the currently selected language.
-     * @param type The event type string to translate.
-     * @returns The translated string, or the original string if no translation is available.
-     */
     const getLocalizedEventType = (type: EventType | null | undefined): string => {
         if (!type) return 'N/A';
         if (currentLanguage.value !== 'vi') {
@@ -57,8 +46,19 @@ export function useLocalization() {
         return translations[type] || type;
     };
 
+    // --- MODIFICATION: Updated the formatting logic ---
+    const getFormattedDeviceType = (type: string): string => {
+        if (!type) return 'N/A';
+        // This regex adds a space before a capital letter if it's preceded by a lowercase letter or a number.
+        // This correctly splits "WristStrap" and "MonitorKD" but not "KD".
+        let formatted = type.replace(/([a-z0-9])([A-Z])/g, '$1 $2');
+        // Capitalize the first letter
+        return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+    };
+
     return {
         getLocalizedStatus,
         getLocalizedEventType,
+        getFormattedDeviceType,
     };
 }

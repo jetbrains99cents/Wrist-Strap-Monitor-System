@@ -66,3 +66,5 @@ function Get-FolderTree {
 }
 
 Get-FolderTree -Exclude @(".git", ".vscode", "__pycache__", ".venv", ".DS_Store", "*.log", "*.tmp", ".pytest_cache", ".idea", "*.uv.lock", "*.http", ".env", "*.pem")
+
+Get-ChildItem -Recurse | Where-Object { $_.FullName -notlike '*\.pio\*' -and $_.FullName -notlike '*\.idea\*' -and $_.FullName -notlike '*\.git\*' -and $_.FullName -notlike '*\cmake-build-debug*' } | Select-Object FullName

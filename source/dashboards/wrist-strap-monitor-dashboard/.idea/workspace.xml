@@ -7,30 +7,13 @@
     <list default="true" id="1920967b-ce8e-42f0-b6c9-49e2d29d39a4" name="Changes" comment="Complete dashboard phase 1">
       <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useLocalization.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/config/constants.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/database_model.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/database_model.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/screen.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/screen.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/firmware.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../commands to be executed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../commands to be executed.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/analytics.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/crud/analytics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../tools/generate_historical_logs_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/generate_historical_logs_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../tools/generate_voltage_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/generate_voltage_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
