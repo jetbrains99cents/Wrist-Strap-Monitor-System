@@ -7,11 +7,19 @@
     <list default="true" id="1920967b-ce8e-42f0-b6c9-49e2d29d39a4" name="Changes" comment="Complete dashboard phase 1">
       <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useLocalization.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/config/constants.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/api/v1/endpoints/firmware.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../commands to be executed.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../commands to be executed.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/config_data.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/device_data.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/ota_handler.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/ota_handler.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/data/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/data/voltage_reading.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/voltage_reading.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/data/wifi_setting.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/wifi_setting.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" afterDir="false" />
     </list>

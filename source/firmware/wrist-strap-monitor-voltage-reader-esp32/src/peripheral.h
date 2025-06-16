@@ -1,16 +1,25 @@
-//
-// Created by ENG on 6/14/2025.
-//
-
 #ifndef PERIPHERAL_H
 #define PERIPHERAL_H
 
+#include "enums.h"
 
+class Mediator;
+class Ina219;
 
-class peripheral {
-
+struct reading_data_t {
+    wrist_strap_status_t status;
+    float voltage;
 };
 
+class Peripheral {
+public:
+    void init(Mediator* mediator, Ina219* sensor);
+    void begin();
+    void read_and_process_data();
 
+private:
+    Mediator* _mediator;
+    Ina219* _sensor;
+};
 
-#endif //PERIPHERAL_H
+#endif // PERIPHERAL_H

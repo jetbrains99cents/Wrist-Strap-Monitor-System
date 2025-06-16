@@ -1,16 +1,20 @@
-//
-// Created by ENG on 6/14/2025.
-//
+#ifndef DATABASE_H
+#define DATABASE_H
 
-#ifndef DATABASE_MODEL_H
-#define DATABASE_MODEL_H
+#include <Arduino.h>
 
+class Database {
+public:
+    void begin();
+    bool append_reading(const char* json_payload);
+    bool retrieve_oldest_reading_filename(String& filename);
+    bool read_file(const String& filename, char* buffer, size_t buffer_size);
+    bool delete_file(const String& filename);
+    int get_queue_size();
+    bool is_queue_empty();
 
-
-class database {
-
+private:
+    const char* _queue_dir = "/data_queue";
 };
 
-
-
-#endif //DATABASE_MODEL_H
+#endif // DATABASE_H

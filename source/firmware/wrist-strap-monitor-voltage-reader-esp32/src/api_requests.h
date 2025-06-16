@@ -1,16 +1,15 @@
-//
-// Created by ENG on 6/14/2025.
-//
-
 #ifndef API_REQUESTS_H
 #define API_REQUESTS_H
 
+class Mediator;
 
+class ApiRequests {
+public:
+    void init(Mediator* mediator);
+    void request_time_sync();
 
-class api_requests {
-
+private:
+    Mediator* _mediator;
 };
 
-
-
-#endif //API_REQUESTS_H
+#endif // API_REQUESTS_H

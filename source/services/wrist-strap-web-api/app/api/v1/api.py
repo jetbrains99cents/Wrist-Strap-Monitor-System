@@ -7,7 +7,8 @@ from app.api.v1.endpoints import (
     devices,
     logs,
     settings,
-    analytics
+    analytics,
+    time_api
 )
 
 api_router = APIRouter()
@@ -20,3 +21,4 @@ api_router.include_router(logs.router, prefix="/logs", tags=["Logs"])
 api_router.include_router(settings.router, prefix="/settings", tags=["Settings"]) 
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["Analytics"])
+api_router.include_router(time_api.router, prefix="/time", tags=["Time"])
