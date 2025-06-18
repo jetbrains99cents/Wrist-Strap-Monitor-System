@@ -6,13 +6,25 @@
   <component name="ChangeListManager">
     <list default="true" id="ea037d49-a3dc-4281-be40-5758b867dee6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../source/dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/enums.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/enums.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/mqtt/mqtt_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/services/wrist-strap-web-api/app/mqtt/mqtt_client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -82,7 +94,7 @@
       <workItem from="1749697137790" duration="1804000" />
       <workItem from="1749712041127" duration="138000" />
       <workItem from="1749712454294" duration="756000" />
-      <workItem from="1749877045249" duration="8960000" />
+      <workItem from="1749877045249" duration="11956000" />
     </task>
     <servers />
   </component>

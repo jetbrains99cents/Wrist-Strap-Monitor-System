@@ -7,15 +7,31 @@
     <list default="true" id="1920967b-ce8e-42f0-b6c9-49e2d29d39a4" name="Changes" comment="Complete dashboard phase 1">
       <change afterPath="$PROJECT_DIR$/wrist-strap/composables/useLocalization.ts" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/wrist-strap/config/constants.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/voltage_reader_schematic.kicad_pro" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/voltage_reader_schematic.kicad_pro" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/~voltage_reader_schematic.kicad_pcb.lck" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/~voltage_reader_schematic.kicad_sch.lck" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/enums.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/enums.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/mqtt/mqtt_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/mqtt/mqtt_client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -114,6 +130,7 @@
       <workItem from="1749610769018" duration="23625000" />
       <workItem from="1749713683644" duration="29619000" />
       <workItem from="1749803120415" duration="3245000" />
+      <workItem from="1750148722102" duration="1950000" />
     </task>
     <task id="LOCAL-00001" summary="Complete dashboard phase 1">
       <option name="closed" value="true" />

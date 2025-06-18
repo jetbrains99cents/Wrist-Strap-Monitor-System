@@ -110,7 +110,7 @@ class MqttClient:
                 return
 
             status_evaluated = "Voltage reading ok"
-            if not (3.0 <= device_reading_in.voltage_value <= 3.4):
+            if not (3.0 <= device_reading_in.voltage_value <= 5):
                 status_evaluated = "Voltage reading failed"
 
             # Construct the 'last_event' object for both DB update and WebSocket broadcast

@@ -7,7 +7,10 @@
 void Peripheral::init(Mediator* mediator, Ina219* sensor) {
     _mediator = mediator;
     _sensor = sensor;
-    _last_reported_status = wrist_strap_status_t::STATUS_UNKNOWN; // Initialize last reported status
+    _last_reported_status = wrist_strap_status_t::STATUS_UNKNOWN;
+    _pending_status = wrist_strap_status_t::STATUS_UNKNOWN;
+    _is_in_debounce_period = false;
+    _state_change_timestamp = 0;
 }
 
 void Peripheral::begin() {
@@ -21,14 +24,15 @@ void Peripheral::begin() {
 
 void Peripheral::read_and_process_data() {
     if (!_sensor) {
-        Logger::get_instance().log_error("Cannot read data, sensor is not initialized.");
         return;
     }
 
     reading_data_t current_reading;
     current_reading.voltage = _sensor->get_voltage();
 
-    float threshold = Config::get_instance().get_voltage_threshold();
+    // MODIFIED: Get latest config values on every check
+    float threshold = Config::get_instance().get_fail_voltage_threshold();
+    long debounce_ms = Config::get_instance().get_debounce_duration() * 1000;
 
     if (current_reading.voltage > threshold) {
         current_reading.status = wrist_strap_status_t::STATUS_PASS;
@@ -36,16 +40,25 @@ void Peripheral::read_and_process_data() {
         current_reading.status = wrist_strap_status_t::STATUS_FAIL;
     }
 
-    // Log every reading, regardless of whether it's sent
-    Logger::get_instance().log_info("New measurement: Status=%s, Voltage=%.2fV",
-        (current_reading.status == wrist_strap_status_t::STATUS_PASS) ? "PASS" :
-        (current_reading.status == wrist_strap_status_t::STATUS_FAIL) ? "FAIL" : "UNKNOWN",
-        current_reading.voltage);
+    if (_is_in_debounce_period) {
+        if (current_reading.status != _pending_status) {
+            _is_in_debounce_period = false;
+            Logger::get_instance().log_info("State change reverted within debounce period. Cancelling event.");
+        } else if (millis() - _state_change_timestamp > debounce_ms) {
+            _last_reported_status = _pending_status;
+            _is_in_debounce_period = false;
 
-    // Only notify Mediator if the status has changed
-    if (current_reading.status != _last_reported_status) {
-        Logger::get_instance().log_info("Status change detected. Notifying Mediator.");
-        _last_reported_status = current_reading.status; // Update last reported status
-        _mediator->notify(event_t::WRIST_STRAP_STATE_UPDATED, &current_reading);
+            Logger::get_instance().log_warn("State change CONFIRMED to %s. Notifying Mediator.",
+                (_last_reported_status == wrist_strap_status_t::STATUS_PASS) ? "PASS" : "FAIL");
+
+            _mediator->notify(event_t::WRIST_STRAP_STATE_UPDATED, &current_reading);
+        }
+    } else {
+        if (current_reading.status != _last_reported_status) {
+            Logger::get_instance().log_info("Potential state change detected. Starting %ldms debounce timer...", debounce_ms);
+            _is_in_debounce_period = true;
+            _pending_status = current_reading.status;
+            _state_change_timestamp = millis();
+        }
     }
 }

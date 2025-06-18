@@ -3,7 +3,6 @@
 
 #include "enums.h"
 
-// Forward declarations to avoid circular includes
 class WifiHandler;
 class MqttClient;
 class ApiRequests;
@@ -12,13 +11,11 @@ class Peripheral;
 class Database;
 class Logger;
 
-// The Mediator is the central communication hub.
-// It receives events and directs commands to the appropriate modules.
 class Mediator {
 public:
     void init();
+    void loop();
 
-    // Registration methods called by main() to wire up the system
     void register_wifi_handler(WifiHandler* handler);
     void register_mqtt_client(MqttClient* client);
     void register_api_requests(ApiRequests* requests);
@@ -27,11 +24,9 @@ public:
     void register_database(Database* database);
     void register_logger(Logger* logger);
 
-    // The main notification function
     void notify(event_t event, void* data = nullptr);
 
 private:
-    // Pointers to all the modules it controls
     WifiHandler* _wifi_handler;
     MqttClient* _mqtt_client;
     ApiRequests* _api_requests;
@@ -40,8 +35,12 @@ private:
     Database* _database;
     Logger* _logger;
 
-    // Timer for MQTT reconnect logic
-    unsigned long _mqtt_reconnect_time;
+    // --- State Management ---
+    bool _is_time_synced = false;
+    unsigned long _next_time_sync_attempt_ms = 0;
+
+    bool _is_mqtt_connected = false;
+    unsigned long _next_mqtt_connect_attempt_ms = 0;
 };
 
 #endif // MEDIATOR_H

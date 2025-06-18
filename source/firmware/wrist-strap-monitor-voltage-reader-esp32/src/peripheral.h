@@ -20,7 +20,12 @@ public:
 private:
     Mediator* _mediator;
     Ina219* _sensor;
-    wrist_strap_status_t _last_reported_status; // New: To track the last sent status
+
+    wrist_strap_status_t _last_reported_status;
+    wrist_strap_status_t _pending_status;
+    unsigned long _state_change_timestamp;
+    bool _is_in_debounce_period;
+    // MODIFIED: Hardcoded constant is removed
 };
 
 #endif // PERIPHERAL_H

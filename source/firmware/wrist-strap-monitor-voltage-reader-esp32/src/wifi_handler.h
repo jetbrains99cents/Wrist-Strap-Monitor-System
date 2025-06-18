@@ -2,23 +2,36 @@
 #define WIFI_HANDLER_H
 
 #include <Arduino.h>
-#include <ESPAsyncWebServer.h> // Include for AsyncWebServer
 
 class Mediator;
+class AsyncWebServer;
 
 class WifiHandler {
 public:
     void init(Mediator* mediator);
-    bool connect_to_known_networks();
+    void begin_connection_process(); // NEW: Non-blocking trigger
     void start_access_point();
-    void log_mac_address(); // Declaration for logging MAC address
-    void loop(); // Added for consistency, even if empty for async server
+    void loop(); // MODIFIED: Now contains the connection logic
 
 private:
-    void setup_web_server(); // Declare this private helper method
+    // NEW: Internal state machine for managing connections
+    enum class wifi_state_t {
+        IDLE,
+        CONNECTING,
+        CONNECTED,
+        CONNECTION_FAILED
+    };
+
+    void setup_web_server();
+    void log_mac_address();
 
     Mediator* _mediator;
-    AsyncWebServer* _server; // Pointer to the AsyncWebServer instance
+    AsyncWebServer* _server;
+
+    wifi_state_t _state = wifi_state_t::IDLE;
+    int _current_network_index = 0;
+    unsigned long _connection_start_time = 0;
+    const long WIFI_CONNECT_TIMEOUT_MS = 20000; // 20 seconds
 };
 
 #endif // WIFI_HANDLER_H

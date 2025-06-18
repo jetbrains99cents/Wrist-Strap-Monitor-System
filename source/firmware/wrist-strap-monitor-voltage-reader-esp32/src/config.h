@@ -4,12 +4,13 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
 
-#define FW_VERSION "1.3.0"
+#define FW_VERSION "1.5.0"
 #define DEVICE_TYPE "WristStrapMonitorKD2001"
 #define SCL_PIN 22
 #define SDA_PIN 21
 #define MAX_SHIFTS 3
 
+// MODIFIED: Full struct definitions are moved here to resolve compiler errors.
 struct time_setting_t {
     int hour;
     int minute;
@@ -43,19 +44,25 @@ struct device_settings_t {
     char mqtt_password[64];
     int mqtt_port;
     int mqtt_ws_port;
-    char base_api_url[128];
-    float wrist_strap_monitor_output_voltage_threshold;
-    shift_setting_t working_time[MAX_SHIFTS];
-    production_plan_setting_t production_plan[MAX_SHIFTS];
+    char base_api_url[256];
+    float wrist_strap_monitor_fail_output_voltage_threshold;
+    int wrist_strap_monitor_fail_output_voltage_maximum_debounce_duration;
+    char device_status_mqtt_publish_topic_prefix[128];
+    shift_setting_t working_time[MAX_SHIFTS]; // MODIFIED: Using fixed array instead of pointer
+    production_plan_setting_t production_plan[MAX_SHIFTS]; // MODIFIED: Using fixed array
+    long time_sync_retry_delay_seconds;
 };
 
 class Config {
 public:
     static Config& get_instance();
+
     void begin();
     bool save();
-    bool is_wifi_configured();
+    void load_defaults();
+    bool is_wifi_configured() const;
 
+    // Getters
     const char* get_office_wifi_ssid() const;
     const char* get_office_wifi_password() const;
     const char* get_testing_wifi_ssid() const;
@@ -71,10 +78,14 @@ public:
     int get_mqtt_port() const;
     int get_mqtt_ws_port() const;
     const char* get_base_api_url() const;
-    float get_voltage_threshold() const;
+    float get_fail_voltage_threshold() const;
+    int get_debounce_duration() const;
+    const char* get_mqtt_topic_prefix() const;
     const shift_setting_t* get_working_time() const;
     const production_plan_setting_t* get_production_plan() const;
+    long get_time_sync_retry_delay_seconds() const;
 
+    // Setters
     void set_office_wifi_ssid(const char* value);
     void set_office_wifi_password(const char* value);
     void set_testing_wifi_ssid(const char* value);
@@ -91,17 +102,19 @@ public:
     void set_mqtt_ws_port(int value);
     void set_base_api_url(const char* value);
     void set_voltage_threshold(float value);
+    void set_debounce_duration_seconds(int value);
+    void set_mqtt_topic_prefix(const char* value);
     void set_working_time(const JsonArray& shifts);
     void set_production_plan(const JsonArray& plans);
+    void set_time_sync_retry_delay_seconds(long value);
 
 private:
     Config() {};
     Config(const Config&) = delete;
     Config& operator=(const Config&) = delete;
 
-    void load_defaults();
-    device_settings_t _settings;
     static Config instance;
+    device_settings_t _settings;
 };
 
 #endif // CONFIG_H

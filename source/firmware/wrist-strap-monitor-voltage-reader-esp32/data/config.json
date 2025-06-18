@@ -14,8 +14,10 @@
   "mqtt_port": 1883,
   "mqtt_ws_port": 8080,
   "base_api_url": "http://172.16.9.183:3002",
-  "wrist_strap_monitor_output_voltage_threshold": 3,
-  "wrist_strap_monitor_failed_voltage_maximum_waiting_duration_threshold": 10,
+  "wrist_strap_monitor_fail_output_voltage_threshold": 3,
+  "wrist_strap_monitor_fail_output_voltage_maximum_debounce_duration": 3,
+  "device_status_mqtt_publish_topic_prefix": "devices/wrist-strap/status/",
+  "time_sync_retry_delay_seconds": 10,
   "working_time": [
     {
       "name": "Shift 1",
@@ -26,31 +28,6 @@
       "name": "Shift 2",
       "from_time": { "hour": 13, "minute": 0 },
       "to_time": { "hour": 17, "minute": 0 }
-    },
-    {
-      "name": "Shift 3",
-      "from_time": { "hour": 18, "minute": 0 },
-      "to_time": { "hour": 22, "minute": 0 }
-    }
-  ],
-  "production_plan": [
-    {
-      "name": "Plan 1",
-      "date": "2025-06-17",
-      "from_time": { "hour": 7, "minute": 30 },
-      "to_time": { "hour": 11, "minute": 30 }
-    },
-    {
-      "name": "Plan 2",
-      "date": null,
-      "from_time": { "hour": 0, "minute": 0 },
-      "to_time": { "hour": 0, "minute": 0 }
-    },
-    {
-      "name": "Plan 3",
-      "date": null,
-      "from_time": { "hour": 0, "minute": 0 },
-      "to_time": { "hour": 0, "minute": 0 }
     }
   ]
 }

@@ -1,4 +1,5 @@
 #include "logger.h"
+#include "mediator.h" // Include Mediator to call notify
 
 Logger Logger::instance;
 
@@ -8,23 +9,33 @@ Logger& Logger::get_instance() {
 
 void Logger::begin(unsigned long baud_rate) {
     Serial.begin(baud_rate);
-    // A small delay to allow serial monitor to connect
-    delay(100); 
+    delay(100);
     _is_active = true;
-    log_info("Logger initialized at %lu baud.", baud_rate);
 }
 
+// MODIFIED: Implementation for the new init method
+void Logger::init(Mediator* mediator) {
+    _mediator = mediator;
+    log_info("Logger initialized and connected to Mediator.");
+}
+
+// MODIFIED: This function now notifies the Mediator after printing
 void Logger::print_log(const char* level, const char* format, va_list args) {
-    if (!_is_active) return;
-    
-    char buffer[256];
     char message[256];
-    
     vsnprintf(message, sizeof(message), format, args);
-    
-    snprintf(buffer, sizeof(buffer), "[%lu] [%s] %s", millis(), level, message);
-    
-    Serial.println(buffer);
+
+    // 1. Always print to the local Serial port if it's active
+    if (_is_active) {
+        char buffer[256];
+        snprintf(buffer, sizeof(buffer), "[%lu] [%s] %s", millis(), level, message);
+        Serial.println(buffer);
+    }
+
+    // 2. Notify the Mediator that a log was created.
+    // The Mediator will decide if it needs to be sent over MQTT.
+    if (_mediator != nullptr) {
+        _mediator->notify(event_t::LOG_MESSAGE_CREATED, (void*)message);
+    }
 }
 
 void Logger::log_info(const char* format, ...) {

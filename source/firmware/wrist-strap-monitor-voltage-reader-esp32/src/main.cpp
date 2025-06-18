@@ -11,7 +11,6 @@
 #include "ina219.h"
 #include "database.h"
 
-// Create global instances of all our modules
 Config& config = Config::get_instance();
 Logger& logger = Logger::get_instance();
 Mediator mediator;
@@ -23,29 +22,18 @@ Peripheral peripheral;
 Ina219 ina219_sensor;
 Database database;
 
-// Timers for periodic tasks
-unsigned long last_sensor_read_time = 0;
 unsigned long last_ota_check_time = 0;
-const long SENSOR_READ_INTERVAL = 5000; // 5 seconds
-const long OTA_CHECK_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
+const long OTA_CHECK_INTERVAL = 30 * 1000;
 
 void setup() {
-    // 1. Initialize Logger first
-    logger.begin(115200);
-    logger.log_info("======================================");
-    logger.log_info("Wrist Strap Monitor Device Starting...");
-    logger.log_info("Firmware Version: %s", FW_VERSION);
-    logger.log_info("======================================");
+    Serial.begin(115200);
+    delay(100);
 
-    // 2. Initialize core services
+    logger.begin();
     config.begin();
     database.begin();
-
-    // 3. Initialize the Mediator
     mediator.init();
 
-    // 4. "Wire up" the system by registering modules with the Mediator
-    logger.log_info("Registering modules with Mediator...");
     mediator.register_logger(&logger);
     mediator.register_database(&database);
     mediator.register_peripheral(&peripheral);
@@ -54,18 +42,20 @@ void setup() {
     mediator.register_api_requests(&api_requests);
     mediator.register_ota_handler(&ota_handler);
 
-    // 5. Initialize modules, injecting dependencies
-    logger.log_info("Initializing modules...");
+    logger.init(&mediator);
     peripheral.init(&mediator, &ina219_sensor);
     wifi_handler.init(&mediator);
     mqtt_client.init(&mediator, &database);
     api_requests.init(&mediator);
     ota_handler.init(&mediator);
 
-    // 6. Begin hardware-level modules
+    logger.log_info("======================================");
+    logger.log_info("Wrist Strap Monitor Device Starting...");
+    logger.log_info("Firmware Version: %s", FW_VERSION);
+    logger.log_info("======================================");
+
     peripheral.begin();
 
-    // 7. Make the first critical decision
     logger.log_info("Checking for saved Wi-Fi configuration...");
     if (config.is_wifi_configured()) {
         mediator.notify(event_t::START_NORMAL_MODE);
@@ -75,21 +65,17 @@ void setup() {
 }
 
 void loop() {
-    // Handlers that need to be called on every loop
-    ota_handler.loop(); // For ArduinoOTA
+    ota_handler.loop();
+    wifi_handler.loop();
+    mediator.loop(); // ADDED: Call the mediator's loop to check for scheduled tasks
 
-    // Non-blocking timers for periodic events
+    mediator.notify(event_t::SENSOR_READ_REQUESTED);
+
     unsigned long current_time = millis();
-
-    // Trigger sensor read
-    if (current_time - last_sensor_read_time > SENSOR_READ_INTERVAL) {
-        last_sensor_read_time = current_time;
-        mediator.notify(event_t::SENSOR_READ_REQUESTED);
-    }
-
-    // Trigger OTA check
     if (current_time - last_ota_check_time > OTA_CHECK_INTERVAL) {
         last_ota_check_time = current_time;
         mediator.notify(event_t::OTA_CHECK_REQUESTED);
     }
+
+    delay(10);
 }

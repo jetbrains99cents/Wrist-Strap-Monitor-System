@@ -22,6 +22,7 @@ enum class event_t {
     MQTT_CONNECT_REQUESTED,
     MQTT_CONNECTED,
     MQTT_DISCONNECTED,
+    MQTT_RECONNECT_REQUESTED, // ADDED: New event for scheduling a reconnect attempt
     MQTT_MESSAGE_PUBLISHED_SUCCESS,
 
     // Sensor & Data Events
@@ -29,7 +30,10 @@ enum class event_t {
 
     // Periodic Timer Events from main()
     SENSOR_READ_REQUESTED,
-    OTA_CHECK_REQUESTED
+    OTA_CHECK_REQUESTED,
+
+    // ADDED: New event for decoupled logging
+    LOG_MESSAGE_CREATED
 };
 
 // Represents the interpreted status of the wrist strap.

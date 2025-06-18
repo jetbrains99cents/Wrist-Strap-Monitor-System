@@ -15,25 +15,30 @@ void MqttClient::init(Mediator* mediator, Database* database) {
 
     const char* broker_ip = Config::get_instance().get_mqtt_broker_ip();
     uint16_t port = Config::get_instance().get_mqtt_port();
-    _mqtt_client.setServer(broker_ip, port);
 
-    // Set other configurations like username/password if needed
-    // _mqtt_client.setCredentials(Config::get_instance().get_mqtt_username(), Config::get_instance().get_mqtt_password());
+    Logger::get_instance().log_info("Setting MQTT server to: %s:%d", broker_ip, port);
+
+    _mqtt_client.setServer(broker_ip, port);
 }
 
 void MqttClient::connect_to_broker() {
-    Logger::get_instance().log_info("Connecting to MQTT broker...");
+    if (_mqtt_client.connected()) {
+        return;
+    }
     _mqtt_client.connect();
 }
 
+bool MqttClient::is_connected() const {
+    return _mqtt_client.connected();
+}
+
 void MqttClient::_on_connect(bool sessionPresent) {
-    Logger::get_instance().log_info("Connected to MQTT Broker.");
     _mediator->notify(event_t::MQTT_CONNECTED);
-    publish_from_queue();
 }
 
 void MqttClient::_on_disconnect(AsyncMqttClientDisconnectReason reason) {
-    Logger::get_instance().log_warn("Disconnected from MQTT Broker. Reason: %d", (int)reason);
+    // This function's only job is to notify the mediator.
+    // The mediator handles all retry scheduling.
     _mediator->notify(event_t::MQTT_DISCONNECTED);
 }
 
@@ -42,36 +47,63 @@ void MqttClient::publish_from_queue() {
         return;
     }
 
-    Logger::get_instance().log_info("Found items in queue, preparing to publish...");
+    if (_pending_publishes.size() >= 5) {
+        Logger::get_instance().log_warn("Too many unconfirmed MQTT messages pending. Waiting...");
+        return;
+    }
 
     String filename;
     if (_database->retrieve_oldest_reading_filename(filename)) {
         char payload_buffer[512];
         if (_database->read_file(filename, payload_buffer, sizeof(payload_buffer))) {
 
-            String topic = "devices/wrist-strap/" + WiFi.macAddress();
-            Logger::get_instance().log_info("Attempting to publish to topic: %s", topic.c_str());
+            String topic_prefix = Config::get_instance().get_mqtt_topic_prefix();
+            String topic = topic_prefix + WiFi.macAddress();
 
-            // Changed QoS from 1 to 2 here
-            uint16_t packet_id = _mqtt_client.publish(topic.c_str(), 2, true, payload_buffer);
+            Logger::get_instance().log_info("Attempting to publish to topic: %s", topic.c_str());
+            uint16_t packet_id = _mqtt_client.publish(topic.c_str(), 1, true, payload_buffer);
 
             if (packet_id != 0) {
+                _pending_publishes[packet_id] = filename;
                 Logger::get_instance().log_info("Publishing message with packet ID %u from file %s", packet_id, filename.c_str());
-                _last_published_filename = filename;
             } else {
-                Logger::get_instance().log_warn("MQTT publish failed. Message remains in queue.");
+                Logger::get_instance().log_warn("MQTT publish failed locally. Message remains in queue.");
             }
         }
     }
 }
 
+void MqttClient::publish_log(const char* message) {
+    if (!_mqtt_client.connected()) {
+        return;
+    }
+
+    String topic_prefix = Config::get_instance().get_mqtt_topic_prefix();
+    String topic = topic_prefix + "log/" + WiFi.macAddress();
+
+    JsonDocument doc;
+    doc["message"] = message;
+    char json_buffer[256];
+    serializeJson(doc, json_buffer);
+
+    _mqtt_client.publish(topic.c_str(), 0, false, json_buffer);
+}
+
+
 void MqttClient::_on_publish(uint16_t packet_id) {
-    Logger::get_instance().log_info("MQTT Message with packet ID %u published successfully.", packet_id);
+    Logger::get_instance().log_info("MQTT Message with packet ID %u acknowledged by broker.", packet_id);
 
-    _database->delete_file(_last_published_filename);
-    _last_published_filename = "";
+    auto it = _pending_publishes.find(packet_id);
+    if (it != _pending_publishes.end()) {
+        String filename_to_delete = it->second;
+        _database->delete_file(filename_to_delete);
+        _pending_publishes.erase(it);
 
-    _mediator->notify(event_t::MQTT_MESSAGE_PUBLISHED_SUCCESS);
-
-    publish_from_queue();
+        _mediator->notify(event_t::MQTT_MESSAGE_PUBLISHED_SUCCESS);
+        publish_from_queue();
+    } else {
+        if (packet_id != 0) {
+            Logger::get_instance().log_warn("Received publish confirmation for an unknown packet ID: %u", packet_id);
+        }
+    }
 }

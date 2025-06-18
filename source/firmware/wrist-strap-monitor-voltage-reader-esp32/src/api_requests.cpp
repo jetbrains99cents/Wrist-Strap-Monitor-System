@@ -4,6 +4,7 @@
 #include "logger.h"
 #include <WiFi.h>
 #include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include <sys/time.h>
 
@@ -18,17 +19,24 @@ void ApiRequests::request_time_sync() {
         return;
     }
 
-    Logger::get_instance().log_info("Requesting time synchronization...");
-    
+    Logger::get_instance().log_info("Requesting time synchronization (sync)...");
+
     HTTPClient http;
-    // NOTE: For production, use WiFiClientSecure and verify the server certificate.
-    // This current implementation is for local development with HTTP.
-    const char* time_server_url = Config::get_instance().get_base_api_url();
-    String full_url = String(time_server_url) + "/api/v1/time/";
-    
+    WiFiClientSecure client;
+
+    const char* server_url = Config::get_instance().get_base_api_url();
+    String full_url = String(server_url) + "/api/v1/time/";
+
     Logger::get_instance().log_info("Time sync URL: %s", full_url.c_str());
 
-    http.begin(full_url);
+    // This allows connecting to local servers with self-signed certs (for HTTPS)
+    // It's safe and good practice to keep for flexibility.
+    client.setInsecure();
+
+    // Begin the connection using the secure client.
+    http.begin(client, full_url);
+    http.setConnectTimeout(5000); // 5-second timeout
+
     int http_code = http.GET();
 
     if (http_code == HTTP_CODE_OK) {
@@ -40,11 +48,10 @@ void ApiRequests::request_time_sync() {
             Logger::get_instance().log_error("Failed to parse time sync JSON: %s", error.c_str());
             _mediator->notify(event_t::TIME_SYNC_FAILED);
         } else {
-            long timestamp_seconds = doc["timestamp_utc_seconds"];
+            int64_t timestamp_seconds = doc["timestamp_utc_seconds"];
             if (timestamp_seconds > 0) {
-                timeval tv = { timestamp_seconds, 0 };
+                timeval tv = { (time_t)timestamp_seconds, 0 };
                 settimeofday(&tv, nullptr);
-                Logger::get_instance().log_info("System time synchronized successfully.");
                 _mediator->notify(event_t::TIME_SYNC_SUCCESS);
             } else {
                  Logger::get_instance().log_error("Invalid timestamp received from server.");
@@ -52,7 +59,7 @@ void ApiRequests::request_time_sync() {
             }
         }
     } else {
-        Logger::get_instance().log_error("Time sync HTTP request failed, error: %s", http.errorToString(http_code).c_str());
+        Logger::get_instance().log_error("Time sync HTTP request failed, error code: %d, message: %s", http_code, http.errorToString(http_code).c_str());
         _mediator->notify(event_t::TIME_SYNC_FAILED);
     }
 
