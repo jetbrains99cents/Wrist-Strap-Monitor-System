@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="7d4c20be-1ab7-41e6-a74c-6889261a0341" name="Changes" comment="Stable version">
-      <change beforePath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/partitions.csv" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/partitions.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/mqtt/mqtt_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/mqtt/mqtt_client.py" afterDir="false" />
-    </list>
+    <list default="true" id="7d4c20be-1ab7-41e6-a74c-6889261a0341" name="Changes" comment="Stable version" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -156,7 +145,7 @@
       <workItem from="1749715536351" duration="28311000" />
       <workItem from="1750295788089" duration="2387000" />
       <workItem from="1750411402624" duration="16000" />
-      <workItem from="1750411434355" duration="7197000" />
+      <workItem from="1750411434355" duration="7798000" />
     </task>
     <task id="LOCAL-00001" summary="Stable version">
       <option name="closed" value="true" />
