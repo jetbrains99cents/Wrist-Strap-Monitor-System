@@ -17,17 +17,30 @@
   "wrist_strap_monitor_fail_output_voltage_threshold": 3,
   "wrist_strap_monitor_fail_output_voltage_maximum_debounce_duration": 3,
   "device_status_mqtt_publish_topic_prefix": "devices/wrist-strap/status/",
-  "time_sync_retry_delay_seconds": 10,
+  "time_sync_retry_delay_seconds": 8,
   "working_time": [
     {
       "name": "Shift 1",
-      "from_time": { "hour": 8, "minute": 0 },
-      "to_time": { "hour": 12, "minute": 0 }
+      "from_time": {
+        "hour": 8,
+        "minute": 0
+      },
+      "to_time": {
+        "hour": 12,
+        "minute": 0
+      }
     },
     {
       "name": "Shift 2",
-      "from_time": { "hour": 13, "minute": 0 },
-      "to_time": { "hour": 17, "minute": 0 }
+      "from_time": {
+        "hour": 13,
+        "minute": 0
+      },
+      "to_time": {
+        "hour": 17,
+        "minute": 0
+      }
     }
-  ]
+  ],
+  "failsafe_reboot_timeout_minutes": 2
 }

@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/27.0.9 Chrome/134.0.6998.205 Electron/35.4.0 Safari/537.36" version="27.0.9" pages="8">
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.15 Chrome/134.0.6998.205 Electron/35.2.1 Safari/537.36" version="26.2.15" pages="8">
   <diagram name="System Design" id="phAwM9XbXjIFgik3ucbz">
     <mxGraphModel dx="7126" dy="1216" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
@@ -591,14 +591,14 @@
     </mxGraphModel>
   </diagram>
   <diagram name="Development Milestones" id="DY6qh0qzcVUlgFyakWrI">
-    <mxGraphModel dx="1426" dy="849" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
+    <mxGraphModel dx="1589" dy="681" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4681" pageHeight="3300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="GzIkWbhAP2jGz76Fo-M--1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=light-dark(#005700,#FFFFFF);strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
           <mxGeometry x="20" y="15" width="100" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--2" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#f0a30a;strokeColor=#BD7000;fontFamily=Segoe UI;fontSize=16;fontColor=#000000;" parent="1" vertex="1">
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--2" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=light-dark(#FFFF33,#FFFF33);strokeColor=light-dark(#D79B00,#FFFFFF);gradientColor=none;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
           <mxGeometry x="20" y="65" width="100" height="20" as="geometry" />
         </mxCell>
         <mxCell id="GzIkWbhAP2jGz76Fo-M--3" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
@@ -626,181 +626,154 @@
             <mxPoint x="472.5" y="195" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--10" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--10" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=#ffffff;strokeColor=default;strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
           <mxGeometry x="422.5" y="255" width="150" height="20" as="geometry" />
         </mxCell>
         <mxCell id="GzIkWbhAP2jGz76Fo-M--33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Segoe UI;fontSize=16;" parent="1" source="GzIkWbhAP2jGz76Fo-M--12" target="GzIkWbhAP2jGz76Fo-M--32" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--12" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#005700;strokeWidth=2;fillColor=#008a00;fontColor=#ffffff;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--12" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=default;strokeWidth=2;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=#ffffff;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
           <mxGeometry x="572.5" y="255" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--14" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=none;strokeColor=default;fontColor=#ffffff;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="722.5" y="255" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--16" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=none;fontColor=#ffffff;strokeColor=default;gradientColor=none;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="822.5" y="255" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--18" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="922.5" y="255" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--20" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="1022.5" y="255" width="100" height="20" as="geometry" />
         </mxCell>
         <mxCell id="GzIkWbhAP2jGz76Fo-M--31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Segoe UI;fontSize=16;" parent="1" source="GzIkWbhAP2jGz76Fo-M--21" target="GzIkWbhAP2jGz76Fo-M--30" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--21" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Phân tích yêu cầu&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#FFFFFF;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--21" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Phân tích yêu cầu&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=light-dark(#000000,#000000);strokeColor=#005700;" parent="1" vertex="1">
           <mxGeometry x="277.5" y="335" width="140" height="30" as="geometry" />
         </mxCell>
         <mxCell id="GzIkWbhAP2jGz76Fo-M--29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Segoe UI;fontSize=16;" parent="1" source="GzIkWbhAP2jGz76Fo-M--22" target="GzIkWbhAP2jGz76Fo-M--28" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--22" value="&lt;font&gt;Thiết kế, vẽ sơ đồ hệ thống theo dõi wrist strap monitor&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fillColor=#008a00;fontColor=#ffffff;fontSize=16;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--22" value="&lt;font&gt;Thiết kế, vẽ sơ đồ hệ thống theo dõi wrist strap monitor&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fillColor=light-dark(#43BA43,#43BA43);fontColor=light-dark(#000000,#000000);fontSize=16;" parent="1" vertex="1">
           <mxGeometry x="372.5" y="145" width="250" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--28" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lên danh sách phần cứng cần mua để làm prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--28" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lên danh sách phần cứng cần mua để làm prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="352.51" y="15" width="290" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--30" value="&lt;span&gt;Nghiên cứu hàng mẫu wrist strap monitor, nghiên cứu cách hoạt động của thiết bị&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#FFFFFF;strokeColor=#005700;" parent="1" vertex="1">
-          <mxGeometry x="240" y="395" width="215" height="90" as="geometry" />
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--30" value="&lt;span&gt;Nghiên cứu hàng mẫu wrist strap monitor, nghiên cứu cách hoạt động của thiết bị&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=light-dark(#000000,#000000);strokeColor=#005700;" parent="1" vertex="1">
+          <mxGeometry x="240" y="415" width="215" height="90" as="geometry" />
         </mxCell>
         <mxCell id="GzIkWbhAP2jGz76Fo-M--36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Segoe UI;fontSize=16;" parent="1" source="GzIkWbhAP2jGz76Fo-M--32" target="GzIkWbhAP2jGz76Fo-M--34" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--32" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Chế tạo prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
-          <mxGeometry x="523.75" y="335" width="247.5" height="60" as="geometry" />
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--32" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Chế tạo prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
+          <mxGeometry x="522.5" y="335" width="250" height="60" as="geometry" />
         </mxCell>
         <mxCell id="2bfFDUI1LnXtJfSeiZJz-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="GzIkWbhAP2jGz76Fo-M--34" target="2bfFDUI1LnXtJfSeiZJz-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--34" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình phần mềm cho hệ thống theo dõi wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
-          <mxGeometry x="523.75" y="430" width="247.5" height="60" as="geometry" />
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--34" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình phần mềm cho hệ thống theo dõi wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
+          <mxGeometry x="522.5" y="425" width="250" height="60" as="geometry" />
         </mxCell>
         <mxCell id="GzIkWbhAP2jGz76Fo-M--39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Segoe UI;fontSize=16;" parent="1" source="GzIkWbhAP2jGz76Fo-M--35" target="GzIkWbhAP2jGz76Fo-M--38" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--35" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Chạy thử nghiệm kết nối prototype thiết bị đọc với hệ thống&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#f0a30a;fontColor=#FFFFFF;strokeColor=#BD7000;" parent="1" vertex="1">
-          <mxGeometry x="521.25" y="620" width="252.5" height="50" as="geometry" />
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--35" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;font&gt;Chạy thử nghiệm kết nối prototype thiết bị đọc với hệ thống&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="517.5" y="615" width="260" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="GzIkWbhAP2jGz76Fo-M--38" value="&lt;div&gt;&lt;span&gt;Lên danh sách phần cứng cần mua để chế tạo thiết bị đọc số lượng lớn, áp dụng cho cả 3 line&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#f0a30a;fontColor=#FFFFFF;strokeColor=#BD7000;" parent="1" vertex="1">
-          <mxGeometry x="522.5" y="700" width="250" height="80" as="geometry" />
+        <mxCell id="GzIkWbhAP2jGz76Fo-M--38" value="&lt;div&gt;&lt;span&gt;Đánh giá hiệu quả, kết quả đạt thì tiếp tục&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;" parent="1" vertex="1">
+          <mxGeometry x="537.5" y="695" width="220" height="50" as="geometry" />
         </mxCell>
         <mxCell id="2bfFDUI1LnXtJfSeiZJz-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="2bfFDUI1LnXtJfSeiZJz-1" target="GzIkWbhAP2jGz76Fo-M--35" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="2bfFDUI1LnXtJfSeiZJz-1" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình phần mềm (firmware) cho prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
-          <mxGeometry x="522.5" y="520" width="250" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-1" value="Chế tạo hàng loạt thiết bị đọc" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="690.62" y="145" width="213.75" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-3" value="Lắp đặt cho cả 3 line" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="840.63" y="335" width="213.75" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Fv79Bvw9ENFD-o9iNsAA-4" target="Fv79Bvw9ENFD-o9iNsAA-1">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-4" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#005700;strokeWidth=2;fillColor=#008a00;fontColor=#ffffff;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="722.5" y="255" width="150" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="Fv79Bvw9ENFD-o9iNsAA-5" target="Fv79Bvw9ENFD-o9iNsAA-3">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-5" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#005700;strokeWidth=2;fillColor=#008a00;fontColor=#ffffff;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="872.5" y="255" width="150" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="Fv79Bvw9ENFD-o9iNsAA-8" target="Fv79Bvw9ENFD-o9iNsAA-9">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-8" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeColor=#005700;strokeWidth=2;fillColor=#008a00;fontColor=#ffffff;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="1022.5" y="255" width="150" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="Fv79Bvw9ENFD-o9iNsAA-9" value="Kiểm tra, vận hành và bàn giao" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="982.81" y="145" width="229.37" height="50" as="geometry" />
+        <mxCell id="2bfFDUI1LnXtJfSeiZJz-1" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình phần mềm (firmware) cho prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
+          <mxGeometry x="527.5" y="515" width="240" height="70" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram name="Development Milestones - Details" id="HXk-DTwsUICzYW4zd06C">
-    <mxGraphModel dx="1678" dy="999" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1308" dy="561" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="6ZTobTey_-HRwaYEJxS3-1" target="LWcNVPjHyxAx7AQxHEh8-1" edge="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="6ZTobTey_-HRwaYEJxS3-1" target="LWcNVPjHyxAx7AQxHEh8-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="6ZTobTey_-HRwaYEJxS3-1" value="Lên danh sách phần cứng cần mua để làm prototype thiết bị đọc dữ liệu từ wrist strap monitor" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="6ZTobTey_-HRwaYEJxS3-1" value="Lên danh sách phần cứng cần mua để làm prototype thiết bị đọc dữ liệu từ wrist strap monitor" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="62.5" y="10" width="287.5" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="6ZTobTey_-HRwaYEJxS3-3" target="KTjymvcnvdZMUycFNodC-9" edge="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="6ZTobTey_-HRwaYEJxS3-3" target="KTjymvcnvdZMUycFNodC-9" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="6ZTobTey_-HRwaYEJxS3-3" value="Lập trình phần mềm cho hệ thống theo dõi wrist strap monitor" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="gp3W7fhHHbwmeH9AHeY4-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="6ZTobTey_-HRwaYEJxS3-3" target="gp3W7fhHHbwmeH9AHeY4-1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6ZTobTey_-HRwaYEJxS3-3" value="Lập trình phần mềm cho hệ thống theo dõi wrist strap monitor" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="60" y="110" width="290" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-3" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình web dashboard theo dõi dữ liệu từ prototype thiết bị đọc&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-3" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình web dashboard theo dõi dữ liệu từ prototype thiết bị đọc&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="810" y="390" width="280" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="YPN4tc-bcIEZLGBnf_l8-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="KTjymvcnvdZMUycFNodC-9" target="KTjymvcnvdZMUycFNodC-10" edge="1">
+        <mxCell id="YPN4tc-bcIEZLGBnf_l8-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="KTjymvcnvdZMUycFNodC-9" target="KTjymvcnvdZMUycFNodC-10" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-9" value="Chuẩn bị 1 PC để làm máy chủ IoT (kết nối các thiết bị IoT với nhau)" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-9" value="Mua 1 mini PC để làm máy chủ IoT (kết nối các thiết bị IoT với nhau)" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="440" y="110" width="280" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="KTjymvcnvdZMUycFNodC-10" target="KTjymvcnvdZMUycFNodC-11" edge="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="KTjymvcnvdZMUycFNodC-10" target="KTjymvcnvdZMUycFNodC-11" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-10" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Cài đặt MQTT Broker lên IoT Server&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-10" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Cài đặt MQTT Broker lên Mini PC&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="810" y="120" width="280" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="KTjymvcnvdZMUycFNodC-11" target="KTjymvcnvdZMUycFNodC-12" edge="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-16" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="KTjymvcnvdZMUycFNodC-11" target="KTjymvcnvdZMUycFNodC-12" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-11" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Cài đặt mongoDB lên IoT Server&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-11" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Cài đặt mongoDB lên Mini PC&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="810" y="210" width="280" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="YPN4tc-bcIEZLGBnf_l8-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="KTjymvcnvdZMUycFNodC-12" target="KTjymvcnvdZMUycFNodC-3" edge="1">
+        <mxCell id="YPN4tc-bcIEZLGBnf_l8-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="KTjymvcnvdZMUycFNodC-12" target="KTjymvcnvdZMUycFNodC-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="KTjymvcnvdZMUycFNodC-12" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình web API&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=#008a00;fontColor=#ffffff;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="KTjymvcnvdZMUycFNodC-12" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình web API&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
           <mxGeometry x="810" y="300" width="280" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="qL5bzAcryQviw9DswQpt-1" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình phần mềm (firmware) cho prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="qL5bzAcryQviw9DswQpt-1" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Lập trình phần mềm (firmware) cho prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
           <mxGeometry x="60" y="210" width="290" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-1" target="LWcNVPjHyxAx7AQxHEh8-3" edge="1">
+        <mxCell id="gp3W7fhHHbwmeH9AHeY4-1" value="Mua 1 mini PC để làm máy tính phát triển phần mềm và nạp phần mềm cho thiết bị đọc (máy tính hiện tại do công ty cấp bị khóa cổng USB và khóa cài đặt phần mềm)" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fillColor=light-dark(#FFFF33,#FFFF33);fontColor=light-dark(#000000,#000000);" parent="1" vertex="1">
+          <mxGeometry x="440" y="250" width="280" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-1" target="LWcNVPjHyxAx7AQxHEh8-3" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-1" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Chế tạo prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-1" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Chế tạo prototype thiết bị đọc dữ liệu từ wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
           <mxGeometry x="440" y="10" width="280" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-3" target="LWcNVPjHyxAx7AQxHEh8-4" edge="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-3" target="LWcNVPjHyxAx7AQxHEh8-4" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-3" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Làm mạch kẹp điện áp âm (negative clamp circuit), bảo vệ cảm biến dòng điện&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-3" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Làm mạch kẹp điện áp âm (negative clamp circuit), bảo vệ cảm biến dòng điện&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
           <mxGeometry x="810" y="10" width="280" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-4" target="LWcNVPjHyxAx7AQxHEh8-7" edge="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-4" target="LWcNVPjHyxAx7AQxHEh8-7" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-4" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Kết nối module vi điều khiển ESP32 với cảm biến dòng điện và wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-4" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Kết nối module vi điều khiển ESP32 với cảm biến dòng điện và wrist strap monitor&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
           <mxGeometry x="1180" y="10" width="280" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fillColor=#008a00;strokeColor=#FFFFFF;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-7" target="LWcNVPjHyxAx7AQxHEh8-9" edge="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="LWcNVPjHyxAx7AQxHEh8-7" target="LWcNVPjHyxAx7AQxHEh8-9" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-7" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Cho tất cả vào hộp nhựa kĩ thuật&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-7" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Cho tất cả vào hộp nhựa kĩ thuật&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
           <mxGeometry x="1180" y="120" width="280" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="LWcNVPjHyxAx7AQxHEh8-9" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Kiểm tra kết nối tới IoT Server&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=#ffffff;fillColor=#008a00;strokeColor=#005700;" parent="1" vertex="1">
+        <mxCell id="LWcNVPjHyxAx7AQxHEh8-9" value="&lt;div&gt;&lt;span style=&quot;background-color: transparent;&quot;&gt;&lt;font&gt;Kiểm tra kết nối tới IoT Server&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=center;fontFamily=Segoe UI;fontSize=16;fontColor=light-dark(#000000,#000000);fillColor=light-dark(#FFFF33,#FFFF33);" parent="1" vertex="1">
           <mxGeometry x="1180" y="210" width="280" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="alzYZ-DCdpBBAZU9Qoo8-1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#008a00;fontColor=#ffffff;strokeColor=light-dark(#005700,#FFFFFF);strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="62.5" y="495" width="100" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="alzYZ-DCdpBBAZU9Qoo8-2" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fillColor=#f0a30a;strokeColor=#BD7000;fontFamily=Segoe UI;fontSize=16;fontColor=#000000;" vertex="1" parent="1">
-          <mxGeometry x="62.5" y="545" width="100" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="alzYZ-DCdpBBAZU9Qoo8-3" value="" style="rounded=1;whiteSpace=wrap;html=1;strokeWidth=2;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="62.5" y="600" width="100" height="20" as="geometry" />
-        </mxCell>
-        <mxCell id="alzYZ-DCdpBBAZU9Qoo8-4" value="&lt;font&gt;Đã xong&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="177.5" y="490" width="90" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="alzYZ-DCdpBBAZU9Qoo8-5" value="&lt;font&gt;Đang làm&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="187.5" y="540" width="70" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="alzYZ-DCdpBBAZU9Qoo8-6" value="&lt;font&gt;Chưa làm&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Segoe UI;fontSize=16;" vertex="1" parent="1">
-          <mxGeometry x="182.5" y="595" width="80" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

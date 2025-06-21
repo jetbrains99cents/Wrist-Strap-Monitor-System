@@ -10,29 +10,14 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/deviceRealtime.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/wrist-strap/stores/userStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/voltage_reader_schematic.kicad_pro" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/voltage_reader_schematic.kicad_pro" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/~voltage_reader_schematic.kicad_pcb.lck" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/voltage_reader_schematic/voltage_reader_schematic/~voltage_reader_schematic.kicad_sch.lck" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/data/config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/partitions.csv" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/partitions.csv" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/platformio.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/api_requests.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/config.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/enums.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/enums.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/logger.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mediator.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/mqtt_client.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/peripheral.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../firmware/wrist-strap-monitor-voltage-reader-esp32/src/wifi_handler.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/mqtt/mqtt_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../services/wrist-strap-web-api/app/mqtt/mqtt_client.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../tools/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,29 +47,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;JavaScript Debug.Debug Application.executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\WebStorm 2024.3.5\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "JavaScript Debug.Debug Application.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "ignore.virus.scanning.warn.message": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "settings.sync",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2024.3.5\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;vue.recent.templates&quot;: [
-      &quot;Vue Composition API Component&quot;
+  "keyToStringList": {
+    "vue.recent.templates": [
+      "Vue Composition API Component"
     ]
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Working\Wrist Strap Monitor System\source\dashboards\wrist-strap-monitor-dashboard\wrist-strap\composables" />
@@ -131,6 +117,8 @@
       <workItem from="1749713683644" duration="29619000" />
       <workItem from="1749803120415" duration="3245000" />
       <workItem from="1750148722102" duration="1950000" />
+      <workItem from="1750295828387" duration="658000" />
+      <workItem from="1750411304007" duration="2540000" />
     </task>
     <task id="LOCAL-00001" summary="Complete dashboard phase 1">
       <option name="closed" value="true" />

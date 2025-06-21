@@ -51,6 +51,8 @@ struct device_settings_t {
     shift_setting_t working_time[MAX_SHIFTS]; // MODIFIED: Using fixed array instead of pointer
     production_plan_setting_t production_plan[MAX_SHIFTS]; // MODIFIED: Using fixed array
     long time_sync_retry_delay_seconds;
+    // ADDED: New field for failsafe reboot timeout
+    int failsafe_reboot_timeout_minutes;
 };
 
 class Config {
@@ -84,6 +86,9 @@ public:
     const shift_setting_t* get_working_time() const;
     const production_plan_setting_t* get_production_plan() const;
     long get_time_sync_retry_delay_seconds() const;
+    // ADDED: Getter for failsafe reboot timeout
+    int get_failsafe_reboot_timeout_minutes() const;
+
 
     // Setters
     void set_office_wifi_ssid(const char* value);
@@ -107,6 +112,9 @@ public:
     void set_working_time(const JsonArray& shifts);
     void set_production_plan(const JsonArray& plans);
     void set_time_sync_retry_delay_seconds(long value);
+    // ADDED: Setter for failsafe reboot timeout
+    void set_failsafe_reboot_timeout_minutes(int value);
+
 
 private:
     Config() {};

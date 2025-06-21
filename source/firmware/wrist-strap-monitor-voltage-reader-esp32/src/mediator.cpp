@@ -17,6 +17,8 @@ void Mediator::init() {
     _is_mqtt_connected = false;
     _next_time_sync_attempt_ms = 0;
     _next_mqtt_connect_attempt_ms = 0;
+    // ADDED: Initialize heartbeat timestamp
+    _last_online_heartbeat_ms = millis();
 }
 
 void Mediator::loop() {
@@ -26,6 +28,18 @@ void Mediator::loop() {
 
     if (!_is_mqtt_connected && WiFi.status() == WL_CONNECTED && millis() >= _next_mqtt_connect_attempt_ms) {
         notify(event_t::MQTT_CONNECT_REQUESTED);
+    }
+
+    // ADDED: Failsafe mechanism check
+    long failsafe_timeout_minutes = Config::get_instance().get_failsafe_reboot_timeout_minutes();
+    if (failsafe_timeout_minutes > 0) { // Only run if failsafe is enabled
+        unsigned long timeout_ms = (unsigned long)failsafe_timeout_minutes * 60UL * 1000UL;
+        unsigned long time_since_last_heartbeat = millis() - _last_online_heartbeat_ms;
+
+        if (time_since_last_heartbeat >= timeout_ms) {
+            _logger->log_error("No successful online activity for %ld minutes. Forcing failsafe reboot.", failsafe_timeout_minutes);
+            notify(event_t::RESTART_REQUESTED);
+        }
     }
 }
 
@@ -79,6 +93,9 @@ void Mediator::notify(event_t event, void* data) {
             localtime_r(&now, &timeinfo);
             strftime(buffer, sizeof(buffer), "%A, %B %d %Y %H:%M:%S", &timeinfo);
             _logger->log_info("Time sync successful. Current time: %s", buffer);
+            // ADDED: Update heartbeat on time sync success
+            _last_online_heartbeat_ms = millis();
+            _logger->log_info("Online activity heartbeat updated (Time Sync Success).");
             break;
         }
         case event_t::TIME_SYNC_FAILED: {
@@ -105,7 +122,10 @@ void Mediator::notify(event_t event, void* data) {
             break;
         }
         case event_t::MQTT_MESSAGE_PUBLISHED_SUCCESS:
-             break;
+            // ADDED: Update heartbeat on MQTT message published success
+            _last_online_heartbeat_ms = millis();
+            _logger->log_info("Online activity heartbeat updated (MQTT Publish Success).");
+            break;
         case event_t::WRIST_STRAP_STATE_UPDATED: {
             reading_data_t* reading = (reading_data_t*)data;
             JsonDocument doc;

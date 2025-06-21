@@ -41,6 +41,9 @@ private:
 
     bool _is_mqtt_connected = false;
     unsigned long _next_mqtt_connect_attempt_ms = 0;
+
+    // ADDED: Failsafe mechanism variables
+    unsigned long _last_online_heartbeat_ms;
 };
 
 #endif // MEDIATOR_H

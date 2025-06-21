@@ -20,34 +20,47 @@ void Config::begin() {
         Serial.println("Reading config file: /config.json");
         File config_file = LittleFS.open("/config.json", "r");
         if (config_file) {
+            // --- DUMPING /config.json RAW CONTENT ---
+            Serial.println("--- DUMPING /config.json RAW CONTENT ---");
+            // Read the entire file into a String to print it
+            String fileContent = config_file.readString();
+            Serial.println(fileContent);
+            Serial.println("--- END OF RAW FILE CONTENT ---");
+            // IMPORTANT: Rewind the file pointer to the beginning so the JSON parser can read it
+            config_file.seek(0);
+            // --- END OF DEBUG BLOCK ---
+
             JsonDocument doc;
             DeserializationError error = deserializeJson(doc, config_file);
             if (error) {
                 Serial.printf("FATAL: deserializeJson() failed: %s. Loading hardcoded defaults.\n", error.c_str());
-                load_defaults();
-                save();
+                //load_defaults();
+                //save();
             } else {
                 Serial.println("Successfully parsed config.json. Loading values...");
-                set_office_wifi_ssid(doc["office_wifi_ssid"] | "");
-                set_office_wifi_password(doc["office_wifi_password"] | "");
-                set_testing_wifi_ssid(doc["testing_wifi_ssid"] | "");
-                set_testing_wifi_password(doc["testing_wifi_password"] | "");
-                set_device_ap_wifi_ssid_prefix(doc["device_ap_wifi_ssid_prefix"] | "");
-                set_device_ap_wifi_password(doc["device_ap_wifi_password"] | "");
-                set_factory_wifi_ssid(doc["factory_wifi_ssid"] | "");
-                set_factory_wifi_password(doc["factory_wifi_password"] | "");
-                set_mqtt_broker_ip(doc["mqtt_broker_ip"] | "");
-                set_mqtt_auto_reconnect_delay(doc["mqtt_auto_reconnect_delay"] | 5000);
-                set_mqtt_username(doc["mqtt_username"] | "");
-                set_mqtt_password(doc["mqtt_password"] | "");
-                set_mqtt_port(doc["mqtt_port"] | 1883);
-                set_mqtt_ws_port(doc["mqtt_ws_port"] | 8080);
-                set_base_api_url(doc["base_api_url"] | "");
-                set_voltage_threshold(doc["wrist_strap_monitor_fail_output_voltage_threshold"] | 3.0);
-                set_debounce_duration_seconds(
-                    doc["wrist_strap_monitor_fail_output_voltage_maximum_debounce_duration"] | 3);
-                set_mqtt_topic_prefix(doc["device_status_mqtt_publish_topic_prefix"] | "devices/wrist-strap/status/");
-                set_time_sync_retry_delay_seconds(doc["time_sync_retry_delay_seconds"] | 10L); // MODIFIED
+
+                set_office_wifi_ssid(doc["office_wifi_ssid"]);
+                set_office_wifi_password(doc["office_wifi_password"]);
+                set_testing_wifi_ssid(doc["testing_wifi_ssid"]);
+                set_testing_wifi_password(doc["testing_wifi_password"]);
+                set_device_ap_wifi_ssid_prefix(doc["device_ap_wifi_ssid_prefix"]);
+                set_device_ap_wifi_password(doc["device_ap_wifi_password"]);
+                set_factory_wifi_ssid(doc["factory_wifi_ssid"]);
+                set_factory_wifi_password(doc["factory_wifi_password"]);
+                set_mqtt_broker_ip(doc["mqtt_broker_ip"]);
+                set_mqtt_auto_reconnect_delay(doc["mqtt_auto_reconnect_delay"]);
+                set_mqtt_username(doc["mqtt_username"]);
+                set_mqtt_password(doc["mqtt_password"]);
+                set_mqtt_port(doc["mqtt_port"]);
+                set_mqtt_ws_port(doc["mqtt_ws_port"]);
+                set_base_api_url(doc["base_api_url"]);
+                set_voltage_threshold(doc["wrist_strap_monitor_fail_output_voltage_threshold"]);
+                set_debounce_duration_seconds(doc["wrist_strap_monitor_fail_output_voltage_maximum_debounce_duration"]);
+                set_mqtt_topic_prefix(doc["device_status_mqtt_publish_topic_prefix"]);
+                set_time_sync_retry_delay_seconds(doc["time_sync_retry_delay_seconds"]);
+                // ADDED: Load failsafe reboot timeout
+                set_failsafe_reboot_timeout_minutes(doc["failsafe_reboot_timeout_minutes"] | 0);
+
 
                 if (doc["working_time"].is<JsonArray>()) {
                     set_working_time(doc["working_time"].as<JsonArray>());
@@ -56,19 +69,23 @@ void Config::begin() {
                     set_production_plan(doc["production_plan"].as<JsonArray>());
                 }
 
+                // The Logger calls will still provide a summarized view of loaded settings.
                 Logger::get_instance().log_info("--- Loaded Configuration Settings ---");
                 Logger::get_instance().log_info("Voltage Threshold: %.2fV", get_fail_voltage_threshold());
                 Logger::get_instance().log_info("Debounce Duration: %d seconds", get_debounce_duration());
                 Logger::get_instance().log_info("MQTT Topic Prefix: %s", get_mqtt_topic_prefix());
-                Logger::get_instance().log_info("Time Sync Retry Delay: %ld seconds", get_time_sync_retry_delay_seconds());
+                Logger::get_instance().log_info("Time Sync Retry Delay: %ld seconds",
+                                                get_time_sync_retry_delay_seconds());
+                // ADDED: Log failsafe reboot timeout
+                Logger::get_instance().log_info("Failsafe Reboot Timeout: %d minutes", get_failsafe_reboot_timeout_minutes());
                 Logger::get_instance().log_info("------------------------------------");
             }
             config_file.close();
         }
     } else {
         Serial.println("WARNING: /config.json not found. Loading and saving hardcoded defaults.");
-        load_defaults();
-        save();
+        //load_defaults();
+        //save();
     }
 }
 
@@ -96,6 +113,8 @@ bool Config::save() {
             wrist_strap_monitor_fail_output_voltage_maximum_debounce_duration;
     doc["device_status_mqtt_publish_topic_prefix"] = _settings.device_status_mqtt_publish_topic_prefix;
     doc["time_sync_retry_delay_seconds"] = _settings.time_sync_retry_delay_seconds;
+    // ADDED: Save failsafe reboot timeout
+    doc["failsafe_reboot_timeout_minutes"] = _settings.failsafe_reboot_timeout_minutes;
 
     File config_file = LittleFS.open("/config.json", "w");
     if (!config_file) {
@@ -132,7 +151,9 @@ void Config::load_defaults() {
     set_voltage_threshold(3.0);
     set_debounce_duration_seconds(3);
     set_mqtt_topic_prefix("devices/wrist-strap/status/");
-    set_time_sync_retry_delay_seconds(10L); // MODIFIED
+    set_time_sync_retry_delay_seconds(10L);
+    // ADDED: Set default failsafe reboot timeout to 2 minutes
+    set_failsafe_reboot_timeout_minutes(2);
 }
 
 bool Config::is_wifi_configured() const {
@@ -167,22 +188,66 @@ const shift_setting_t *Config::get_working_time() const { return _settings.worki
 const production_plan_setting_t *Config::get_production_plan() const { return _settings.production_plan; }
 long Config::get_time_sync_retry_delay_seconds() const { return _settings.time_sync_retry_delay_seconds; }
 
+// ADDED: Getter for failsafe reboot timeout
+int Config::get_failsafe_reboot_timeout_minutes() const {
+    return _settings.failsafe_reboot_timeout_minutes;
+}
+
+
 // Setters
-void Config::set_office_wifi_ssid(const char *value) { strlcpy(_settings.office_wifi_ssid, value, sizeof(_settings.office_wifi_ssid)); }
-void Config::set_office_wifi_password(const char *value) { strlcpy(_settings.office_wifi_password, value, sizeof(_settings.office_wifi_password)); }
-void Config::set_testing_wifi_ssid(const char *value) { strlcpy(_settings.testing_wifi_ssid, value, sizeof(_settings.testing_wifi_ssid)); }
-void Config::set_testing_wifi_password(const char *value) { strlcpy(_settings.testing_wifi_password, value, sizeof(_settings.testing_wifi_password)); }
-void Config::set_device_ap_wifi_ssid_prefix(const char *value) { strlcpy(_settings.device_ap_wifi_ssid_prefix, value, sizeof(_settings.device_ap_wifi_ssid_prefix)); }
-void Config::set_device_ap_wifi_password(const char *value) { strlcpy(_settings.device_ap_wifi_password, value, sizeof(_settings.device_ap_wifi_password)); }
-void Config::set_factory_wifi_ssid(const char *value) { strlcpy(_settings.factory_wifi_ssid, value, sizeof(_settings.factory_wifi_ssid)); }
-void Config::set_factory_wifi_password(const char *value) { strlcpy(_settings.factory_wifi_password, value, sizeof(_settings.factory_wifi_password)); }
-void Config::set_mqtt_broker_ip(const char *value) { strlcpy(_settings.mqtt_broker_ip, value, sizeof(_settings.mqtt_broker_ip)); }
+void Config::set_office_wifi_ssid(const char *value) {
+    strlcpy(_settings.office_wifi_ssid, value, sizeof(_settings.office_wifi_ssid));
+}
+
+void Config::set_office_wifi_password(const char *value) {
+    strlcpy(_settings.office_wifi_password, value, sizeof(_settings.office_wifi_password));
+}
+
+void Config::set_testing_wifi_ssid(const char *value) {
+    strlcpy(_settings.testing_wifi_ssid, value, sizeof(_settings.testing_wifi_ssid));
+}
+
+void Config::set_testing_wifi_password(const char *value) {
+    strlcpy(_settings.testing_wifi_password, value, sizeof(_settings.testing_wifi_password));
+}
+
+void Config::set_device_ap_wifi_ssid_prefix(const char *value) {
+    strlcpy(_settings.device_ap_wifi_ssid_prefix, value, sizeof(_settings.device_ap_wifi_ssid_prefix));
+}
+
+void Config::set_device_ap_wifi_password(const char *value) {
+    strlcpy(_settings.device_ap_wifi_password, value, sizeof(_settings.device_ap_wifi_password));
+}
+
+void Config::set_factory_wifi_ssid(const char *value) {
+    strlcpy(_settings.factory_wifi_ssid, value, sizeof(_settings.factory_wifi_ssid));
+}
+
+void Config::set_factory_wifi_password(const char *value) {
+    strlcpy(_settings.factory_wifi_password, value, sizeof(_settings.factory_wifi_password));
+}
+
+void Config::set_mqtt_broker_ip(const char *value) {
+    strlcpy(_settings.mqtt_broker_ip, value, sizeof(_settings.mqtt_broker_ip));
+}
+
 void Config::set_mqtt_auto_reconnect_delay(int value) { _settings.mqtt_auto_reconnect_delay = value; }
-void Config::set_mqtt_username(const char *value) { strlcpy(_settings.mqtt_username, value, sizeof(_settings.mqtt_username)); }
-void Config::set_mqtt_password(const char *value) { strlcpy(_settings.mqtt_password, value, sizeof(_settings.mqtt_password)); }
+
+void Config::set_mqtt_username(const char *value) {
+    strlcpy(_settings.mqtt_username, value, sizeof(_settings.mqtt_username));
+}
+
+void Config::set_mqtt_password(const char *value) {
+    strlcpy(_settings.mqtt_password, value, sizeof(_settings.mqtt_password));
+}
+
 void Config::set_mqtt_port(int value) { _settings.mqtt_port = value; }
 void Config::set_mqtt_ws_port(int value) { _settings.mqtt_ws_port = value; }
-void Config::set_base_api_url(const char *value) { strlcpy(_settings.base_api_url, value, sizeof(_settings.base_api_url)); }
+
+void Config::set_base_api_url(const char *value) {
+    strlcpy(_settings.base_api_url, value, sizeof(_settings.base_api_url));
+}
+
 void Config::set_voltage_threshold(float value) { _settings.wrist_strap_monitor_fail_output_voltage_threshold = value; }
 
 void Config::set_debounce_duration_seconds(int value) {
@@ -225,4 +290,9 @@ void Config::set_production_plan(const JsonArray &plans) {
 
 void Config::set_time_sync_retry_delay_seconds(long value) {
     _settings.time_sync_retry_delay_seconds = value;
+}
+
+// ADDED: Setter for failsafe reboot timeout
+void Config::set_failsafe_reboot_timeout_minutes(int value) {
+    _settings.failsafe_reboot_timeout_minutes = value;
 }
