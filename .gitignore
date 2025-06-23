@@ -2,6 +2,9 @@
 # General Project & OS
 ################################################################################
 
+# Jetbrains IDE config directory/.idea
+/.idea
+
 # Miscellaneous
 .DS_Store
 .AppleDouble
@@ -275,3 +278,5 @@ factory-layout.svg
 
 # Ignore Microsoft Office temporary files
 ~$*
+source/dashboards/wrist-strap-monitor-dashboard/.idea/inspectionProfiles/Project_Default.xml
+source/dashboards/wrist-strap-monitor-dashboard/.idea/workspace.xml
